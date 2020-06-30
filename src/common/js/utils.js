@@ -437,34 +437,9 @@ export const compareDateTime = (t1,t2) => {
 
 export const removeAllLocalStorage = () => {
   removeStore('currentTitle');
-  removeStore('storeOverDueWay');
-  removeStore('departmentInfo');
-  removeStore('departmentInfoNo');
-  removeStore('questToken');
   // removeStore('userName');
   // removeStore('userPassword');
   removeStore('userInfo');
   removeStore('isLogin');
-  removeStore('userType');
-  removeStore('isAppointFirstSweepCode');
-  removeStore('completAppointTaskSweepCodeInfo');
-  removeStore('completAppointTaskSweepCodeDestinationInfo');
-  removeStore('currentDepartmentId');
-  removeStore('completPhotoInfo');
-  removeStore('completeDispatchSweepCodeDestinationInfo');
-  removeStore('isDispatchFirstSweepCode');
-  removeStore('completeDispatchSweepCodeInfo');
-  removeStore('completAppointTaskSweepCodeInfo');
-  removeStore('currentCirculationCollectMessage');
-  removeStore('completeDepartmentMessage');
-  removeStore('isDeleteEcho');
-  removeStore('isampleInfo');
-  removeStore('isClickSure');
-  removeStore('isDeleteCancel');
-  removeStore('isDeleteEcho');
-  removeStore('currentCirculationConnectMessage');
-  removeStore('currentAppointTaskMessage');
-  removeStore('currentDispatchTaskMessage');
-  removeStore('currentDispatchTaskMessage');
-  removeStore('completDepartmentNumber')
+  removeStore('userType')
 }

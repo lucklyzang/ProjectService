@@ -72,7 +72,6 @@ export default {
         pushHistory();
         this.$router.push({path: '/'});  //输入要返回的上一级路由地址
       });
-      this.changeRouterFlag(false)
     };
 
     // 监控键盘弹起
@@ -92,146 +91,60 @@ export default {
   methods: {
     ...mapMutations([
       'storeUserInfo',
-      'changeTitleTxt',
-      'changeRouterFlag',
-      'changeLoginMethod',
-      'changeUserType',
-      'changeOverDueWay'
+      'changeTitleTxt'
     ]),
-
-    // 并行获取科室字典值(编号和字典)
-     parallelFunction () {
-        Promise.all([this.queryDepartmentList(),this.queryDepartmentListNo()])
-        .then((res) => {
-          if (res && res.length > 0) {
-            this.destinationList = [];
-            this.vehicleOperationList = [];
-            this.destinationList.push({text: '无', value: 0});
-            let [item1,item2] = res;
-            if (item1) {
-             setStore('departmentInfo', item1);
-            };
-            if (item2) {
-             setStore('departmentInfoNo', item2);
-             window.location.reload()
-            };
-          }
-        })
-        .catch((err) => {
-          this.$dialog.alert({
-            message: `${err}`,
-            closeOnPopstate: true
-          }).then(() => {})
-        })
-      },
-
-    // 获取科室字典id
-    queryDepartmentList () {
-      return new Promise((resolve,reject) => {
-        getdepartmentList(this.proId).then((res) => {
-          if (res && res.data.code == 200) {
-              resolve(res.data.data)
-            }
-          })
-          .catch((err) => {
-            reject(err.message)
-          })
-      })
-    },
-
-    // 获取科室字典编号
-    queryDepartmentListNo () {
-      return new Promise((resolve,reject) => {
-        getdepartmentListNo(this.proId).then((res) => {
-          if (res && res.data.code == 200) {
-              resolve(res.data.data)
-            }
-          })
-          .catch((err) => {
-            reject(err.message)
-          })
-      })
-    },
-
-    // 注册channel
-    getChannel (data) {
-      registerChannel(data)
-      .then((res) => {
-      })
-      .catch((err) => {
-        this.$dialog.alert({
-          message: `${err}`,
-          closeOnPopstate: true
-        }).then(() => {})
-      })
-    },
-
     // 账号密码登录方法
     login () {
-      let loginMessage;
-      this.showLoadingHint = true;
-      if (this.showAccountLogin) {
-        loginMessage = {
-          username: this.username,
-          password: this.password,
-          rememberMe: 1
-        };
-      } else {
-        loginMessage = {
-          username: this.sweepMsg,
-          flag: 1,
-        }
-      };
-      logIn(loginMessage).then((res)=>{
-        if (res) {
-          if (res.data.code == 200) {
-            // 重置过期方式
-            this.changeOverDueWay(false);
-            setStore('storeOverDueWay',false);
-            if (this.showAccountLogin) {
-              setStore('userName', this.username);
-              setStore('userPassword', this.password);
-            };
-            // 登录用户名密码及用户信息存入Locastorage
-            setStore('userInfo', res.data.data);
-            setStore('isLogin', true);
-            // 用户身份类别存入store和Locastorage
-            this.changeUserType(res.data.data["extendData"]['user_type_id']);
-            setStore('userType', res.data.data["extendData"]['user_type_id']);
-            this.storeUserInfo(JSON.parse(getStore('userInfo')));
-            this.$router.push({path:'/home'});
-            this.changeTitleTxt({tit:'中央运送'});
-            this.proId = res.data.data['proId'];
-            // 注册channel
-            try {
-              this.getChannel({proId:res.data.data.proId,workerId:res.data.data.id,type:res.data.data["extendData"]['user_type_id'],channelId:window.android.getChannelId()});
-            } catch (err) {
-              this.$dialog.alert({
-                message: `${err}`,
-                closeOnPopstate: true
-              }).then(() => {
-              })
-            };
-            // 获取科室字典数据
-            this.parallelFunction()
-          } else {
-             this.$dialog.alert({
-              message: `${res.data.msg}`,
-              closeOnPopstate: true
-            }).then(() => {
-            });
-          }
-        };
-        this.showLoadingHint = false
-      })
-      .catch((err) => {
-        this.showLoadingHint = false;
-        this.$dialog.alert({
-          message: `${err.message}`,
-          closeOnPopstate: true
-        }).then(() => {
-        })
-      })
+      this.$router.push({path:'/home'});
+      this.changeTitleTxt({tit:'工程管理系统'});
+      // let loginMessage;
+      // this.showLoadingHint = true;
+      // if (this.showAccountLogin) {
+      //   loginMessage = {
+      //     username: this.username,
+      //     password: this.password,
+      //     rememberMe: 1
+      //   };
+      // } else {
+      //   loginMessage = {
+      //     username: this.sweepMsg,
+      //     flag: 1,
+      //   }
+      // };
+      // logIn(loginMessage).then((res)=>{
+      //   if (res) {
+      //     if (res.data.code == 200) {
+      //       // 重置过期方式
+      //       if (this.showAccountLogin) {
+      //         setStore('userName', this.username);
+      //         setStore('userPassword', this.password);
+      //       };
+      //       // 登录用户名密码及用户信息存入Locastorage
+      //       setStore('userInfo', res.data.data);
+      //       setStore('isLogin', true);
+      //       // 用户身份类别存入store和Locastorage
+      //       this.storeUserInfo(JSON.parse(getStore('userInfo')));
+      //       this.$router.push({path:'/home'});
+      //       this.changeTitleTxt({tit:'工程管理系统'});
+      //       this.proId = res.data.data['proId'];
+      //     } else {
+      //        this.$dialog.alert({
+      //         message: `${res.data.msg}`,
+      //         closeOnPopstate: true
+      //       }).then(() => {
+      //       });
+      //     }
+      //   };
+      //   this.showLoadingHint = false
+      // })
+      // .catch((err) => {
+      //   this.showLoadingHint = false;
+      //   this.$dialog.alert({
+      //     message: `${err.message}`,
+      //     closeOnPopstate: true
+      //   }).then(() => {
+      //   })
+      // })
     }
   } 
 }

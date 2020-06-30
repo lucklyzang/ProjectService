@@ -11,7 +11,6 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex'
 import Loading from '../components/Loading'
-// import {getAlltTaskNumber} from '@/api/workerPort.js'
 import { formatTime, setStore, IsPC} from '@/common/js/utils'
 export default {
   name: 'HeaderTop',
@@ -25,7 +24,7 @@ export default {
   @import "../common/stylus/mixin.less";
   @import "../common/stylus/variable.less";
   .header {
-    background: #2895ea;
+    background: #2c65f7;
     background-position: center center;
     background-size: 100% 100%;
     width: 100%;

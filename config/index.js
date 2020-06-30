@@ -53,12 +53,12 @@ module.exports = {
 
   build: {
     // Template for index.html
-    index: path.resolve(__dirname, '../transWeb/index.html'),
+    index: path.resolve(__dirname, '../projectWeb/index.html'),
 
     // Paths
-    assetsRoot: path.resolve(__dirname, '../transWeb'),
+    assetsRoot: path.resolve(__dirname, '../projectWeb'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/transWeb/',
+    assetsPublicPath: '/projectWeb/',
 
     /**
      * Source Maps

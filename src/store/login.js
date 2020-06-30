@@ -14,6 +14,7 @@ export default {
     newTaskName: '',
     taskDetailsMessage: {},
     taskType: '',
+    navTopTitle: '',
     globalTimer: null,
     isFreshHomePage: false,
   },
@@ -30,7 +31,8 @@ export default {
     taskDetailsMessage: state => state.taskDetailsMessage,
     taskType: state => state.taskType,
     globalTimer: state => state.globalTimer,
-    isFreshHomePage: state => state.isFreshHomePage
+    isFreshHomePage: state => state.isFreshHomePage,
+    navTopTitle: state => state.navTopTitle
   },
   mutations:{
     storeUserInfo (state, playLoad) {
@@ -83,6 +85,10 @@ export default {
     // 改变是否刷新首页的状态
     changeIsFreshHomePage (state, playLoad) {
       state.isFreshHomePage = playLoad
+    },
+    // 改变路由标题状态
+    changeTitleTxt (state, playLoad) {
+      state.navTopTitle = playLoad.tit
     }
   },
   actions:{}

@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-     <keep-alive :include="catch_components">
+     <!-- <keep-alive> -->
       <router-view/>
-    </keep-alive>
+    <!-- </keep-alive> -->
   </div>
 </template>
 <script>
@@ -24,13 +24,12 @@ import { mapGetters} from 'vuex'
         'catch_components'
       ])
     },
-    watch: {
-      catch_components: {
-       handler (){
-        console.log('缓存组件',this.catch_components);
-      },deep: true
-      }
-    }
+    // watch: {
+    //   catch_components: {
+    //    handler (){
+    //   },deep: true
+    //   }
+    // }
   };
   //App接口
   window['setAppInfo'] =function (uid,os) {
