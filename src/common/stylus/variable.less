@@ -1,0 +1,97 @@
+
+@import "./mixin.less";
+
+// 颜色定义规范
+@color-background: #f4f4f4;  //背景色
+@color-theme: #2895ea;  //主题颜色
+@left-button: #ffaa29; //页面底部左边按钮颜色
+
+//字体定义规范
+@font-size-small-s: 10px;
+@font-size-small: 12px;
+@font-size-medium: 14px;
+@font-size-medium-x: 16px;
+@font-size-large: 18px;
+@font-size-large-x: 22px;
+
+//高度定义规范
+@header-title-height: 60px;
+@header-footer-height: 50px;
+@header-input-height: 44px;
+
+//宽度定义规范
+@card-theme-margin: 10px;
+
+//首页标签数量提示框的样式
+.repeat-sign (@width:40, @height:40, @backgroundColor:@color-theme,@top:0,@left:0) {
+  transform: scale(.5);
+  transform-origin: 0% top;
+  background: @backgroundColor;
+  color: #fff;
+  width:@width;
+  height: @height;
+  display: inline-block;
+  position: absolute;
+  top: @top;
+  right: @left;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: @height;
+  text-align: center;
+  .no-wrap()
+}
+//循环情况标签数量提示框
+.status-sign (@width:44px, @height:44px, @right:-20px,@backgroundColor:@color-theme) {
+  transform: scale(.5);
+  transform-origin: 0% top;
+  background: @backgroundColor;
+  color: #fff;
+  width: @width;
+  height: @height;
+  display: inline-block;
+  position: absolute;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: @height;
+  text-align: center;
+  right: @right;
+  top: 4px;
+  .no-wrap()
+}
+.content-wrapper () {
+  display: flex;
+  min-height: 100vh;
+  height: 100%;
+  flex-direction: column
+}
+
+// 页面顶部右侧下拉框样式
+.rightDropDown () {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  background: #f6f6f6;
+  width: 80px;
+  z-index: 100;
+  text-align: center;
+  padding: 10px 0;
+  color: #5a5a5a;
+  box-shadow: 0 1px 6px 2px #d1d1d1;
+  li {
+    font-size: 13px;
+    height: 24px;
+    line-height: 24px;
+    letter-spacing: 2px;
+    text-indent: 2px;
+  }
+  .liStyle {
+    background: @color-theme;
+    color: #fff;
+  }
+}
+
+// 页面底部按钮样式
+.bottomButton (@width:120px, @height:50px) {
+  width: @width;
+  height: @height
+}

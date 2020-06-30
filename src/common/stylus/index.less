@@ -1,0 +1,650 @@
+@import "./variable.less";
+@import "./reset.less";
+@import "./base.less";
+@import "./modifyUI.less";
+
+
+/** 
+ * pc端样式 
+*/ 
+
+@media screen and (min-width: 1280px){
+
+  // 报表页面可视化样式
+  #content-middle-dayData,#content-middle-weekData,#content-middle-monthData,#content-middle-yearData {
+    width: 44%;
+    margin-right: 4%;
+    margin-bottom: 4%;
+    padding: 10px 20px;
+    &:nth-of-type(2n) {
+      margin-right: 0
+    };
+    &:last-child {
+      margin-bottom: 0
+    };
+    &:nth-child(3) {
+      margin-bottom: 0
+    }
+  };
+
+  // 报表页面标题样式
+  .content-middle-title {
+    > div {
+      width: 23%;
+      margin-right: 2%;
+      &:last-child {
+        margin-right:0
+      }
+    }
+  }
+
+  // 首页菜单栏布局及样式
+  .content-list {
+    box-shadow: 0 2.5px 12px 4px #d1d1d1;
+    border-radius: 4px;
+    width: 22%;
+    height: 70px;
+    line-height: 70px;
+    text-align: center;
+    box-sizing: border-box;
+    margin-right: 4%;
+    margin-bottom: 4%;
+    display: inline-block;
+    .title-content {
+      font-size: 15px;
+      width: auto;
+      margin-left: 8px;
+      display: inline-block;
+      color: black;
+    }
+    .title-img {
+      display: inline-block;
+      width: 35px;
+      height: 35px;
+      margin-top: -12px;
+      vertical-align: middle;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  .content-middle {
+    div {
+      &:nth-of-type(4n) {
+        margin-right: 0;
+        vertical-align: top;
+      }
+      &:last-child {
+        margin-right: 0;
+        vertical-align: top;
+      }
+    }
+  }
+
+  // 首页菜单栏宽度样式
+   .content-middle-home {
+    width: 90%
+  }
+
+  //列表页页面样式
+  .content-middle-list {
+    text-align: center;
+    padding-top: 8px;
+    .content-middle-list-item {
+      width: 46%;
+      display: inline-block;
+      margin-right: 20px !important;
+      &:nth-of-type(2n) {
+        margin-right: 0 !important;
+      }
+    }
+  }
+
+  //出库也顶部搜索按钮样式
+  .middle-top-search-outStorage {
+    right: 4px !important
+  }
+
+  .time-between {
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    left: 0;
+    top: 18px;
+    color: black;
+    position: absolute;
+    display: inline-block;
+  }
+
+  .time-between-outstorage  {
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    left: 0;
+    top: 18px;
+    color: black;
+    position: absolute;
+    display: inline-block;
+  }
+
+
+  // 出库页面'至'的位置
+  .content-middle-top-content {
+    .left-time {
+      left: 0;
+      width: 45%;
+    }
+    .right-time {
+      right: 0;
+      width: 45%;
+    }
+  }
+
+  .content-middle {
+    /deep/ .van-tabs {
+      .right-sign {
+        .repeat-sign(0)
+      }
+    }
+  }
+
+  // 审核页面数字说明样式
+   .content-middle {
+    /deep/ .van-tabs {
+      .sign-not-check {
+        .repeat-sign(-18px);
+        right: 18px !important
+      }
+      .sign-checked {
+        .repeat-sign(-18px);
+        right: 18px !important
+      }
+    }
+  }
+
+  // 登录页登录切换位置
+  .check-box {
+    top: 80% !important;
+    .check-box-content {
+      width: 40% !important
+    }
+  }
+
+  // 处理信息页按钮宽度
+  .content-middle-bottom {
+    .van-cell-group {
+      width: 20%
+    }
+  }
+
+  // 个人信息页注销按钮宽度
+  .content-wrapper {
+    .content-bottom {
+      .van-cell-group {
+        width: 20%
+      }
+    }
+  } 
+
+   // 新增出库页底部按钮宽度
+   .content-wrapper {
+    .increaseBtn {
+      .van-cell-group {
+        width: 20%
+      }
+    }
+  }
+
+  // 登录页输入按钮框宽度样式
+  .input-box { 
+    .van-cell-group {
+      width: 40% !important;
+    }
+  }
+
+  // 页面弹框样式
+  .van-dialog {
+    width: 55% !important
+  }
+
+  // 补打印批次号选择弹框
+  .batchNumberDialog /deep/  .van-dialog {
+    width: 50% !important;
+    .van-dialog__content {
+      height: 220px !important
+    }
+  }
+
+  // 部分页面头部日历栏宽度样式
+  .content-middle-top-content {
+    width: 58% !important;
+  }
+};
+
+@media screen and (min-width: 813px) and (max-width: 1280px) {
+
+  // 报表页面可视化样式
+  #content-middle-dayData,#content-middle-weekData,#content-middle-monthData,#content-middle-yearData {
+    width: 44%;
+    margin-right: 4%;
+    margin-bottom: 4%;
+    padding: 10px 20px;
+    &:nth-of-type(2n) {
+      margin-right: 0
+    };
+    &:last-child {
+      margin-bottom: 0
+    };
+    &:nth-child(3) {
+      margin-bottom: 0
+    }
+  };
+
+  // 报表页面标题样式
+  .content-middle-title {
+    > div {
+      width: 23%;
+      margin-right: 2%;
+      &:last-child {
+        margin-right:0
+      }
+    }
+  }
+
+  // 首页菜单栏字体颜色
+  .content-list {
+    border-radius: 4px;
+    box-shadow: 0 2.5px 12px 4px #d1d1d1;
+    width: 22%;
+    height: 70px;
+    line-height: 70px;
+    text-align: center;
+    box-sizing: border-box;
+    margin-right: 4%;
+    margin-bottom: 4%;
+    display: inline-block;
+    .title-content {
+      font-size: 15px;
+      width: auto;
+      margin-left: 8px;
+      display: inline-block;
+      color: black;
+    }
+    .title-img {
+      display: inline-block;
+      width: 35px;
+      height: 35px;
+      margin-top: -12px;
+      vertical-align: middle;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  .content-middle {
+    div {
+      &:nth-of-type(4n) {
+        margin-right: 0;
+        vertical-align: top;
+      }
+      &:last-child {
+        margin-right: 0;
+        vertical-align: top;
+      }
+    }
+  }
+
+  // 首页菜单栏宽度样式
+   .content-middle-home {
+    width: 90%
+  }
+
+  // 列表页面样式
+  .content-middle-list {
+    text-align: center;
+    padding-top: 8px;
+    .content-middle-list-item {
+      width: 46%;
+      display: inline-block;
+      margin-right: 20px !important;
+      &:nth-of-type(2n) {
+        margin-right: 0 !important;
+      }
+    }
+  }
+
+  //出库也顶部搜索按钮样式
+   .middle-top-search-outStorage {
+    right: 4px !important
+  }
+ 
+  .time-between {
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    left: 0;
+    top: 18px;
+    color: black;
+    position: absolute;
+    display: inline-block;
+  }
+  
+
+  // 出库页面'至'的位置
+  .content-middle-top-content {
+    .left-time {
+      left: 0;
+      width: 45%;
+    }
+    .right-time {
+      right: 0;
+      width: 45%;
+    }
+  }
+
+  .time-between-outstorage  {
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    left: 0;
+    top: 18px;
+    color: black;
+    position: absolute;
+    display: inline-block;
+  }
+
+  .content-middle {
+    /deep/ .van-tabs {
+      .right-sign {
+       .repeat-sign(0)
+      }
+    }
+  }
+
+   // 审核页面数字说明样式
+   .content-middle {
+    /deep/ .van-tabs {
+      .sign-not-check {
+        .repeat-sign(-18px);
+        right: 18px !important
+      }
+      .sign-checked {
+        .repeat-sign(-18px);
+        right: 18px !important
+      }
+    }
+  }
+
+  // 处理信息页按钮宽度
+  .content-middle-bottom {
+    .van-cell-group {
+      width: 20%
+    }
+  }
+ 
+  // 个人信息页注销按钮宽度
+  .content-wrapper {
+    .content-bottom {
+      .van-cell-group {
+        width: 20%
+      }
+    }
+  } 
+
+  // 新增出库页底部按钮宽度
+  .content-wrapper {
+    .increaseBtn {
+      .van-cell-group {
+        width: 20%
+      }
+    }
+  }
+
+  // 登录页登录切换位置
+   .check-box {
+    top: 80% !important;
+    .check-box-content {
+      width: 40% !important
+    }
+  }
+
+  // 登录页输入按钮框宽度样式 
+  .input-box { 
+    .van-cell-group {
+      width: 40% !important;
+    }
+  }
+
+  // 页面弹框样式
+   .van-dialog {
+    width: 55% !important
+  }
+
+  // 补打印批次号选择弹框
+  .batchNumberDialog /deep/  .van-dialog {
+    width: 50% !important;
+    .van-dialog__content {
+      height: 220px !important
+    }
+  }
+
+  // 部分页面头部日历栏宽度样式
+  .content-middle-top-content {
+    width: 58% !important;
+  }
+};
+
+/** 
+ * 移动端端样式
+*/ 
+@media screen and (max-width: 813px) {
+
+  // 报表页面可视化样式
+  #content-middle-dayData,#content-middle-weekData,#content-middle-monthData,#content-middle-yearData {
+    width: 97%;
+    padding: 6px;
+    margin-bottom: 8px;
+    &:last-child {
+      margin-bottom: 0
+    }
+  };
+
+  // 报表页面标题样式
+  .content-middle-title {
+    > div {
+      width: 46%;
+      margin-right: 4%;
+      &:nth-of-type(2n) {
+        margin-right: 0
+      }
+    }
+  };
+
+  // 首页菜单栏字体颜色
+  .content-list {
+    box-shadow: 0 1.5px 6px 2px #d1d1d1;
+    border-radius: 4px;
+    width: 30%;
+    height: 80px;
+    text-align: center;
+    box-sizing: border-box;
+    margin-right: 5%;
+    margin-bottom: 5%;
+    padding-top: 12px;
+    display: inline-block;
+    .title-content {
+      font-size: 14px;
+      width: 100%;
+      margin-top: 10px;
+      display: inline-block;
+      color: black;
+    }
+    .title-img {
+      display: inline-block;
+      width: 30px;
+      height: 31px;
+      img {
+        width: 100%;
+        height: 100%;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .content-middle {
+    div {
+      &:nth-of-type(3n) {
+        margin-right: 0;
+        vertical-align: top;
+      }
+      &:last-child {
+        margin-right: 0;
+        vertical-align: top;
+      }
+    }
+  }
+
+  // 首页菜单栏宽度样式
+  .content-middle-home {
+    width: 96%
+  }
+
+  // 列表页面样式
+  .content-middle-list {
+    text-align: center;
+    padding-top: 8px;
+    .content-middle-list-item {
+      width: 96%;
+    }
+  }
+
+  // 出库界面时间框调整
+  .content-middle-top-outStorage {
+    /deep/ .van-cell {
+      padding: 10px 12px !important;
+    }
+  }
+
+  //出库也顶部搜索按钮样式
+  .middle-top-search-outStorage {
+    right: 4px !important
+  }
+
+  .time-between {
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    left: 0;
+    top: 18px;
+    color: black;
+    position: absolute;
+    display: inline-block;
+  }
+
+  // 出库页面'至'的位置
+  .content-middle-top-content {
+    .left-time {
+      left: 0;
+      width: 45%;
+    }
+    .right-time {
+      right: 0;
+      width: 45%;
+    }
+  }
+
+  // 出库页面时间框的宽度
+  .content-middle-top-content-outstorage {
+    width: 81% !important;
+    margin: 0 !important;
+    margin-left: 4px !important;
+  }
+
+  // 补打印批次号选择弹框
+  .batchNumberDialog /deep/  .van-dialog {
+    width: 94% !important
+  }
+
+  .time-between-outstorage  {
+    width: 81%;
+    text-align: center;
+    font-size: 14px;
+    left: 4px !important;
+    color: black;
+    position: absolute;
+    display: inline-block;
+    top: 18px
+  }
+
+  .content-middle {
+    /deep/ .van-tabs {
+      .right-sign {
+        .repeat-sign(-18px);
+        right: -18px !important
+      }
+    }
+  }
+
+  // 审核页面数字说明样式
+  .content-middle {
+    /deep/ .van-tabs {
+      .sign-not-check {
+        .repeat-sign(-18px);
+        right: 0 !important
+      }
+      .sign-checked {
+        .repeat-sign(-18px);
+        right: 0 !important
+      }
+    }
+  }
+
+  // 处理信息页按钮宽度
+  .content-middle-bottom {
+    .van-cell-group {
+      width: 80%
+    }
+  }
+
+  // 新增出库页底部按钮宽度
+  .content-wrapper {
+    .increaseBtn {
+      .van-cell-group {
+        width: 80%
+      }
+    }
+  }
+
+  // 补打印批次号选择弹框
+  .batchNumberDialog /deep/  .van-dialog {
+    .van-dialog__content {
+      height: 220px !important
+    }
+  }
+
+  // 登录页登录切换位置
+  .check-box {
+    top: 71%;
+    .check-box-content {
+      width: 86% !important;
+    }
+  }
+
+  // 登录页输入按钮框宽度样式 
+  .van-cell-group {
+    width: 90%;
+  }
+
+  // 个人信息页注销按钮宽度
+  .content-wrapper {
+    .content-bottom {
+      .van-cell-group {
+        width: 80%
+      }
+    }
+  } 
+}

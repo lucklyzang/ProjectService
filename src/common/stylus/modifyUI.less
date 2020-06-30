@@ -1,0 +1,51 @@
+/**
+修改UI组件样式
+ */
+@import "./variable.less";
+.van-dialog__confirm {
+  color: @color-theme
+}
+.van-button--normal {
+  height: 60px
+}
+.van-picker__confirm {
+  color: @color-theme
+}
+.van-checkbox-group--horizontal {
+  justify-content: space-between;
+}
+.van-tabs--line  .van-tabs__wrap--scrollable .van-tabs__nav--line .van-tab {
+  flex: 0 0 28% !important;
+  flex-basis: 28% !important
+}
+.van-checkbox-group .van-checkbox--horizontal{
+  margin-bottom: 4px;
+  margin-right: 0;
+}
+.van-picker__cancel {
+  color: @color-theme
+}
+.van-icon-manager-o {
+  position: absolute;
+  height: @header-title-height;
+  line-height: @header-title-height;
+  right: 9px;
+  font-size: 18px;
+  color: #fff;
+}
+.van-icon-arrow-left {
+  position: absolute;
+  height: @header-title-height;
+  line-height: @header-title-height;
+  left: 4px;
+  font-size: 20px;
+  color: #fff
+}
+.van-loading {
+  position:absolute;
+  top:50%;
+  left:50%;
+  -webkit-transform: translate(-50%,-50%);
+  -moz-transform: translate(-50%,-50%);
+  transform:translate(-50%,-50%);
+}
