@@ -11,10 +11,10 @@
           @mouseup="mouseUp"
         >
         </canvas>
-        <div class="btnBox">
+        <!-- <div class="btnBox">
           <div @click="overwrite">重写</div>
           <div @click="commitSure">确认签名</div>
-        </div>   
+        </div>    -->
       </div>
     </div>
   </section> 
@@ -194,35 +194,35 @@ import { base64ImgtoFile } from '@/common/js/utils'
         this.changeCurrentElectronicSignature({DtMsg:this.$refs.board.toDataURL("image/png")});
         var imgFile = base64ImgtoFile(this.$refs.board.toDataURL());
         this.changeOriginalSignature(null);
-        this.$dialog.alert({
-          message: '签名已保存',
-          closeOnPopstate: false  
-        }).then(() => {
-        });
+        this.$toast('签名已保存')
       }
     }
   }
 </script>
 <style lang='less' scoped>
-  .signatureBox {
-    width: 96%;
+  .signature {
     height: 100%;
-    margin:0 auto;
-    box-sizing: border-box;
-    overflow: hidden;
-    background: #fff;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-  }
+    .signatureBox {
+      width: 96%;
+      height: 100%;
+      margin:0 auto;
+      box-sizing: border-box;
+      overflow: hidden;
+      background: #fff;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #cacaca
+    }
+  };
   .canvasBox {
     box-sizing: border-box;
-    flex: 1;
+    flex: 1
   }
   canvas {
     height: 100%;
     width: 100%;
-    background: #efefef
+    background: #fff
   }
   .btnBox {
     padding: 10px;

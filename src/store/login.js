@@ -9,6 +9,8 @@ export default {
     userType: '',
     // 过期方式
     overDueWay: false,
+    originalSignature: null,
+    currentElectronicSignature: null,
     departmentInfoList: {},
     departmentInfoListNo: {},
     newTaskName: '',
@@ -32,7 +34,9 @@ export default {
     taskType: state => state.taskType,
     globalTimer: state => state.globalTimer,
     isFreshHomePage: state => state.isFreshHomePage,
-    navTopTitle: state => state.navTopTitle
+    navTopTitle: state => state.navTopTitle,
+    originalSignature: state => state.originalSignature,
+    currentElectronicSignature: state => state.currentElectronicSignature
   },
   mutations:{
     storeUserInfo (state, playLoad) {
@@ -49,6 +53,14 @@ export default {
       if (playLoad && playLoad != 'null') {
         state.token = playLoad
       }
+    },
+    // 改变原始签名状态
+    changeOriginalSignature (state, playLoad) {
+      state.originalSignature = playLoad
+    },
+    // 改变当前签名状态
+    changeCurrentElectronicSignature (state, playLoad) {
+      state.currentElectronicSignature = playLoad.DtMsg
     },
     // 修改用户状态
     changeUserType (state, playLoad) {

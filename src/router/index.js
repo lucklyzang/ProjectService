@@ -8,7 +8,11 @@ const MyInfo = () => import('@/pages/MyInfo')
 const RepairsWorkOrder = () => import('@/pages/taskPage/RepairsWorkOrder')
 const DeviceService = () => import('@/pages/taskPage/DeviceService')
 const DepartmentService = () => import('@/pages/taskPage/DepartmentService')
-Vue.use(Router)
+const WorkOrderDetails = () => import('@/pages/taskDetailsPage/WorkOrderDetails')
+const FillConsumable = () => import('@/pages/taskMessagePage/workOrderMessage/FillConsumable')
+const WorkOrderSignature = () => import('@/pages/taskMessagePage/workOrderMessage/WorkOrderSignature')
+const DepartmentWorkOrderDeatils = () => import('@/pages/taskDetailsPage/DepartmentWorkOrderDeatils')
+Vue.use(Router) 
 
 let baseRoute  = [
   {
@@ -40,6 +44,26 @@ let baseRoute  = [
     path: '/departmentService',
     name: 'departmentService',
     component: DepartmentService
+  },
+  {
+    path: '/workOrderDetails',
+    name: 'workOrderDetails',
+    component:  WorkOrderDetails
+  },
+  {
+    path: '/fillConsumable',
+    name: 'fillConsumable',
+    component:  FillConsumable
+  },
+  {
+    path: '/workOrderSignature',
+    name: 'workOrderSignature',
+    component:  WorkOrderSignature
+  },
+  {
+    path: '/departmentWorkOrderDeatils',
+    name: 'departmentWorkOrderDeatils',
+    component:  DepartmentWorkOrderDeatils
   }
 ];
 let router = new Router({

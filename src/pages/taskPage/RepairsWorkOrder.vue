@@ -10,7 +10,65 @@
     <HeaderTop :title="navTopTitle">
       <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
     </HeaderTop>
-   <!-- 右边下拉框菜单 -->
+    <div class="content-top">
+      <ul class="tab-title">
+        <li :class="{liStyle: currentIndex == index}" v-for="(item,index) in tabTitleList" :key="`${item,index}`" @click="liClickEvent(item,index)">{{item}}</li>
+      </ul>
+    </div>
+    <div class="content-bottom">
+      <div class="content-list-action-task-wrapper" v-show="currentIndex == 0">
+        <div class="content-list-action-task-item" v-for="(item,index) in taskMessageList" :key="`${index}-${item}`">
+          <span class="status-box">待确认</span>
+          <span class="task-date">{{item.date}}</span>
+          <p class="task-btn">
+            <span class="back" @click="taskBack(item)">退回</span>
+            <span class="sure" @click="taskSure(item)">确认</span>
+          </p>
+          <p class="work-order-number">
+            <span class="tit">工单号:</span>
+            <span class="name">{{item.workOrderNumber}}</span>
+          </p>
+          <p class="work-info-other">
+            <span class="tit">工单:</span>
+            <span class="name">{{item.workOrder}}</span>
+          </p>
+          <p class="work-info-other">
+            <span class="tit">类型:</span>
+            <span class="name">{{item.taskType}}</span>
+          </p>
+          <p class="work-info-other">
+            <span class="tit">地点:</span>
+            <span class="name">{{item.taskPoint}}</span>
+          </p>
+        </div>
+      </div>
+      <div class="content-list-action-task-wrapper content-list-complete-task-wrapper" v-show="currentIndex == 1">
+        <div class="content-list-action-task-item">
+          <span class="status-box">待确认</span>
+          <span class="task-date">sasasas</span>
+          <p class="task-btn">
+            <span class="view"  @click="taskView(item)">查看任务</span>
+          </p>
+          <p class="work-order-number">
+            <span class="tit">工单号:</span>
+            <span class="name">sasasas</span>
+          </p>
+          <p class="work-info-other">
+            <span class="tit">工单:</span>
+            <span class="name">sasasasa</span>
+          </p>
+          <p class="work-info-other">
+            <span class="tit">类型:</span>
+            <span class="name">sasasa</span>
+          </p>
+          <p class="work-info-other">
+            <span class="tit">地点:</span>
+            <span class="name">sasasas</span>
+          </p>
+        </div>
+      </div>
+    </div>
+   <!-- 退回原因弹窗 -->
     <van-dialog v-model="toolShow" title="请选择退回原因" show-cancel-button width="92%"
           @confirm="toolSure" @cancel="toolCancel"
         >
@@ -39,6 +97,38 @@
     name: 'RepairsWorkOrder',
     data () {
       return {
+        currentIndex: 0,
+        tabTitleList: ['待办任务','已完成'],
+        taskMessageList: [
+          {
+            date: '2020-03-03 13:00',
+            workOrderNumber: 'bx12131313131',
+            workOrder: '灯管不亮,需更换',
+            taskType: '维修',
+            taskPoint: '一号楼-2层-放射科-306'
+          },
+          {
+            date: '2020-03-03 13:00',
+            workOrderNumber: 'bx12131313131',
+            workOrder: '灯管不亮,需更换',
+            taskType: '维修',
+            taskPoint: '一号楼-2层-放射科-306'
+          },
+          {
+            date: '2020-03-03 13:00',
+            workOrderNumber: 'bx12131313131',
+            workOrder: '灯管不亮,需更换',
+            taskType: '维修',
+            taskPoint: '一号楼-2层-放射科-306'
+          },
+          {
+            date: '2020-03-03 13:00',
+            workOrderNumber: 'bx12131313131',
+            workOrder: '灯管不亮,需更换',
+            taskType: '维修',
+            taskPoint: '一号楼-2层-放射科-306'
+          }
+        ]
       };
     },
 
@@ -84,6 +174,28 @@
       ...mapMutations([
         'changeTitleTxt'
       ]),
+
+      // tab点击事件
+      liClickEvent (item,index) {
+        this.currentIndex = index
+      },
+
+      // 任务退回
+      taskBack (item) {
+
+      },
+
+      // 任务确认
+      taskSure (item) {
+
+      },
+
+      // 任务查看
+      taskView (item) {
+        this.$router.push({path: 'workOrderDetails'});
+        this.changeTitleTxt({tit:'工单详情'});
+        setStore('currentTitle','工单详情')
+      },
 
       // 返回上一页
       backTo () {
@@ -138,9 +250,8 @@
         }
       }
     };
-    .content-wrapper();
-    position: relative;
-    font-size: 14px;
+      .content-wrapper();
+      position: relative;
     .no-data {
       position: absolute;
       top: 200px;
@@ -156,5 +267,104 @@
       height: 50px;
       text-align: center;
     };
+    .content-top {
+      height: 60px;
+      .tab-title {
+        width: 90%;
+        height: 55px;
+        margin: 0 auto;
+        li {
+          float: left;
+          font-size: 16px;
+          width: 50%;
+          line-height: 55px;
+          text-align: center;
+          color: #bbbaba
+        };
+        .liStyle {
+          color: #2c65f7;
+          border-bottom: 1px solid #2c65f7
+        }
+      }
+    };
+    .content-bottom {
+      flex: 1;
+      width: 100%;
+      font-size: 13px;
+      background: #f7f7f7;
+      position: relative;
+      overflow: auto;
+      > div {
+        width: 96%;
+        margin: 0 auto;
+        height: 100%;
+        padding-top: 10px;
+        box-sizing: border-box;
+      }
+      .content-list-action-task-wrapper {
+        .content-list-action-task-item {
+          height: 200px;
+          background: #fff;
+          padding: 15px;
+          box-sizing: border-box;
+          margin-bottom: 15px;
+          position: relative;
+          .status-box {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 13px;
+            color: red
+          };
+          .task-date {
+            position: absolute;
+            bottom: 30px;
+            left: 15px;
+            font-size: 13px;
+            color: #bbbaba
+          };
+          .task-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 13px;
+            height: 35px;
+            span {
+              display: inline-block;
+              width: 90px;
+              height: 35px;
+              line-height: 35px;
+              text-align: center;
+              color: #fff
+            };
+            .back {
+              background: #bec7d1
+            };
+            .sure {
+              background: #2c65f7
+            };
+            .view {
+              background: #2c65f7
+            }
+          }
+          > p {
+            height: 30px;
+            font-size: 15px;
+            color: black;
+            font-weight: bold;
+          };
+          .work-order-number {
+            font-size: 14px;
+            color: #bbbaba
+          }
+          &:last-child {
+            margin-bottom: 0
+          }
+        }
+      };
+      .content-list-complete-task-wrapper {
+
+      }
+    }
   }
 </style>
