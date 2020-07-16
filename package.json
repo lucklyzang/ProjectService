@@ -15,6 +15,7 @@
     "babel-runtime": "^6.26.0",
     "better-scroll": "^1.13.2",
     "echarts": "^4.2.1",
+    "js-base64": "^\n[0x7FF9BB53D3F0] ANOMALY: meaningless REX prefix used2.6.3",
     "lib-flexible": "^0.3.2",
     "moment": "^2.24.0",
     "px2rem-loader": "^0.1.9",

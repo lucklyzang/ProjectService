@@ -26,10 +26,9 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-   import {uploadRepairsTaskPhoto, completeRepairsTaskFinal} from '@/api/worker.js'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
   export default {
-    name: 'WorkOrderSignature',
+    name: 'DepartmentServiceSignature',
     components:{
       HeaderTop,
       FooterBottom,
@@ -46,9 +45,9 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
-          this.$router.push({path: 'fillConsumable'});
-          this.changeTitleTxt({tit:'填写耗材'});
-          setStore('currentTitle','填写耗材')
+          this.$router.push({path: 'departmentWorkOrderDeatils'});
+          this.changeTitleTxt({tit:'工单详情'});
+          setStore('currentTitle','工单详情')
         })
       }
     },
@@ -59,10 +58,7 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
-        'currentElectronicSignature',
-        'repairsWorkOrderMsg',
-        'originalSignature',
-        'userInfo'
+        'currentElectronicSignature'
       ]),
       userName () {
        return this.userInfo.userName
@@ -81,9 +77,6 @@
       },
       name () {
         return this.userInfo.name
-      },
-      taskId () {
-        return this.repairsWorkOrderMsg.id
       }
     },
 
@@ -94,44 +87,18 @@
 
       //返回上一页
       backTo () {
-        this.$router.push({path: 'fillConsumable'});
-        this.changeTitleTxt({tit:'填写耗材'});
-        setStore('currentTitle','填写耗材')
+        this.$router.push({path: 'departmentWorkOrderDeatils'});
+        this.changeTitleTxt({tit:'工单详情'});
+        setStore('currentTitle','工单详情')
       },
 
       // 确认
       sure () {
         this.$refs.mychild.commitSure();
-        if (this.currentElectronicSignature == this.originalSignature || !this.currentElectronicSignature) {
-          return
-        };
-        let photoMsg = {
-          taskId: this.taskId,  //任务ID
-          images: []
-        };
-        photoMsg.images = [];
-        photoMsg.images.push({
-          imgType: 0,
-          image: this.currentElectronicSignature
-        });
-        uploadRepairsTaskPhoto(photoMsg)
-        .then((res) => {
-          if (res && res.data.code == 200) {
-            this.$toast(`${res.data.msg}`);
-            this.rewrite ();
-            this.updateTaskComplete()
-          } else {
-            this.$toast(`${res.data.msg}`);
-          }
-        })
-        .catch((err) => {
-          this.$dialog.alert({
-            message: `${err.message}`,
-            closeOnPopstate: true
-          }).then(() => {
-          })
-        })
         console.log('sas1',this.currentElectronicSignature);
+        this.$router.push({path: 'departmentServiceBill'});
+        this.changeTitleTxt({tit:'科室巡检单'});
+        setStore('currentTitle','科室巡检单')
       },
 
       // 重写
@@ -139,39 +106,13 @@
         this.$refs.mychild.overwrite()
       },
 
-      // 更改任务状态为已完成
-      updateTaskComplete () {
-        completeRepairsTaskFinal({
-          proId: this.proId,
-          taskId: this.taskId
-        })
-        .then((res) => {
-          if (res && res.data.code == 200) {
-            this.$toast(`${res.data.msg}`);
-            this.$router.push({path: 'repairsWorkOrder'});
-            this.changeTitleTxt({tit:'报修工单'});
-            setStore('currentTitle','报修工单')
-          } else {
-            this.$toast(`${res.data.msg}`);
-          }
-        })
-        .catch((err) => {
-          this.$dialog.alert({
-            message: `${err.message}`,
-            closeOnPopstate: true
-          }).then(() => {
-          })
-        })
-      },
-
       // 取消
       cancel () {
         this.$refs.mychild.overwrite();
-        this.$router.push({path: 'workOrderDetails'});
+        this.$router.push({path: 'departmentWorkOrderDeatils'});
         this.changeTitleTxt({tit:'工单详情'});
         setStore('currentTitle','工单详情')
       }
-
     }
   }
 </script>

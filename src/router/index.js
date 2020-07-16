@@ -12,6 +12,13 @@ const WorkOrderDetails = () => import('@/pages/taskDetailsPage/WorkOrderDetails'
 const FillConsumable = () => import('@/pages/taskMessagePage/workOrderMessage/FillConsumable')
 const WorkOrderSignature = () => import('@/pages/taskMessagePage/workOrderMessage/WorkOrderSignature')
 const DepartmentWorkOrderDeatils = () => import('@/pages/taskDetailsPage/DepartmentWorkOrderDeatils')
+const DepartmentServiceSignature = () => import('@/pages/taskMessagePage/departmentService/DepartmentServiceSignature')
+const DepartmentServiceBill = () => import('@/pages/taskMessagePage/departmentService/DepartmentServiceBill')
+const DepartmentServiceIssueReport = () => import('@/pages/taskMessagePage/departmentService/DepartmentServiceIssueReport')
+const DeviceServiceDetails = () => import('@/pages/taskDetailsPage/DeviceServiceDetails')
+const OperateRecordOrderDetails = () => import('@/pages/taskDetailsPage/OperateRecordOrderDetails')
+const DeviceServiceBill = () => import('@/pages/taskMessagePage/deviceService/DeviceServiceBill')
+const OperateRecordBill = () => import('@/pages/taskMessagePage/deviceService/OperateRecordBill')
 Vue.use(Router) 
 
 let baseRoute  = [
@@ -64,6 +71,41 @@ let baseRoute  = [
     path: '/departmentWorkOrderDeatils',
     name: 'departmentWorkOrderDeatils',
     component:  DepartmentWorkOrderDeatils
+  },
+  {
+    path: '/departmentServiceSignature',
+    name: 'departmentServiceSignature',
+    component:  DepartmentServiceSignature
+  },
+  {
+    path: '/departmentServiceBill',
+    name: 'departmentServiceBill',
+    component:  DepartmentServiceBill
+  },
+  {
+    path: '/departmentServiceIssueReport',
+    name: 'departmentServiceIssueReport',
+    component:  DepartmentServiceIssueReport
+  },
+  {
+    path: '/deviceServiceDetails',
+    name: 'deviceServiceDetails',
+    component: DeviceServiceDetails
+  },
+  {
+    path: '/deviceServiceBill',
+    name: 'deviceServiceBill',
+    component: DeviceServiceBill
+  },
+  {
+    path: '/operateRecordBill',
+    name: 'operateRecordBill',
+    component: OperateRecordBill
+  },
+  {
+    path: '/operateRecordOrderDetails',
+    name: 'operateRecordOrderDetails',
+    component: OperateRecordOrderDetails
   }
 ];
 let router = new Router({

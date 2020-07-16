@@ -18,7 +18,7 @@
           </p>
           <p class="content-top-userName-msg">
             <span class="real-name-one">{{name}}</span>
-            <span class="real-name-two">{{departmentName}}&emsp;&emsp;{{personType}}</span>
+            <span class="real-name-two">{{proName}}&emsp;&emsp;{{userType}}</span>
           </p>
         </div>
       </div>
@@ -26,11 +26,19 @@
         <p class="content-middle-title">任务看板</p>
         <ul class="content-middle-task-name">
           <li v-for="(item,index) in taskList" :key="index" @click="taskClickEvent(item,index)">
+            <span class="task-length" v-show="index == 0">{{repairsWorkerOrderCount}}</span>
+            <span class="task-length" v-show="index == 1">{{deviceServiceCount}}</span>
+            <span class="task-length" v-show="index == 2">{{departmentServieCount}}</span>
             <p class="task-button-wrapper">
               <img :src="btnTaskWrapperPng" alt="">
             </p>
-            <p class="task-btn-img">
-              <img :src="item.imgUrl" alt="">
+            <p class="task-btn-img" :class="{taskBtnImgOne: index == 0,taskBtnImgTwo: index == 1,taskBtnImgThree: index == 2}">
+              <span>
+                <img :src="item.imgUrl" alt="">
+              </span>
+              <span>
+                <img :src="item.imgUrlOther" alt="">
+              </span>
             </p>
             <p  class="task-btn-tit">{{item.tit}}</p>
           </li>
@@ -53,11 +61,15 @@
   import NoData from '@/components/NoData'
   import Loading from '@/components/Loading'
   import store from '@/store'
-  import dispatchTaskPng from '@/common/images/home/dispatch-task.png'
-  import circulationTaskPng from '@/common/images/home/circulation-task.png'
-  import appointTaskPng from '@/common/images/home/appoint-task.png'
+  import departmentServiceOnePng from '@/common/images/home/department-service-one.png'
+  import departmentServiceTwoPng from '@/common/images/home/department-service-two.png'
+  import deviceServiceOnePng from '@/common/images/home/device-service-one.png'
+  import deviceServiceTwoPng from '@/common/images/home/device-service-two.png'
+  import repairsWorkOrderOnePng from '@/common/images/home/repairs-work-order-one.png'
+  import repairsWorkOrderTwoPng from '@/common/images/home/repairs-work-order-two.png'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
+  import {queryTaskCount} from '@/api/worker.js'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
   export default {
     name: 'home',
@@ -70,14 +82,14 @@
     },
     data() {
       return {
-        name: '杂行啊',
         btnIndex: 0,
-        departmentName: '工程部',
-        personType: '维修员',
+        repairsWorkerOrderCount: '',
+        deviceServiceCount: '',
+        departmentServieCount: '',
         taskList: [
-          {tit:'报修工单',imgUrl: dispatchTaskPng}, 
-          {tit:'设备巡检',imgUrl: circulationTaskPng}, 
-          {tit:'科室巡检',imgUrl: appointTaskPng}
+          {tit:'报修工单', imgUrl: repairsWorkOrderOnePng, imgUrlOther: repairsWorkOrderTwoPng}, 
+          {tit:'设备巡检', imgUrl: deviceServiceOnePng, imgUrlOther: deviceServiceTwoPng}, 
+          {tit:'科室巡检', imgUrl: departmentServiceOnePng, imgUrlOther: departmentServiceTwoPng}
         ],
         btnList: [
           {name: '主页', icon: 'wap-home-o'},
@@ -96,7 +108,8 @@
         pushHistory();
         this.gotoURL(() => { 
         })
-      }
+      };
+      this.getTaskCount(this.proId,this.workerId)
     },
     
     watch: {
@@ -105,12 +118,16 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
+        'userInfo'
       ]),
       userName () {
        return this.userInfo.userName
       },
       userTypeId () {
         return this.userInfo.extendData.user_type_id
+      },
+      userType () {
+        return this.userInfo.extendData.userType
       },
       proId () {
         return this.userInfo.extendData.proId
@@ -136,16 +153,36 @@
 
     methods:{
       ...mapMutations([
-        'changeTitleTxt'
+        'changeTitleTxt',
+        'changeIsFreshRepairsWorkOrderPage'
       ]),
 
       juddgeIspc () {
         return IsPC()
       },
 
+      // 查询任务数量
+      getTaskCount (proId,workerId) {
+        queryTaskCount(proId,workerId).then((res) => {
+          if (res && res.data.code == 200) {
+            this.repairsWorkerOrderCount = res.data.data.bxTask;
+            this.deviceServiceCount = res.data.data.sxTask;
+            this.departmentServieCount = res.data.data.kxTask
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        }) 
+      },
+
       // 任务类型点击事件
       taskClickEvent (item,index) {
         if (item.tit == '报修工单') {
+          this.changeIsFreshRepairsWorkOrderPage(true)
           this.$router.push({path: 'repairsWorkOrder'});
           this.changeTitleTxt({tit:'报修工单'});
           setStore('currentTitle','报修工单')
@@ -186,6 +223,14 @@
         // 重新存入请求token
         if (getStore('questToken')) {
           this.$store.commit('changeToken', getStore('questToken'));
+        };
+        // 重新存入当前报修工单信息
+        if (getStore('repairsWorkOrderMsg')) {
+          this.$store.commit('changeRepairsWorkOrderMsg', JSON.parse(getStore('repairsWorkOrderMsg')));
+        };
+        // 重新存入当前报修工单上传的图片
+        if (getStore('completPhotoInfo')) {
+          this.$store.commit('changeIsCompletePhotoList', JSON.parse(getStore('completPhotoInfo'))['photoInfo']);
         }
       }
     }
@@ -283,16 +328,30 @@
           li {
             background: #fff;
             width:47%;
-            height: 140px;
+            height: 160px;
             border-radius: 4px;
             display:inline-block;
             text-align: center;
-            padding-top: 15px;
+            padding-top: 20px;
             box-sizing: border-box;
             position: relative;
+            .task-length {
+              position: absolute;
+              width: 15px;
+              height: 15px;
+              line-height: 15px;
+              font-size: 10px;
+              top: 14px;
+              right: 14px;
+              background: #fe4c46;
+              color: #fff;
+              border-radius: 2px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap
+            }
             .task-button-wrapper {
               width: 100%;
-              height: 120px;
               position: absolute;
               top: 0;
               left: 0;
@@ -305,19 +364,42 @@
             .task-btn-img {
               width: 60px;
               height: 60px;
+              line-height: 70px;
               margin: 0 auto;
-              img {
-                width: 100%;
-                height: 100%;
+              border-radius: 4px;
+              position: relative;
+              span {
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                margin: 0 auto;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                margin-top: -20px;
+                margin-left: -20px;
+                img {
+                  width: 100%;
+                  height: 100%;
+                };
               }
             };
+            .taskBtnImgOne {
+              background: #f56046
+            };
+            .taskBtnImgTwo {
+              background: #5b8eee
+            }
+            .taskBtnImgThree {
+              background: #3949e7
+            }
             .task-btn-tit {
               color: #271010;
               font-weight: bold;
               margin-top: 30px;
             }
             &:nth-child(3) {
-              margin-top: 10px
+              margin-top: 6%
             };
             &:nth-child(4) {
               margin-top: 10px

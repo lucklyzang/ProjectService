@@ -16,14 +16,17 @@
         <div class="circulation-area">
           <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
             <span>{{index}}</span>
-            <span>
-              <van-field v-model="item.consumableName" placeholder="请输入耗材名称"/>
+             <span>
+              {{item.mateName}}
             </span>
             <span>
-              <van-field v-model="item.consumableUnit" placeholder="单位"/>
+              {{item.unit}}
             </span>
             <span>
-              <van-stepper theme="round" @change="stepperEvent" v-model="item.consumableNumber" min="0"/>
+              <van-stepper theme="round" @change="stepperEvent" v-model="item.number" min="0"/>
+              <!-- <span>
+                <van-icon name="delete" @click="deleteEvent(item,index)" />
+              </span> -->
             </span>
           </p>
         </div>
@@ -33,6 +36,38 @@
         <p class="quit-account" @click="sure">确认</p>
       </div>
     </div>
+    <van-dialog v-model="toolShow"  show-cancel-button width="92%"
+          @confirm="toolSure" @cancel="toolCancel" confirmButtonText="添加"
+        >
+          <div class="tool-name-list">
+            <div class="tool-name-list-title-innner">
+              <van-field
+                v-model="searchValue"
+              />
+              <span class="icon-span">
+                <van-icon name="search" @click="searchEvent"/>
+              </span>
+            </div>
+            <div class="tool-name-list-content">
+              <p class="circulation-area-title">
+                <span>物质名称</span>
+                <span>单位</span>
+                <span></span>
+              </p>
+               <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
+                <span>
+                  {{item.mateName}}
+                </span>
+                <span>
+                  {{item.unit}}
+                </span>
+                <span>
+                  <van-checkbox v-model="item.checked" shape="square"></van-checkbox>
+                </span>
+              </p>
+            </div>
+          </div>
+    </van-dialog>
   </div>
 </template>
 <script>
@@ -43,7 +78,8 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  import {queryMaterialById,queryAllMaterial,saveMate,completeRepairsTask} from '@/api/worker.js'
+  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray } from '@/common/js/utils'
   export default {
     name: 'FillConsumable',
     components:{
@@ -53,23 +89,10 @@
     },
     data() {
       return {
-        consumableMsgList: [
-          {
-            consumableNumber: 0,
-            consumableName: '耗材一',
-            consumableUnit: '只',
-          },
-          {
-            consumableNumber: 0,
-            consumableName: '耗材二',
-            consumableUnit: '根',
-          },
-          {
-            consumableNumber: 0,
-            consumableName: '耗材三',
-            consumableUnit: '根',
-          }
-        ]
+        toolShow: false,
+        searchValue: '',
+        consumableMsgList: [],
+        inventoryMsgList: [],
       }
     },
     
@@ -82,7 +105,8 @@
           this.changeTitleTxt({tit:'工单详情'});
           setStore('currentTitle','工单详情')
         })
-      }
+      };
+      this.getMaterialById(this.taskId)
     },
     
     watch: {
@@ -91,6 +115,9 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
+        'repairsWorkOrderMsg',
+        'userInfo',
+        'completeRoomList'
       ]),
       userName () {
        return this.userInfo.userName
@@ -109,12 +136,16 @@
       },
       name () {
         return this.userInfo.name
+      },
+      taskId () {
+        return this.repairsWorkOrderMsg.id
       }
     },
 
     methods:{
       ...mapMutations([
-        'changeTitleTxt'
+        'changeTitleTxt',
+        'changeCompleteRoomList'
       ]),
 
       //返回上一页
@@ -124,24 +155,209 @@
         setStore('currentTitle','工单详情')
       },
 
-      // 计数器变化回调
-      stepperEvent (value) {
+      //查询任务关联的物料信息
+      getMaterialById (taskId) {
+        queryMaterialById(taskId)
+        .then((res) => {
+          if(res && res.data.code == 200) {
+            if (res.data.data.length > 0) {
+              this.consumableMsgList = [];
+              this.consumableMsgList = res.data.data
+            } else {
+              this.$dialog.alert({
+                message: '没有查询到对应的物料信息',
+                closeOnPopstate: true
+              }).then(() => {
+              })
+            }
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
 
+      //查询所有物料信息
+       getAllMaterial (data) {
+        queryAllMaterial(data)
+        .then((res) => {
+          if(res && res.data.code == 200) {
+            if (res.data.data.length > 0) {
+              this.inventoryMsgList = [];
+              this.inventoryMsgList = res.data.data
+            } else {
+              this.$dialog.alert({
+                message: '没有查询到对应的物料信息',
+                closeOnPopstate: true
+              }).then(() => {
+              })
+            }
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
       },
 
       // 添加物质
       addConsumable () {
-        this.consumableMsgList.push(
-           {
-            consumableNumber: 0,
-            consumableName: '',
-            consumableUnit: '',
+        this.toolShow = true;
+        this.getAllMaterial({ 
+	        proId: this.proId,
+          state: 0
+        })
+      },
+
+      // 添加确认
+      toolSure () {
+        let count = this.inventoryMsgList.some((item)=> {return item.checked == true});
+        if (!count) {
+          this.$toast('至少要选择一种耗材')
+        } else {
+          let checkConsumableList = this.inventoryMsgList.filter((item) => {return item.checked == true});
+          for (let item of checkConsumableList) {
+             this.consumableMsgList.push({
+                number: 0,
+                mateName: item.mateName,
+                unit: item.unit,
+                mateId: item.id
+             })
+           
           }
-        )
+        }
+      },
+
+      // 删除事件
+      deleteEvent(item,index) {
+        this.consumableMsgList.splice(index,1)
+      },
+
+      // 搜索事件
+      searchEvent () {
+        if (this.searchValue == '') {
+          this.getAllMaterial({ 
+            proId: this.proId,
+            state: 0
+          });
+          return
+        };
+        this.inventoryMsgList = this.inventoryMsgList.filter((item) => {return item.mateName.indexOf(this.searchValue) != -1})
+      },
+
+      // 添加取消
+      toolCancel () {
+
       },
 
       // 确认
-      sure () {}
+      sure () {
+        let mateMsg = {
+          proId: this.proId,
+          id: this.taskId,
+          materials: []
+        };
+        let temporaryConsumableMsgList = this.consumableMsgList.filter((item) => {return item.number > 0});
+        if (temporaryConsumableMsgList.length == 0) {
+          this.$toast('添加的耗材数量不能为0');
+          return
+        };
+        for (let item of temporaryConsumableMsgList) {
+          mateMsg.materials.push(
+            {
+              proId: this.proId, 
+              proName: item.mateName,
+              mateId: item.mateId,
+              number: item.number
+            }
+          )
+        };
+        saveMate(mateMsg).then((res) => {
+          if (res && res.data.code == 200) {
+            this.$toast(`${res.data.msg}`);
+            this.$dialog.alert({
+              message: '是否还有地点未完成',
+              closeOnPopstate: true,
+              showCancelButton: true
+            })
+            .then(() => {
+              this.$router.push({path: 'repairsWorkOrder'});
+              this.changeTitleTxt({tit:'报修工单'});
+              setStore('currentTitle','报修工单')
+            })
+            .catch(() => {
+              completeRepairsTask({
+                proId: this.proId,
+                taskId: this.taskId
+              })
+              .then((res) => {
+                if (res && res.data.code == 200) {
+                  this.$toast(`${res.data.msg}`);
+                  this.$router.push({path: 'repairsWorkOrder'});
+                  this.changeTitleTxt({tit:'报修工单'});
+                  setStore('currentTitle','报修工单')
+                } else {
+                  this.$toast(`${res.data.msg}`);
+                }
+              })
+              .catch((err) => {
+                this.$dialog.alert({
+                  message: `${err.message}`,
+                  closeOnPopstate: true
+                }).then(() => {
+                })
+              })
+            })
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      // 存储已完成检修的房间信息
+      storageCompletedRoom (departmentNo) {
+        let temporaryOfficeList = [];
+        let temporaryDepartmentId = [];
+        temporaryOfficeList = deepClone(this.completeRoomList);
+        if (this.completeRoomList.length > 0 ) {
+          let temporaryIndex = this.completeRoomList.indexOf(this.completeRoomList.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (temporaryIndex != -1) {
+            temporaryDepartmentId = temporaryOfficeList[temporaryIndex]['officeList'];
+            temporaryDepartmentId.push(departmentNo);
+            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId)
+          } else {
+            temporaryDepartmentId.push(departmentNo);
+            temporaryOfficeList.push(
+              { 
+                officeList: repeArray(temporaryDepartmentId),
+                taskId: this.taskId
+              }
+            )
+          };
+        } else {
+          temporaryDepartmentId.push(departmentNo);
+          temporaryOfficeList.push(
+            { 
+              officeList: repeArray(temporaryDepartmentId),
+              taskId: this.taskId
+            }
+          )
+        };
+        this.changeCompleteRoomList(temporaryOfficeList);
+        setStore('completeRoomList', {"sweepCodeInfo": temporaryOfficeList})
+      }
     }
   }
 </script>
@@ -150,6 +366,82 @@
   @import "~@/common/stylus/mixin.less";
   @import "~@/common/stylus/modifyUi.less";
   .content-wrapper {
+    /deep/ .van-dialog {
+      top: 50%;
+      .van-dialog__content {
+        margin-bottom: 6px;
+        height: 500px;
+        margin: 10px 0;
+        .tool-name-list {
+          width: 94%;
+          height: 100%;
+          overflow: auto;
+          margin: 0 auto;
+          padding: 0;
+          .tool-name-list-title-innner {
+            padding: 10px;
+            position: relative;
+            /deep/ .van-cell {
+              padding: 4px;
+              border: 1px solid #333;
+            };
+            .icon-span {
+              position: absolute;
+              top: 14px;
+              display: inline-block;
+              right: 16px;
+              .van-icon {
+                font-size: 23px
+              }
+            }
+          }
+          .tool-name-list-content {
+            height: 82%;
+            max-height: 82%;
+            padding: 6px;
+            overflow: auto;
+            border-top: 1px solid #b2b2b2;
+            border-bottom: 1px solid #b2b2b2;
+            .circulation-area-content {
+              position: relative;
+              height: 40px;
+              background: #fff;
+              > span {
+                height: 40px;
+                line-height: 40px;
+                font-size: 16px;
+                display: inline-block;
+                &:first-child {
+                  width: 55%
+                };
+                &:nth-child(2) {
+                  width: 20%;
+                }
+                &:last-child {
+                  position: absolute;
+                  top: 6px;
+                  right: 0
+                }
+              }
+            }
+            .circulation-area-title {
+              position: relative;
+              font-size: 0;
+              span {
+                height: 40px;
+                line-height: 40px;
+                display: inline-block;
+                width: 20%;
+                font-size: 16px;
+                &:first-child {
+                  width: 55%
+                }
+              }
+            }
+          }
+        }
+      }
+    };
     .content-wrapper();
     position: relative;
      .no-data {
@@ -190,7 +482,7 @@
           &:last-child {
             margin-bottom:0
           }
-          span {
+          > span {
             height: 50px;
             line-height: 50px;
             width: 40%;
@@ -225,11 +517,31 @@
                   color: #fff;
                   background-color: #2c65f7;
                   border: 1px solid #2c65f7;
+                  &:before {
+                    height: 3px
+                  }
                 };
                 .van-stepper__plus {
                   color: #fff;
                   background-color: #2c65f7;
                   border: 1px solid #2c65f7;
+                  &:before {
+                    height: 3px
+                  };
+                  &:after {
+                    width: 3px
+                  }
+                }
+              };
+              span {
+                display: inline-block;
+                position: absolute;
+                top: 0;
+                right: 2px;
+                font-size: 22px;
+                color:  #2c65f7;
+                /deep/ .van-icon {
+                  top: 2px
                 }
               }
             }

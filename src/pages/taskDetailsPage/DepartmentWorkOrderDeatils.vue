@@ -63,6 +63,7 @@
     },
     data() {
       return {
+        departmentWorkOrderMsg: '',
         name: '撒飒飒',
         phoneNumber: '132212121',
         personPosition: '维修员',
@@ -75,6 +76,11 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
+          // if (this.departmentWorkOrderMsg.state == 7) {
+        //   this.changeIsFreshDepartmentServicePage(false)
+        // } else {
+        //   this.changeIsFreshDepartmentServicePage(true)
+        // };
           this.$router.push({path: 'departmentService'});
           this.changeTitleTxt({tit:'科室巡检'});
           setStore('currentTitle','科室巡检')
@@ -93,6 +99,7 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
+        'departmentServiceMsg'
       ]),
       userName () {
        return this.userInfo.userName
@@ -111,12 +118,16 @@
       },
       name () {
         return this.userInfo.name
+      },
+      taskId () {
+        return this.departmentServiceMsg.id
       }
     },
 
     methods:{
       ...mapMutations([
-        'changeTitleTxt'
+        'changeTitleTxt',
+        'changeIsFreshDepartmentServicePage'
       ]),
 
       // 摄像头扫码后的回调
@@ -126,6 +137,11 @@
 
       //返回上一页
       backTo () {
+        // if (this.departmentWorkOrderMsg.state == 7) {
+        //   this.changeIsFreshDepartmentServicePage(false)
+        // } else {
+        //   this.changeIsFreshDepartmentServicePage(true)
+        // };
         this.$router.push({path: 'departmentService'});
         this.changeTitleTxt({tit:'科室巡检'});
         setStore('currentTitle','科室巡检')
@@ -133,7 +149,10 @@
 
       // 扫一扫
       fillConsumable () {
-        window.android.scanQRcode()
+        this.$router.push({path: 'departmentServiceBill'});
+        this.changeTitleTxt({tit:'科室巡检单'});
+        setStore('currentTitle','科室巡检单')
+        // window.android.scanQRcode()
       },
 
       // 完成巡检

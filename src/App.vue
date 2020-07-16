@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-     <!-- <keep-alive> -->
+     <keep-alive :include="catch_components">
       <router-view/>
-    <!-- </keep-alive> -->
+    </keep-alive>
   </div>
 </template>
 <script>

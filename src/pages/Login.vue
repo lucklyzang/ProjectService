@@ -2,14 +2,26 @@
   <div id="LoginBox">
     <div class="bg-icon-wrapper" ref="bgIconWrapper">
       <div class="bg-icon">
-        <img :src="logoTopPng" alt="">
+        <h3>登录</h3>
       </div>
     </div>
     <div class="input-box"  ref="inputBox">
-      <van-cell-group>
-        <van-field label="用户名"  left-icon="contact" placeholder="请输入用户名" type="text" v-model="username"></van-field>
-        <van-field label="密码" left-icon="bag-o" placeholder="请输入密码" type="password" v-model="password"></van-field>
-      </van-cell-group>
+      <div>
+        <p>
+          账号
+        </p>
+        <p>
+          <van-field type="text"  placeholder="请输入用户名" v-model="username"></van-field>
+        </p>
+      </div>
+      <div>
+        <p>
+          密码
+        </p>
+        <p>
+          <van-field type="password" placeholder="请输入密码" v-model="password"></van-field>
+        </p>
+      </div>
     </div>
     <div class="btn-box" @click="login">
       <img :src="loginBtnPng" alt="">
@@ -37,11 +49,8 @@ export default {
       username: '',
       password: '',
       showAccountLogin: true,
-      showSweepLogin: false,
       showLoadingHint: false,
-      sweepMsg: null,
       proId: '',
-      barCodeScannerShow: false,
       logoTopPng: require('@/components/images/logo-top.png'),
       loginBtnPng: require('@/components/images/login-btn.png'),
     };
@@ -97,54 +106,48 @@ export default {
     login () {
       this.$router.push({path:'/home'});
       this.changeTitleTxt({tit:'工程管理系统'});
-      // let loginMessage;
-      // this.showLoadingHint = true;
-      // if (this.showAccountLogin) {
-      //   loginMessage = {
-      //     username: this.username,
-      //     password: this.password,
-      //     rememberMe: 1
-      //   };
-      // } else {
-      //   loginMessage = {
-      //     username: this.sweepMsg,
-      //     flag: 1,
-      //   }
-      // };
-      // logIn(loginMessage).then((res)=>{
-      //   if (res) {
-      //     if (res.data.code == 200) {
-      //       // 重置过期方式
-      //       if (this.showAccountLogin) {
-      //         setStore('userName', this.username);
-      //         setStore('userPassword', this.password);
-      //       };
-      //       // 登录用户名密码及用户信息存入Locastorage
-      //       setStore('userInfo', res.data.data);
-      //       setStore('isLogin', true);
-      //       // 用户身份类别存入store和Locastorage
-      //       this.storeUserInfo(JSON.parse(getStore('userInfo')));
-      //       this.$router.push({path:'/home'});
-      //       this.changeTitleTxt({tit:'工程管理系统'});
-      //       this.proId = res.data.data['proId'];
-      //     } else {
-      //        this.$dialog.alert({
-      //         message: `${res.data.msg}`,
-      //         closeOnPopstate: true
-      //       }).then(() => {
-      //       });
-      //     }
-      //   };
-      //   this.showLoadingHint = false
-      // })
-      // .catch((err) => {
-      //   this.showLoadingHint = false;
-      //   this.$dialog.alert({
-      //     message: `${err.message}`,
-      //     closeOnPopstate: true
-      //   }).then(() => {
-      //   })
-      // })
+      let loginMessage;
+      this.showLoadingHint = true;
+        loginMessage = {
+          username: this.username,
+          password: this.password,
+          rememberMe: 1
+        };
+      logIn(loginMessage).then((res)=>{
+        if (res) {
+          if (res.data.code == 200) {
+            // 重置过期方式
+            if (this.showAccountLogin) {
+              setStore('userName', this.username);
+              setStore('userPassword', this.password);
+            };
+            // 登录用户名密码及用户信息存入Locastorage
+            setStore('userInfo', res.data.data);
+            setStore('isLogin', true);
+            // 用户身份类别存入store和Locastorage
+            this.storeUserInfo(JSON.parse(getStore('userInfo')));
+            window.location.reload();
+            this.$router.push({path:'/home'});
+            this.changeTitleTxt({tit:'工程管理系统'});
+            this.proId = res.data.data['proId'];
+          } else {
+             this.$dialog.alert({
+              message: `${res.data.msg}`,
+              closeOnPopstate: true
+            }).then(() => {
+            });
+          }
+        };
+        this.showLoadingHint = false
+      })
+      .catch((err) => {
+        this.showLoadingHint = false;
+        this.$dialog.alert({
+          message: `${err.message}`,
+          closeOnPopstate: true
+        }).then(() => {
+        })
+      })
     }
   } 
 }
@@ -158,15 +161,48 @@ export default {
     .input-box {
       width: 100%;
       height: 190px;
-      padding-top: 50px;
       box-sizing: border-box;
+      > div {
+        width: 85%;
+        margin: 0 auto;
+        height: 50px;
+        margin-bottom: 20px;
+        position: relative;
+        > p {
+          font-size: 18px;
+          position: absolute;
+          top: 0;
+          display: inline-block;
+          height: 50px;
+          &:first-child {
+            left: 0;
+            line-height: 50px;
+            width: 20%
+          };
+          &:last-child {
+            right: 0;
+            width: 80%;
+            /deep/ .van-cell {
+              border: 1px solid #cdcdcd;
+              height: 100%;
+              padding: 0;
+              .van-cell__value {
+                .van-field__body {
+                  height: 100%;
+                  padding-left: 8px
+                }
+              }
+            }
+          }
+        }
+      }
     }
     .loading-btn {
       width: 100%;
       height: 50px;
     }
    .btn-box {
-      width: 80%;
+      width: 85%;
       height: 140px;
       margin: 0 auto;
       img {
@@ -182,27 +218,11 @@ export default {
       .bg-icon {
         width: 100%;
         height: 100%;
-        display: inline-block;
-        img {
-          width: 100%;
-          height: 100%
-        }
-      }
-    }
-    .van-hairline--top-bottom::after {
-      display: none
-    }
-    .van-cell-group {
-      width: 80%;
-      margin: 0 auto;
-      font-size: 14px;
-      .van-cell {
-        border-bottom: 1px solid #e8e8e8;
-        padding-left: 0;
-        .van-cell__title {
-          .van-field__label {
-            color: #6a6a6a
-          }
+        h3 {
+          font-size: 20px;
+          font-weight: bold;
+          line-height: 50px;
+          text-align: center
         }
       }
     }

@@ -153,14 +153,16 @@
             workOrderNumber: 'bx12131313131',
             workOrder: '灯管',
             taskType: '1',
-            taskPoint: '2'
+            taskPoint: '2',
+            type: 1
           },
           {
             date: '2020-03-03 13:00',
             workOrderNumber: 'bx12131313131',
             workOrder: '灯管',
             taskType: '1',
-            taskPoint: '2'
+            taskPoint: '2',
+            type:2
           },
           {
             date: '2020-03-03 13:00',
@@ -230,7 +232,15 @@
 
       // 任务查看
       taskView (item) {
-
+        if (item.type == 1) {
+          this.$router.push({path: 'deviceServiceDetails'});
+          this.changeTitleTxt({tit:'设备巡检详情'});
+          setStore('currentTitle','设备巡检详情')
+        } else {
+          this.$router.push({path: 'operateRecordOrderDetails'});
+          this.changeTitleTxt({tit:'设备巡检详情'});
+          setStore('currentTitle','设备巡检详情')
+        }
       },
 
       // 返回上一页

@@ -347,7 +347,7 @@ export const arrayDiff = (a, b) => {
 
 /* 
   * 压缩图片
-  * @param{Array} originSite base64字符串
+  * @param{String} originSite base64字符串
   * @param{Function} callback 压缩成功后的回调函数
 */
 export const compressImg = (originSite,callback) => {
@@ -371,6 +371,58 @@ export const compressImg = (originSite,callback) => {
     data = canvas.toDataURL('image/jpeg');
     callback(data)
   }
+}
+
+/* 
+  * 压缩图片
+  * @param{String} img 图片对象
+*/
+export const compress = (img,Orientation) => {
+  let canvas = document.createElement("canvas");
+  let ctx = canvas.getContext('2d');
+  //创建canvas
+  let tCanvas = document.createElement("canvas");
+  let tctx = tCanvas.getContext("2d");
+  let initSize = img.src.length;
+  let width = img.width;
+  let height = img.height;
+  //如果图片大于四百万像素，计算压缩比并将大小压至400万以下
+  let ratio;
+  if ((ratio = width * height / 4000000) > 1) {
+    console.log("大于400万像素")
+    ratio = Math.sqrt(ratio);
+    width /= ratio;
+    height /= ratio
+  } else {
+    ratio = 1;
+  };
+  canvas.width = width;
+  canvas.height = height;
+  //铺底色
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //如果图片像素大于100万则使用canvas绘制
+  let count;
+  if ((count = width * height / 1000000) > 1) {
+    count = ~~(Math.sqrt(count) + 1); //计算要分成多少块瓦片
+    //计算每块canvas的宽和高
+    let nw = ~~(width / count);
+    let nh = ~~(height / count);
+    tCanvas.width = nw;
+    tCanvas.height = nh;
+    for (let i = 0; i < count; i++) {
+      for (let j = 0; j < count; j++) {
+          tctx.drawImage(img, i * nw * ratio, j * nh * ratio, nw * ratio, nh * ratio, 0, 0, nw, nh);
+          ctx.drawImage(tCanvas, i * nw, j * nh, nw, nh);
+      }
+    }
+  } else {
+    ctx.drawImage(img, 0, 0, width, height);
+  };
+  //进行最小压缩
+  let ndata = canvas.toDataURL('image/jpeg', 0.3);
+  tCanvas.width = tCanvas.height = canvas.width = canvas.height = 0;
+  return ndata
 }
 
 /* 
@@ -441,5 +493,67 @@ export const removeAllLocalStorage = () => {
   // removeStore('userPassword');
   removeStore('userInfo');
   removeStore('isLogin');
-  removeStore('userType')
+  removeStore('userType');
+  removeStore('completPhotoInfo')
+}
+
+/*
+ * 
+ *  任务优先级转换
+ * @param{Number} index
+ * 
+*/
+
+export const priorityTransfer = (index) => {
+  switch(index) {
+    case 1 :
+      return '正常'
+      break;
+    case 2 :
+      return '重要'
+      break;
+    case 3 :
+      return '紧急'
+      break;
+    case 4 :
+      return '紧急重要'
+      break;
+    default:
+      return '无'
+  }
+}
+
+/*
+ * 
+ *  任务状态转换
+ * @param{Number} index
+ * 
+*/
+export const stateTransfer =  (index) => {
+  switch(index) {
+    case 0 :
+      return '未分配'
+      break;
+    case 1 :
+      return '未获取'
+      break;
+    case 2 :
+      return '未开始'
+      break;
+    case 3 :
+      return '进行中'
+      break;
+    case 4 :
+      return '待签字'
+      break;
+    case 5 :
+      return '已完成'
+      break;
+    case 6 :
+      return '已取消'
+      break;
+    case 7 :
+      return '已延迟'
+      break;
+  }
 }

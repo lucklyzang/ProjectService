@@ -36,7 +36,7 @@ export default {
     isFreshHomePage: state => state.isFreshHomePage,
     navTopTitle: state => state.navTopTitle,
     originalSignature: state => state.originalSignature,
-    currentElectronicSignature: state => state.currentElectronicSignature
+    currentElectronicSignature: state => state.currentElectronicSignature,
   },
   mutations:{
     storeUserInfo (state, playLoad) {

@@ -1,77 +1,101 @@
 <template>
   <div class="content-wrapper">
+     <van-overlay :show="overlayShow"/>
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
         <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
       </HeaderTop>
+      <div class="loading">
+        <loading :isShow="showLoadingHint" :textContent="loadinText" textColor="#2895ea"></loading>
+      </div>
       <!-- 内容部分 -->
       <div class="content-top">
         <p class="content-top-other">
           <span>工单编号</span>
           <span>
-            2121212121
+            {{oneRepairsMsg.taskNumber}}
           </span>
         </p>
         <p class="content-top-other">
           <span>工单标题</span>
           <span>
-            {{name}}
+            {{oneRepairsMsg.taskDesc}}
           </span>
         </p>
         <p class="content-top-other">
           <span>工单类型</span>
           <span>
-            {{phoneNumber}}
+            {{oneRepairsMsg.typeName}}
           </span>
         </p>
         <p class="content-top-other">
           <span>时间</span>
           <span>
-            {{departmentName}}
+            {{oneRepairsMsg.planStartTime}}
           </span>
+        </p>
+        <p class="content-top-other">
+          <span>参与人员</span>
+          <span v-if="oneRepairsMsg.present ? oneRepairsMsg.present.length > 0 : false">
+            <b v-for="(item,index) in oneRepairsMsg.present" :key="`${item}-${index}`">
+              {{item.name}}
+            </b>
+          </span> 
+          <span v-if="oneRepairsMsg.present ? oneRepairsMsg.present.length == 0 : false">
+            <b>
+              无
+            </b>
+          </span> 
         </p>
         <p class="content-top-other">
           <span>地点</span>
           <span>
-            {{departmentName}}
+            {{oneRepairsMsg.depName}}
           </span>
         </p>
         <p class="content-top-name">
           <span>工单内容</span>
           <span>
-            飒飒撒飒飒下载下中选中下载下大师打死多所
+            {{oneRepairsMsg.taskRemark ? oneRepairsMsg.taskRemark : '无'}}
           </span>
         </p>
       </div>
-      <div class="content-middle">
+      <div class="content-middle" v-if="repairsWorkOrderMsg.state != 4">
         <p class="issue-photo">
           <span>问题拍照</span>
           <ul class="photo-list">
-            <li v-for="(item,index) in issueImageList" :key="`${item}-${index}`">
-              <img width="100" height="130" :src="item"/>
+            <li v-for="(item,index) in issueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
+              <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item)" />
               <van-icon name="cross" @click="issueDelete(index)"/>
             </li>
+            <li v-for="(item,index) in historyIssueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
+              <img width="100" height="130" :src="Base64.decode(item)" @click="enlargeIssueImgEvent(Base64.decode(item))"/>
+            </li>
           </ul>
-          <span @click="issueClickEvent" class="icon-wrapper">
+          <span @click="issueClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
             <van-icon name="plus"/>
           </span>
         </p>
         <p class="complete-photo">
           <span>完成拍照</span>
           <ul class="photo-list">
-            <li v-for="(item,index) in completeImageList" :key="`${item}-${index}`">
-              <img width="100" height="130" :src="item"/>
+            <li v-for="(item,index) in completeImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
+              <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item)"/>
               <van-icon name="cross" @click="completeDelete(index)"/>
             </li>
+            <li v-for="(item,index) in historyCompleteImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
+              <img width="100" height="130" :src="Base64.decode(item)" @click="enlargeCompleteImgEvent(Base64.decode(item))"/>
+            </li>
           </ul>
-          <span @click="completeClickEvent" class="icon-wrapper">
+          <span @click="completeClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
             <van-icon name="plus"/>
           </span>
         </p>
       </div>
-      <div class="content-bottom">
-        <p class="back-home"  @click="fillConsumable">填写耗材</p>
+      <div class="content-bottom" ref="contentBottom" v-show="repairsWorkOrderMsg.state !== 5">
+        <p class="back-home"  @click="uploadPhoto" v-show="showUploadPhoto">确定</p>
+        <p class="back-home"  @click="fillConsumable" v-show="!showUploadPhoto && repairsWorkOrderMsg.state !== 4 && repairsWorkOrderMsg.state !== 5">填写耗材</p>
         <p class="quit-account" @click="completeTask">完成工单</p>
       </div>
       <div class="choose-photo-box" v-show="photoBox">
@@ -83,6 +107,9 @@
         </div>
       </div>
     </div>
+    <van-dialog v-model="enlargeImgShow" width="90%">
+      <img :src="enlargeImgUrl">
+    </van-dialog>
   </div>
 </template>
 <script>
@@ -93,25 +120,34 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  import {queryOneRepairsProject,uploadRepairsTaskPhoto,queryRepairsTaskPhoto} from '@/api/worker.js'
+  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, deepClone, compress } from '@/common/js/utils'
   export default {
     name: 'WorkOrderDetails',
     components:{
       HeaderTop,
       FooterBottom,
-      VanFieldSelectPicker
+      VanFieldSelectPicker,
+      Loading
     },
     data() {
       return {
         photoBox: false,
+        showLoadingHint: false,
+        overlayShow: false,
+        showUploadPhoto: false,
+        imgType: '',
+        loadinText: '',
         clickIssue: false,
         clickComplete: false,
         issueImageList: [],
         completeImageList: [],
-        name: '撒飒飒',
-        phoneNumber: '132212121',
-        departmentName: '工程部',
-        personPosition: '维修员'
+        historyIssueImageList: [],
+        historyCompleteImageList: [],
+        photonList: [],
+        enlargeImgShow: false,
+        oneRepairsMsg: '',
+        enlargeImgUrl: ''
       }
     },
     
@@ -119,6 +155,11 @@
       // 控制设备物理返回按键测试
       if (!IsPC()) {
         pushHistory();
+        if (this.repairsWorkOrderMsg.state == 5) {
+          this.changeIsFreshRepairsWorkOrderPage(false)
+        } else {
+          this.changeIsFreshRepairsWorkOrderPage(true)
+        };
         this.gotoURL(() => {
           this.$router.push({path: 'repairsWorkOrder'});
           this.changeTitleTxt({tit:'报修工单'});
@@ -129,15 +170,53 @@
         if(e.target.className!='van-icon van-icon-plus'){
           this.photoBox = false;
         }
-      })
+      });
+      if (this.repairsWorkOrderMsg.state == 5) {
+        this.getOneRepairsProjectNoComplete(this.taskId);
+        this.parallelFunction()
+      } else {
+        this.getOneRepairsProjectNoComplete(this.taskId)
+      };
+      this.changeElementSite();
+      this.echoPhoto();
+      console.log('sasas',this.isCompleteRepairsWorkOrderPhotoList);
     },
     
     watch: {
+      issueImageList: {
+        handler(newValue,oldValue) {
+          if (newValue.length == 0) {
+            if (this.completeImageList.length == 0) {
+              this.showUploadPhoto = false
+            }
+          } else {
+            this.showUploadPhoto = true
+          }
+        },
+        immediate: true,
+        deep: true 
+      },
+      completeImageList: {
+        handler(newValue,oldValue) {
+          if (newValue.length == 0) {
+            if (this.issueImageList.length == 0) {
+              this.showUploadPhoto = false
+            }
+          } else {
+            this.showUploadPhoto = true
+          }
+        },
+        immediate: true,
+        deep: true 
+      }
     },
     
     computed:{
       ...mapGetters([
         'navTopTitle',
+        'repairsWorkOrderMsg',
+        'userInfo',
+        'isCompleteRepairsWorkOrderPhotoList'
       ]),
       userName () {
        return this.userInfo.userName
@@ -156,23 +235,119 @@
       },
       name () {
         return this.userInfo.name
+      },
+      taskId () {
+        return this.repairsWorkOrderMsg.id
       }
     },
 
     methods:{
       ...mapMutations([
-        'changeTitleTxt'
+        'changeTitleTxt',
+        'changeIsFreshRepairsWorkOrderPage',
+        'changeIsCompletePhotoList'
       ]),
 
       //返回上一页
       backTo () {
+        if (this.repairsWorkOrderMsg.state == 5) {
+          this.changeIsFreshRepairsWorkOrderPage(false)
+        } else {
+          this.changeIsFreshRepairsWorkOrderPage(true)
+        };
         this.$router.push({path: 'repairsWorkOrder'});
         this.changeTitleTxt({tit:'报修工单'});
         setStore('currentTitle','报修工单')
       },
 
+      // 改变元素位置
+      changeElementSite () {
+        if (this.repairsWorkOrderMsg.state == 4) {
+          this.$refs.contentBottom.style.position = "absolute"
+          this.$refs.contentBottom.style.bottom = 0;
+          this.$refs.contentBottom.style.left = 0
+        } else {
+          this.$refs.contentBottom.style.position = "relative"
+        };
+      },
+
+      // 放大问题图片点击事件
+      enlargeIssueImgEvent (item) {
+        this.enlargeImgShow = true;
+        this.enlargeImgUrl = item
+      },
+
+      // 放大维修后图片点击事件
+      enlargeCompleteImgEvent (item) {
+        this.enlargeImgShow = true;
+        this.enlargeImgUrl = item
+      },
+
+      // 并行查询工单信息和图片信息
+      parallelFunction () {
+        this.loadinText = '加载中,请稍等···';
+        this.showLoadingHint = true;
+        this.overlayShow = true;
+        Promise.all([this.getOneRepairsProjectPhoto()]).then((values) => {
+          this.showLoadingHint = false;
+          this.overlayShow = false;
+          if (values.length > 0) {
+            this.photonList = values[0];
+            if (this.photonList.length > 0) {
+              for (let i = 0, len = this.photonList.length; i < len; i++) {
+                if (this.photonList[i].imgType == 1) {
+                  this.historyIssueImageList.push(this.photonList[i].imgSign)
+                } else if (this.photonList[i].imgType == 2) {
+                  this.historyCompleteImageList.push(this.photonList[i].imgSign)
+                }
+              }
+            };
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err}`,
+            closeOnPopstate: true
+          }).then(() => {
+          });
+          this.showLoadingHint = false;
+          this.overlayShow = false
+        })
+      },
+
+      // 查询单条工单信息
+      getOneRepairsProjectNoComplete () {
+        queryOneRepairsProject(this.taskId).then((res) => {
+          if(res && res.data.code == 200) {
+            this.oneRepairsMsg = res.data.data;
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+          message: `${err}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      // 查询任务下的图片
+       getOneRepairsProjectPhoto () {
+        return new Promise((resolve,reject) => {
+          queryRepairsTaskPhoto({taskId:this.taskId,imgType:-1}).then((res) => {
+            if(res && res.data.code == 200) {
+              resolve(res.data.data)
+            }
+          })
+          .catch((err) => {
+            reject(err.message)
+          })
+        })
+      },
+
       // 拍照问题照片点击
       issueClickEvent () {
+        this.photoType = 1;
         this.photoBox = true;
         this.clickIssue = true;
         this.clickComplete = false
@@ -180,6 +355,7 @@
 
       // 拍照完成照片点击
       completeClickEvent () {
+        this.photoType = 2;
         this.photoBox = true;
         this.clickIssue = false;
         this.clickComplete = true
@@ -197,6 +373,7 @@
 
       // 图片上传预览
       previewFileOne() {
+        let Orientation;
         let file = document.getElementById("demo1").files[0];
         let _this = this;
         let reader = new FileReader();
@@ -210,14 +387,19 @@
           return
         };  
         reader.addEventListener("load", function () {
-          if (_this.clickIssue) {
-            _this.issueImageList.push(reader.result)
-          } else {
-            _this.completeImageList.push(reader.result)
-          };
-          // _this.upImgUrl = reader.result;
-          // 存储上传的照片
-          // _this.storePhoto(reader.result)
+          // 压缩图片
+          let result = reader.result;
+          let img = new Image();
+          img.src = result;
+          img.onload = function () {
+            let src = compress(img,Orientation);
+            if (_this.clickIssue) {
+              _this.issueImageList.push(reader.result)
+            } else {
+              _this.completeImageList.push(reader.result)
+            };
+             _this.storePhoto(reader.result,_this.photoType)
+          }
         }, false);
         if (file) {
           reader.readAsDataURL(file);
@@ -226,6 +408,7 @@
 
       //拍照预览
       previewFileTwo() {
+        let Orientation;
         let file = document.getElementById("demo2").files[0];
         let _this = this;
         let reader = new FileReader();
@@ -239,17 +422,146 @@
           return
         };  
         reader.addEventListener("load", function () {
-          if (this.clickIssue) {
-            _this.issueImageList.push(reader.result)
-          } else {
-            _this.completeImageList.push(reader.result)
-          };
-          // 存储上传的照片
-          // _this.storePhoto(reader.result)
+          // 压缩图片
+          let result = reader.result;
+          let img = new Image();
+          img.src = result;
+          img.onload = function () {
+            let src = compress(img,Orientation);
+            if (_this.clickIssue) {
+                _this.issueImageList.push(reader.result)
+            } else {
+              _this.completeImageList.push(reader.result)
+            };
+            // 存储上传的照片
+            _this.storePhoto(reader.result,_this.photoType)
+            }
         }, false);
         if (file) {
           reader.readAsDataURL(file);
         };
+      },
+
+      // 存储已经上传的照片
+      storePhoto (photoId,type) {
+        let temporaryPhotoList = [];
+        let temporaryPhotoId = [];
+        temporaryPhotoList = deepClone(this.isCompleteRepairsWorkOrderPhotoList);
+        if (this.isCompleteRepairsWorkOrderPhotoList.length > 0 ) {
+          let temporaryIndex = this.isCompleteRepairsWorkOrderPhotoList.indexOf(this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (temporaryIndex != -1) {
+            temporaryPhotoId = temporaryPhotoList[temporaryIndex]['phototList'];
+            temporaryPhotoId.push({photoId,type});
+            temporaryPhotoList[temporaryIndex]['phototList'] = temporaryPhotoId
+          } else {
+            temporaryPhotoId.push({photoId,type});
+            temporaryPhotoList.push(
+              { 
+                phototList: temporaryPhotoId,
+                taskId: this.taskId
+              }
+            )
+          };
+        } else {
+          temporaryPhotoId.push({photoId,type});
+          temporaryPhotoList.push(
+            { 
+              phototList: temporaryPhotoId,
+              taskId: this.taskId
+            }
+          )
+        };
+        this.changeIsCompletePhotoList(temporaryPhotoList);
+        setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList})
+      },
+
+      // 回显照片
+      echoPhoto () {
+        this.historyIssueImageList = [];
+        this.historyCompleteImageList = [];
+        if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
+        let echoIndex = this.isCompleteRepairsWorkOrderPhotoList.indexOf(this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId == this.taskId})[0]);
+        if (echoIndex == -1) { return };
+        let temporaryPhotoInfo = this.isCompleteRepairsWorkOrderPhotoList[echoIndex]['phototList'];
+        for (let i = 0, len = temporaryPhotoInfo.length; i < len; i++) {
+          if (temporaryPhotoInfo[i].type == 1) {
+            this.issueImageList.push(temporaryPhotoInfo[i].photoId)
+          } else if (temporaryPhotoInfo[i].type == 2) {
+            this.completeImageList.push(temporaryPhotoInfo[i].photoId)
+          };
+        }
+      },
+
+      // 上传图片
+      uploadPhoto () {
+        if (this.issueImageList.length > 0 && this.completeImageList.length > 0) {
+          this.$toast('只能同时提交一种类型的照片');
+          return
+        };
+        this.loadinText = '上传中,请稍等···';
+        this.showLoadingHint = true;
+        this.overlayShow = true;
+        let imageType;
+        let photoMsg = {
+          taskId: this.taskId,  //任务ID
+          images: []
+        };
+        photoMsg.images = [];
+        if (this.issueImageList.length > 0) {
+          imageType = 1;
+          for (let item of this.issueImageList) {
+            photoMsg.images.push({
+              imgType: imageType,
+              image: item
+            })
+          }
+        } else {
+          imageType = 2;
+          for (let item of this.completeImageList) {
+            photoMsg.images.push({
+              imgType: imageType,
+              image: item
+            })
+          }
+        };
+        uploadRepairsTaskPhoto(photoMsg)
+        .then((res) => {
+          this.showLoadingHint = false;
+          this.overlayShow = false;
+          if (res && res.data.code == 200) {
+            this.$toast(`${res.data.msg}`);
+            if (this.issueImageList.length > 0) {
+              this.issueImageList = []
+            } else if (this.completeImageList.length > 0) {
+              this.showUploadPhoto = false
+              this.completeImageList = []
+            };
+            this.clearPhotoList()
+          } else {
+            this.$toast(`${res.data.msg}`);
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          });
+          this.showLoadingHint = false;
+          this.overlayShow = false
+        })
+      },
+
+      // 清除上传成功后存储的照片
+      clearPhotoList () {
+        if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
+        let echoIndex = this.isCompleteRepairsWorkOrderPhotoList.indexOf(this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId == this.taskId})[0]);
+        if (echoIndex == -1) { return };
+        let temporaryPhotoList = deepClone(this.isCompleteRepairsWorkOrderPhotoList);
+        let temporaryPhotoId = [];
+        temporaryPhotoList[echoIndex]['phototList'] = temporaryPhotoId
+        this.changeIsCompletePhotoList(temporaryPhotoList);
+        setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
       },
 
       // 填写耗材
@@ -261,9 +573,13 @@
 
       // 完成工单
       completeTask () {
-        this.$router.push({path: 'workOrderSignature'});
-        this.changeTitleTxt({tit:'工单完成签名'});
-        setStore('currentTitle','工单完成签名')
+        if (this.repairsWorkOrderMsg.state == 4) {
+          this.$router.push({path: 'workOrderSignature'});
+          this.changeTitleTxt({tit:'签字'});
+          setStore('currentTitle','签字')
+        } else {
+          this.$toast('任务状态为待签字时才能完成任务');
+        }
       }
     }
   }
@@ -286,10 +602,21 @@
     .loading {
       position: absolute;
       top: 280px;
-      left: 13%;
+      left: 0;
       width: 100%;
       height: 100px;
       text-align: center;
+    };
+    /deep/ .van-dialog {
+      width: 95% !important;
+      top: 50% !important;
+      .van-dialog__content {
+        height: 90vh;
+        img {
+          width: 100%;
+          height: 100%
+        }
+      }
     };
     .worker-show {
       .content-wrapper();
@@ -344,11 +671,17 @@
               color: #bbbaba;
               padding-left: 10px;
             };
-            &:last-child {
+            &:not(:first-child) {
+              width: 70%;
+              text-align: right;
+              overflow: auto;
               color: #2c65f7;
               font-weight: bold;
               right: 10px;
-              top: 0
+              top: 0;
+              b {
+                font-weight: bold;
+              }
             }
           }
         }
@@ -366,13 +699,14 @@
           left: 70px;
           width: 250px;
           top: 10px;
-          height: 100px;
+          height: 90px;
           overflow: auto;
           li {
             width: 80px;
             height: 80px;
             float: left;
             margin-right: 4px;
+            margin-bottom: 4px;
             position: relative;
             /deep/ .van-icon-cross {
               position: absolute;
@@ -385,7 +719,8 @@
               width: 100%;
               height: 100%
             };
-            &:last-child {
+            &:nth-of-type(3n+0)
+            {
               margin-right: 0
             }
           }
@@ -450,7 +785,6 @@
         width: 100%;
         font-size: 13px;
         background: #f7f7f7;
-        position: relative;
         .back-home {
           height: 40px;
           width: 220px;
@@ -459,7 +793,7 @@
           left: 50%;
           margin-left: -110px;
           position: absolute;
-          top: 5px;
+          bottom: 50px;
           background: #fff;
           color: #2c65f7;
           font-weight: bold;

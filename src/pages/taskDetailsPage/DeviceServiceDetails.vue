@@ -7,46 +7,40 @@
       </HeaderTop>
       <!-- 内容部分 -->
       <div class="content-top">
-        <p class="content-top-name">
-          <span>头像</span>
+        <p class="content-top-other">
+          <span>巡检编号</span>
           <span>
-            <img :src="defaultPersonPng" alt="">
+            2121212121
           </span>
         </p>
         <p class="content-top-other">
-          <span>姓名</span>
+          <span>巡检名称</span>
           <span>
             {{name}}
           </span>
         </p>
         <p class="content-top-other">
-          <span>手机号码</span>
+          <span>当前次数</span>
           <span>
             {{phoneNumber}}
           </span>
         </p>
         <p class="content-top-other">
-          <span>公司部门</span>
+          <span>时间</span>
           <span>
             {{departmentName}}
           </span>
         </p>
-        <p class="content-top-other">
-          <span>职位</span>
-          <span>
-            {{personPosition}}
-          </span>
-        </p>
+      </div>
+      <div class="content-middle">
+        <p>巡检设备</p>
+        <ul>
+          <li v-for="(item,index) in viewPointList" :key="`${item}-${index}`">{{item}}</li>
+        </ul>
       </div>
       <div class="content-bottom">
-        <p class="app-version">
-          <span>当前版本</span>
-          <span>
-            1.0.1
-          </span>
-        </p>
-        <p class="back-home"  @click="backTo">返回主页</p>
-        <p class="quit-account" @click="isLoginOut">退出账号</p>
+        <p class="back-home"  @click="fillConsumable">扫一扫</p>
+        <p class="quit-account" @click="completeTask">完成巡检</p>
       </div>
     </div>
   </div>
@@ -60,9 +54,8 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
-  import {userSignOut} from '@/api/login.js'
   export default {
-    name: 'MyInfo',
+    name: 'DeviceServiceDetails',
     components:{
       HeaderTop,
       FooterBottom,
@@ -72,9 +65,8 @@
       return {
         name: '撒飒飒',
         phoneNumber: '132212121',
-        departmentName: '工程部',
         personPosition: '维修员',
-        defaultPersonPng: require('@/common/images/home/default-person.jpg')
+        viewPointList: ['科室一飒飒','科室一查询查询从','科室一想','科室一下载','科室一没那么','科室一婆婆','科室一的','科室一传','科室一辅导费','科室一']
       }
     },
     
@@ -83,11 +75,16 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
-          this.$router.push({path: 'home'});
-          this.changeTitleTxt({tit:'工程管理系统'});
-          setStore('currentTitle','工程管理系统')
+          this.$router.push({path: 'deviceService'});
+          this.changeTitleTxt({tit:'设备巡检'});
+          setStore('currentTitle','设备巡检')
         })
-      }
+      };
+      // 二维码回调方法绑定到window下面,提供给外部调用
+      let me = this;
+      window['scanQRcodeCallback'] = (code) => {
+        me.scanQRcodeCallback(code);
+      };
     },
     
     watch: {
@@ -96,8 +93,6 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
-        'userInfo',
-        'globalTimer'
       ]),
       userName () {
        return this.userInfo.userName
@@ -121,58 +116,31 @@
 
     methods:{
       ...mapMutations([
-        'changeTitleTxt',
-        'changeOverDueWay'
+        'changeTitleTxt'
       ]),
 
-      // 是否签退
-      isLoginOut () {
-        this.$dialog.alert({
-          message: '确定签退?',
-          closeOnPopstate: true,
-          showCancelButton: true
-        }).then(() => {
-          this.userLoginOut(this.proId, this.userInfo.userName)
-        })
-        .catch(() => {
-        })
-      },
-        
-      // 用户签退
-      userLoginOut (proId,workerId) {
-        this.changeOverDueWay(true);
-        setStore('storeOverDueWay',true);
-        userSignOut(proId,workerId).then((res) => {
-          if (res && res.data.code == 200) {
-            if(this.globalTimer) {window.clearInterval(this.globalTimer)};
-            removeAllLocalStorage();
-            this.$router.push({path:'/'})
-          } else {
-            this.$dialog.alert({
-              message: `${res.data.msg}`,
-              closeOnPopstate: true
-            }).then(() => {
-            });
-            this.changeOverDueWay(false);
-            setStore('storeOverDueWay',false);
-          }
-        }).
-        catch((err) => {
-          this.changeOverDueWay(false);
-          setStore('storeOverDueWay',false);
-          this.$dialog.alert({
-            message: `${err.message}`,
-            closeOnPopstate: true
-          }).then(() => {
-          });
-        })
+      // 摄像头扫码后的回调
+      scanQRcodeCallback(code) {
+        if (code) {}
       },
 
       //返回上一页
       backTo () {
-        this.$router.push({path: 'home'});
-        this.changeTitleTxt({tit:'工程管理系统'});
-        setStore('currentTitle','工程管理系统')
+        this.$router.push({path: 'deviceService'});
+        this.changeTitleTxt({tit:'设备巡检'});
+        setStore('currentTitle','设备巡检')
+      },
+
+      // 扫一扫
+      fillConsumable () {
+        this.$router.push({path: 'deviceServiceBill'});
+        this.changeTitleTxt({tit:'设备巡检单'});
+        setStore('currentTitle','设备巡检单')
+        // window.android.scanQRcode()
+      },
+
+      // 完成巡检
+      completeTask () {
       }
     }
   }
@@ -204,7 +172,6 @@
       .content-wrapper();
       overflow: auto;
       .content-top {
-        height: auto;
         font-size: 14px;
         background: #fff;
         .content-top-name {
@@ -218,22 +185,21 @@
             display: inline-block;
             &:first-child {
               left: 0;
-              top: 38px;
+              top: 16px;
               color: #bbbaba;
               padding-left: 10px;
             };
             &:last-child {
-              color: #271010;
+              color: #2c65f7;
               font-weight: bold;
               right: 10px;
-              top: 10px;
-              width: 65px;
+              top: 16px;
+              width: 300px;
+              padding-left: 50px;
+              box-sizing: border-box;
+              line-height: 18px;
               height: 65px;
-              border-radius: 50%;
-              img {
-                width: 100%;
-                height: 100%
-              }
+              overflow: auto
             }
           }
         };
@@ -256,7 +222,7 @@
               padding-left: 10px;
             };
             &:last-child {
-              color: #271010;
+              color: #2c65f7;
               font-weight: bold;
               right: 10px;
               top: 0
@@ -264,62 +230,68 @@
           }
         }
       };
-      .content-bottom {
+      .content-middle {
         flex: 1;
+        margin: 0 auto;
+        border-top: 4px solid #f7f7f7;
+        width: 100%;
+        overflow: auto;
+        font-size: 13px;
+        background: #fff;
+        padding: 10px;
+        position: relative;
+        > p {
+          color: #bbbaba;
+          height: 5%;
+        };
+        ul {
+          width: 100%;
+          height: 92%;
+          overflow: auto;
+          margin-top: 10px;
+          li {
+            float: left;
+            padding: 8px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            background: #8e9397;
+            color: #fff;
+            border-radius: 2px
+          }
+        }
+      };
+      .content-bottom {
+        height: 140px;
         margin: 0 auto;
         width: 100%;
         font-size: 13px;
         background: #f7f7f7;
         position: relative;
-        .app-version {
-          position: relative;
-          top: 14px;
-          left: 0;
-          height: 45px;
-          background: #fff;
-          line-height: 45px;
-          box-sizing: border-box;
-          > span {
-            position: absolute;
-            display: inline-block;
-            &:first-child {
-              left: 0;
-              top: 0;
-              color: #bbbaba;
-              padding-left: 10px;
-            };
-            &:last-child {
-              color: #271010;
-              font-weight: bold;
-              right: 10px;
-              top: 0
-            }
-          }
-        };
         .back-home {
-          height: 45px;
-          width: 300px;
+          height: 40px;
+          width: 220px;
           margin: 0 auto;
-          line-height: 45px;
+          line-height: 40px;
           left: 50%;
-          margin-left: -150px;
+          margin-left: -110px;
           position: absolute;
-          bottom: 100px;
+          top: 20px;
           background: #fff;
-          color: #271010;
+          color: #2c65f7;
           font-weight: bold;
-          text-align: center
+          text-align: center;
+          border: 1px solid #2c65f7
         };
         .quit-account {
-          height: 45px;
-          width: 300px;
+          height: 40px;
+          width: 220px;
           margin: 0 auto;
-          line-height: 45px;
+          line-height: 40px;
           left: 50%;
-          margin-left: -150px;
+          margin-left: -110px;
           position: absolute;
-          bottom: 30px;
-          background: #ff0000;
+          bottom: 20px;
+          background: #2c65f7;
           color: #fff;
           font-weight: bold;
           text-align: center

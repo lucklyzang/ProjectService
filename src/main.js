@@ -8,6 +8,7 @@ import {setStore, getStore, IsPC} from '@/common/js/utils.js'
 import echarts from 'echarts'
 
 Vue.prototype.$echarts = echarts
+Vue.prototype.Base64 = require('js-base64').Base64;
 // 全局挂载时间格式化方法
 Vue.filter('dateformat', function(dataStr, pattern = 'YYYY-MM-DD HH:mm:ss') {
   return moment(dataStr).format(pattern)
@@ -59,6 +60,14 @@ new Vue({
     // 页面刷新重新存入请求token
     if (getStore('questToken')) {
       store.commit('changeToken', getStore('questToken'));
+    };
+    // 重新存入当前报修工单信息
+    if (getStore('repairsWorkOrderMsg')) {
+      store.commit('changeRepairsWorkOrderMsg', JSON.parse(getStore('repairsWorkOrderMsg')));
+    };
+    // 重新存入当前报修工单上传的图片
+    if (getStore('completPhotoInfo')) {
+      store.commit('changeIsCompletePhotoList', JSON.parse(getStore('completPhotoInfo'))['photoInfo']);
     }
   },
   template: '<App/>'

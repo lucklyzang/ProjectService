@@ -7,10 +7,10 @@ import { Dialog, Toast } from 'vant';
 // 全局注册
 Vue.use(Dialog);
 import { setStore } from '@/common/js/utils'
-// http://blink.blinktech.cn/trans 测试地址
+// http://blink.blinktech.cn:8080/project 测试地址
 // http://blinktech.cn/trans 正式地址
 const service = axios.create({
-  baseURL: 'http://blink.blinktech.cn/trans', //接口基础地址
+  baseURL: 'http://blink.blinktech.cn:8080/project', //接口基础地址
   retry: 2, // 网络请求异常后，重试次数
   retryDelay: 1000, // 每次重试间隔时间
   shouldRetry: (err) => true // 重试条件
@@ -41,12 +41,12 @@ service.interceptors.response.use(
     };
     if (!response.headers.hasOwnProperty('token')) {
       if (!store.getters.overDueWay) {
-        Toast('token已过期,请重新登录');
-        if(store.getters.globalTimer) {window.clearInterval(store.getters.globalTimer)};
-        removeAllLocalStorage();
-        setTimeout(() => {
-          router.push({path: '/'})
-        },2000);
+        // Toast('token已过期,请重新登录');
+        // if(store.getters.globalTimer) {window.clearInterval(store.getters.globalTimer)};
+        // removeAllLocalStorage();
+        // setTimeout(() => {
+        //   router.push({path: '/'})
+        // },2000);
       }
     };
     return response

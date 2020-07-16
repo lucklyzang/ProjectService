@@ -193,8 +193,7 @@ import { base64ImgtoFile } from '@/common/js/utils'
         this.signNatureData = this.$refs.board.toDataURL("image/png");
         this.changeCurrentElectronicSignature({DtMsg:this.$refs.board.toDataURL("image/png")});
         var imgFile = base64ImgtoFile(this.$refs.board.toDataURL());
-        this.changeOriginalSignature(null);
-        this.$toast('签名已保存')
+        this.changeOriginalSignature(null)
       }
     }
   }

@@ -112,28 +112,32 @@
             workOrderNumber: 'bx12131313131',
             workOrder: '灯管不亮,需更换',
             taskType: '1',
-            taskPoint: '2'
+            taskPoint: '2',
+            id: 1
           },
           {
             date: '2020-03-03 13:00',
             workOrderNumber: 'bx12131313131',
             workOrder: '灯管不亮,需更换',
             taskType: '1',
-            taskPoint: '2'
+            taskPoint: '2',
+            id: 1
           },
           {
             date: '2020-03-03 13:00',
             workOrderNumber: 'bx12131313131',
             workOrder: '灯管不亮,需更换',
             taskType: '1',
-            taskPoint: '2'
+            taskPoint: '2',
+            id: 1
           },
           {
             date: '2020-03-03 13:00',
             workOrderNumber: 'bx12131313131',
             workOrder: '灯管不亮,需更换',
             taskType: '1',
-            taskPoint: '2'
+            taskPoint: '2',
+            id: 1
           }
         ]
       };
@@ -149,7 +153,9 @@
     computed: {
       ...mapGetters([
         'navTopTitle',
-        'userInfo'
+        'userInfo',
+        'catch_components',
+        'isFreshDepartmentServicePage'
       ]),
       proId () {
         return this.userInfo.extendData.proId
@@ -160,6 +166,22 @@
     },
 
     watch : {
+    },
+
+    beforeRouteEnter (to, from, next){
+      let catch_components = store.state.catchComponent.catch_components;
+      let i = catch_components.indexOf('DepartmentService');
+      i === -1 && catch_components.push('DepartmentService');
+      next();
+    },
+
+    beforeRouteLeave(to, from, next) {
+      let catch_components = this.catch_components;
+      if (to.name !== 'departmentWorkOrderDeatils'){
+        let i = catch_components.indexOf('DepartmentService');
+        i > -1 && this.changeCatchComponent([]);
+      }
+      next()
     },
 
     mounted () {
@@ -179,7 +201,9 @@
 
     methods: {
       ...mapMutations([
-        'changeTitleTxt'
+        'changeTitleTxt',
+        'changeCatchComponent',
+        'changeDepartmentServiceMsg'
       ]),
 
       // tab点击事件
@@ -189,6 +213,7 @@
 
       // 任务查看
       taskView (item) {
+        this.changeDepartmentServiceMsg(item)
         this.$router.push({path: 'departmentWorkOrderDeatils'});
         this.changeTitleTxt({tit:'工单详情'});
         setStore('currentTitle','工程详情')
