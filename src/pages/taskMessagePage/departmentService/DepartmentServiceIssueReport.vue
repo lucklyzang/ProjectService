@@ -86,6 +86,7 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  import {reportProblem} from '@/api/worker.js'
   export default {
     name: 'DepartmentServiceIssueReport',
     components:{
@@ -97,6 +98,7 @@
       return {
         photoBox: false,
         endTimePop: false,
+        currentDepartmentId: '',
         currentDateStart: new Date(),
         minDateEnd: new Date(2020, 0, 1),
         issueName: '',
@@ -122,7 +124,8 @@
           this.photoBox = false;
         }
       });
-      this.initDate()
+      this.initDate();
+      this.echoCurrentDepartmentId()
     },
     
     watch: {
@@ -131,6 +134,8 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
+        'userInfo',
+        'isCurrentDepartmentServiceVerifySweepCode'
       ]),
       userName () {
        return this.userInfo.userName
@@ -156,6 +161,14 @@
       ...mapMutations([
         'changeTitleTxt'
       ]),
+
+      // 回显当前检修科室名称
+      echoCurrentDepartmentId () {
+        if (this.isCurrentDepartmentServiceVerifySweepCode.length == 0) { return };
+        let echoIndex = this.isCurrentDepartmentServiceVerifySweepCode.indexOf(this.isCurrentDepartmentServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
+        if (echoIndex == -1) { return };
+        this.currentDepartmentId = this.isCurrentDepartmentServiceVerifySweepCode[echoIndex]['number'];
+      },
 
       //返回上一页
       backTo () {
@@ -244,9 +257,32 @@
 
       // 完成工单
       completeTask () {
-        this.$router.push({path: 'departmentServiceBill'});
-        this.changeTitleTxt({tit:'科室巡检单'});
-        setStore('currentTitle','科室巡检单')
+        let data = {
+          taskDesc: this.issueName,    //问题描述  必填
+          taskRemark: this.issueMessage,  //问题详情  非必输
+          depId: this.currentDepartmentId,      //科室ID   必输
+          workerId: this.workerId,   //上报人ID，及当前登录用户ID 必输
+          workerName: "",  //当前登录用户名 非必输
+          proId: this.proId,      //项目ID 必输
+          images: this.issueImageList // 问题图片信息 非必输
+        }
+        reportProblem(data).then((res) => {
+          if (res && res.data.code == 200) {
+            this.$toast('上报成功');
+            this.$router.push({path: 'departmentServiceBill'});
+            this.changeTitleTxt({tit:'科室巡检单'});
+            setStore('currentTitle','科室巡检单')
+          } else {
+            this.$toast(`${res.data.msg}`);
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+            }).then(() => {
+          })
+        })
       }
     }
   }

@@ -27,6 +27,7 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  import {submitDepartMentServiceSignInfo} from '@/api/worker.js'
   export default {
     name: 'DepartmentServiceSignature',
     components:{
@@ -58,7 +59,9 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
-        'currentElectronicSignature'
+        'currentElectronicSignature',
+        'userInfo',
+        'departmentServiceMsg'
       ]),
       userName () {
        return this.userInfo.userName
@@ -77,6 +80,9 @@
       },
       name () {
         return this.userInfo.name
+      },
+      taskId () {
+        return this.departmentServiceMsg.id
       }
     },
 
@@ -95,10 +101,44 @@
       // 确认
       sure () {
         this.$refs.mychild.commitSure();
-        console.log('sas1',this.currentElectronicSignature);
-        this.$router.push({path: 'departmentServiceBill'});
-        this.changeTitleTxt({tit:'科室巡检单'});
-        setStore('currentTitle','科室巡检单')
+        submitDepartMentServiceSignInfo({
+          taskId: this.taskId,
+          imgType: 0,
+          imgOrsign: this.currentElectronicSignature
+        }).then((res) => {
+          if(res && res.data.code == 200) {
+            this.updateTaskComplete(this.proId,this.taskId)
+          } else {
+            this.$toast(`${res.data.msg}`)
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      // 更新任务为已完成
+      updateTaskComplete (proId,taskId) {
+        updateDepartmentServiceTaskBeCompleted(proId,taskId).then((res) => {
+          if(res && res.data.code == 200) {
+            this.$router.push({path: 'departmentService'});
+            this.changeTitleTxt({tit:'科室巡检'});
+            setStore('currentTitle','科室巡检')
+          } else {
+            this.$toast(`${res.data.msg}`)
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        });
       },
 
       // 重写

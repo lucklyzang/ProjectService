@@ -494,7 +494,9 @@ export const removeAllLocalStorage = () => {
   removeStore('userInfo');
   removeStore('isLogin');
   removeStore('userType');
-  removeStore('completPhotoInfo')
+  removeStore('completPhotoInfo'),
+  removeStore('isDepartmentServiceVerifySweepCode'),
+  removeStore('isCurrentDepartmentServiceVerifySweepCode')
 }
 
 /*
@@ -523,37 +525,3 @@ export const priorityTransfer = (index) => {
   }
 }
 
-/*
- * 
- *  任务状态转换
- * @param{Number} index
- * 
-*/
-export const stateTransfer =  (index) => {
-  switch(index) {
-    case 0 :
-      return '未分配'
-      break;
-    case 1 :
-      return '未获取'
-      break;
-    case 2 :
-      return '未开始'
-      break;
-    case 3 :
-      return '进行中'
-      break;
-    case 4 :
-      return '待签字'
-      break;
-    case 5 :
-      return '已完成'
-      break;
-    case 6 :
-      return '已取消'
-      break;
-    case 7 :
-      return '已延迟'
-      break;
-  }
-}

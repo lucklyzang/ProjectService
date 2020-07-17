@@ -16,64 +16,66 @@
       </ul>
     </div>
     <div class="content-bottom">
-      <div class="content-list-action-task-wrapper" v-show="currentIndex == 0">
-        <div class="content-list-action-task-item" v-for="(item,index) in taskMessageList" :key="`${index}-${item}`">
-          <span class="status-box">待确认</span>
-          <span class="task-date">{{item.date}}</span>
-          <p class="task-btn">
-            <span class="view"  @click="taskView(item)">查看任务</span>
-          </p>
-          <p class="work-order-number">
-            <span class="tit">巡检单号:</span>
-            <span class="name">{{item.workOrderNumber}}</span>
-          </p>
-          <p class="work-info-other">
-            <span class="tit">巡检:</span>
-            <span class="name">{{item.workOrderNumber}}</span>
-          </p>
-          <p class="work-info-other">
-            <span class="tit">当前次数:</span>
-            <span class="name">{{item.workOrder}}</span>
-          </p>
-          <p class="work-info-other work-info-other-row">
-            <span class="tit">已完成点位:</span>
-            <span class="name">{{item.taskType}}</span>
-          </p>
-          <p class="work-info-other work-info-other-row">
-            <span class="tit">未完成点位:</span>
-            <span class="name">{{item.taskPoint}}</span>
-          </p>
+      <van-pull-refresh v-model="isRefresh" @refresh="onRefresh" success-text="刷新成功">
+        <div class="content-list-action-task-wrapper" v-show="currentIndex == 0">
+          <div class="content-list-action-task-item" v-for="(item,index) in taskMessageList" :key="`${index}-${item}`">
+            <span class="status-box">{{stateTransfer(item.state)}}</span>
+            <span class="task-date">{{item.startTime}}</span>
+            <p class="task-btn">
+              <span class="view"  :class="{viewStyle: item.state == 1}" @click="taskView(item)">查看任务</span>
+            </p>
+            <p class="work-order-number">
+              <span class="tit">巡检单号:</span>
+              <span class="name">{{item.taskNumber}}</span>
+            </p>
+            <p class="work-info-other">
+              <span class="tit">巡检:</span>
+              <span class="name">{{item.taskName}}</span>
+            </p>
+            <p class="work-info-other">
+              <span class="tit">当前次数:</span>
+              <span class="name">{{item.currentTimes}}</span>
+            </p>
+            <p class="work-info-other work-info-other-row">
+              <span class="tit">已完成点位:</span>
+              <span class="name"></span>
+            </p>
+            <p class="work-info-other work-info-other-row">
+              <span class="tit">未完成点位:</span>
+              <span class="name"></span>
+            </p>
+          </div>
         </div>
-      </div>
-      <div class="content-list-action-task-wrapper content-list-complete-task-wrapper" v-show="currentIndex == 1">
-        <div class="content-list-action-task-item">
-          <span class="status-box">待确认</span>
-          <span class="task-date">sasasas</span>
-          <p class="task-btn">
-            <span class="view"  @click="taskView(item)">查看任务</span>
-          </p>
-          <p class="work-order-number">
-            <span class="tit">巡检单号:</span>
-            <span class="name">sasasas</span>
-          </p>
-          <p class="work-info-other">
-            <span class="tit">巡检:</span>
-            <span class="name">sasas</span>
-          </p>
-          <p class="work-info-other">
-            <span class="tit">当前次数:</span>
-            <span class="name">sasasasa</span>
-          </p>
-          <p class="work-info-other work-info-other-row">
-            <span class="tit">已完成点位:</span>
-            <span class="name">1</span>
-          </p>
-          <p class="work-info-other work-info-other-row">
-            <span class="tit">未完成点位:</span>
-            <span class="name">2</span>
-          </p>
+        <div class="content-list-action-task-wrapper content-list-complete-task-wrapper" v-show="currentIndex == 1">
+          <div class="content-list-action-task-item" v-for="(item,index) in taskCompleteMessageList" :key="`${index}-${item}`">
+            <span class="status-box">{{stateTransfer(item.state)}}</span>
+            <span class="task-date">{{item.startTime}}</span>
+            <p class="task-btn">
+              <span class="view"  @click="taskView(item)">查看任务</span>
+            </p>
+            <p class="work-order-number">
+                <span class="tit">巡检单号:</span>
+                <span class="name">{{item.taskNumber}}</span>
+              </p>
+              <p class="work-info-other">
+                <span class="tit">巡检:</span>
+                <span class="name">{{item.taskName}}</span>
+              </p>
+              <p class="work-info-other">
+                <span class="tit">当前次数:</span>
+                <span class="name">{{item.currentTimes}}</span>
+              </p>
+              <p class="work-info-other work-info-other-row">
+                <span class="tit">已完成点位:</span>
+                <span class="name"></span>
+              </p>
+              <p class="work-info-other work-info-other-row">
+                <span class="tit">未完成点位:</span>
+                <span class="name"></span>
+              </p>
+          </div>
         </div>
-      </div>
+      </van-pull-refresh>
     </div>
    <!-- 退回原因弹窗 -->
     <van-dialog v-model="toolShow" title="请选择退回原因" show-cancel-button width="92%"
@@ -99,47 +101,18 @@
   import { mapGetters, mapMutations } from 'vuex'
   import store from '@/store'
   import { formatTime, setStore, getStore, removeStore, IsPC, judgeOverTime, removeAllLocalStorage } from '@/common/js/utils'
-  import {getDictionaryData} from '@/api/login.js'
+  import {queryDepartmentServiceList} from '@/api/worker.js'
   export default {
     name: 'RepairsWorkOrder',
     data () {
       return {
         currentIndex: 0,
         tabTitleList: ['待办任务','已完成'],
-        taskMessageList: [
-          {
-            date: '2020-03-03 13:00',
-            workOrderNumber: 'bx12131313131',
-            workOrder: '灯管不亮,需更换',
-            taskType: '1',
-            taskPoint: '2',
-            id: 1
-          },
-          {
-            date: '2020-03-03 13:00',
-            workOrderNumber: 'bx12131313131',
-            workOrder: '灯管不亮,需更换',
-            taskType: '1',
-            taskPoint: '2',
-            id: 1
-          },
-          {
-            date: '2020-03-03 13:00',
-            workOrderNumber: 'bx12131313131',
-            workOrder: '灯管不亮,需更换',
-            taskType: '1',
-            taskPoint: '2',
-            id: 1
-          },
-          {
-            date: '2020-03-03 13:00',
-            workOrderNumber: 'bx12131313131',
-            workOrder: '灯管不亮,需更换',
-            taskType: '1',
-            taskPoint: '2',
-            id: 1
-          }
-        ]
+        isRefresh: false,
+        noDataShow: false,
+        showLoadingHint: false,
+        taskMessageList: [],
+        taskCompleteMessageList: []
       };
     },
 
@@ -195,8 +168,39 @@
           this.changeTitleTxt({tit:'工程管理系统'});
           setStore('currentTitle','工程管理系统')
         })
+      };
+      if (this.isFreshDepartmentServicePage) {
+        this.getDepartmentList({
+          proId: this.proId,
+          workerId: this.workerId,	
+          state: -1,
+          startDate	: '',
+          endDate : ''
+        },0)
       }
-      
+    },
+
+    activated () {
+      // 控制设备物理返回按键测试
+      if (!IsPC()) {
+        let that = this;
+        pushHistory();
+        that.gotoURL(() => {
+          pushHistory();
+          this.$router.push({path: 'home'});
+          this.changeTitleTxt({tit:'工程管理系统'});
+          setStore('currentTitle','工程管理系统')
+        })
+      }
+      if (this.isFreshDepartmentServicePage) {
+        this.getDepartmentList({
+          proId: this.proId,
+          workerId: this.workerId,	
+          state: -1,
+          startDate	: '',
+          endDate : ''
+        },0)
+      }
     },
 
     methods: {
@@ -206,14 +210,115 @@
         'changeDepartmentServiceMsg'
       ]),
 
+      // 任务状态转换
+      stateTransfer (index) {
+        switch(index) {
+          case 0 :
+            return '未分配'
+            break;
+          case 1 :
+            return '未开始'
+            break;
+          case 2 :
+            return '待完成'
+            break;
+          case 3 :
+            return '待签字'
+            break;
+          case 4 :
+            return '已完成'
+            break
+        }
+      },
+
       // tab点击事件
       liClickEvent (item,index) {
-        this.currentIndex = index
+        this.currentIndex = index;
+        if (index == 0) {
+          this.getDepartmentList({
+            proId: this.proId,
+            workerId: this.workerId,	
+            state: -1,
+            startDate	: '',
+            endDate : ''
+          },index)
+        } else {
+          this.getDepartmentList({
+            proId: this.proId,
+            workerId: this.workerId,	
+            state: -2,
+            startDate	: '',
+            endDate : ''
+          },index)
+        }
+      },
+
+      // 下拉刷新事件
+      onRefresh() {
+        this.getDepartmentList({
+          proId: this.proId,
+          workerId: this.workerId,	
+          state: this.currentIndex == 0 ? -1 : -2,
+          startDate	: '',
+          endDate : ''
+        },this.currentIndex)
+      },
+
+      // 查询任务列表
+      getDepartmentList(data,index) {
+        this.noDataShow = false;
+        this.showLoadingHint = true;
+        queryDepartmentServiceList(data).then((res) => {
+          this.showLoadingHint = false;
+          this.taskMessageList = [];
+          this.taskCompleteMessageList = [];
+          if(res && res.data.code == 200) {
+            this.isRefresh = false;
+            if (res.data.data.length > 0) {
+              this.noDataShow = false;
+              for (let item of res.data.data) {
+                if (index == 0) {
+                  this.taskMessageList.push({
+                    taskNumber: item.taskNumber,
+                    taskName: item.taskName,
+                    startTime: item.startTime,
+                    state: item.state,
+                    currentTimes: item.currentTimes,
+                    id: item.id,
+                    isMe: item.isMe,
+                    spaces: item.spaces
+                  })
+                } else {
+                  this.taskCompleteMessageList.push({
+                    taskNumber: item.taskNumber,
+                    taskName: item.taskName,
+                    startTime: item.startTime,
+                    state: item.state,
+                    currentTimes: item.currentTimes,
+                    id: item.id,
+                    isMe: item.isMe,
+                    spaces: item.spaces
+                  })
+                }
+              }
+            } else {
+              this.noDataShow = true;
+            }
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
       },
 
       // 任务查看
       taskView (item) {
-        this.changeDepartmentServiceMsg(item)
+        this.changeDepartmentServiceMsg(item);
+        setStore('departmentServiceMsg',item);
         this.$router.push({path: 'departmentWorkOrderDeatils'});
         this.changeTitleTxt({tit:'工单详情'});
         setStore('currentTitle','工程详情')
@@ -280,6 +385,7 @@
       left: 0;
       width: 100%;
       text-align: center;
+      z-index: 200
     }
     .loading {
       position: absolute;
@@ -316,6 +422,9 @@
       background: #f7f7f7;
       position: relative;
       overflow: auto;
+      /deep/ .van-pull-refresh {
+        overflow: auto
+      };
       > div {
         width: 96%;
         margin: 0 auto;
@@ -361,6 +470,9 @@
             };
             .view {
               background: #2c65f7
+            };
+            .viewStyle {
+              background: #8e9397
             }
           }
           > p {

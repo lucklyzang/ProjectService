@@ -58,3 +58,11 @@ export function registerChannel (data) {
     data
   })
 }
+
+// 获取科室字典值
+export function getDepartmentMsg (proId) {
+  return request({
+    url: `department/dict/${proId}`,
+    method: 'get'
+  })
+}

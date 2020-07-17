@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import {logIn, getDictionaryData, getdepartmentList, getdepartmentListNo,registerChannel} from '@/api/login.js'
+import {logIn, getDictionaryData, getdepartmentList, getdepartmentListNo,registerChannel,getDepartmentMsg} from '@/api/login.js'
 import { mapGetters, mapMutations } from 'vuex'
 import passwordPng from '@/components/images/password.png'
 import userPng from '@/components/images/user.png'
@@ -102,6 +102,7 @@ export default {
       'storeUserInfo',
       'changeTitleTxt'
     ]),
+
     // 账号密码登录方法
     login () {
       this.$router.push({path:'/home'});
@@ -126,10 +127,7 @@ export default {
             setStore('isLogin', true);
             // 用户身份类别存入store和Locastorage
             this.storeUserInfo(JSON.parse(getStore('userInfo')));
-            window.location.reload();
-            this.$router.push({path:'/home'});
-            this.changeTitleTxt({tit:'工程管理系统'});
-            this.proId = res.data.data['proId'];
+            this.queryDepartmentMsg(res.data.data.proId)
           } else {
              this.$dialog.alert({
               message: `${res.data.msg}`,
@@ -147,6 +145,21 @@ export default {
           closeOnPopstate: true
         }).then(() => {
         })
+      })
+    },
+
+    // 获取科室信息字典值
+    queryDepartmentMsg (proId) {
+      getDepartmentMsg(proId).then((res) => {
+        if (res && res.data.code == 200) {
+          setStore('departmentMessage', res.data.data);
+          window.location.reload();
+          this.$router.push({path:'/home'});
+          this.changeTitleTxt({tit:'工程管理系统'});
+          this.proId = res.data.data['proId'];
+        }
+      })
+      .catch((err) => {
       })
     }
   } 

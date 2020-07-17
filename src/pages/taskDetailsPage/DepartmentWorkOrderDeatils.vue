@@ -10,32 +10,32 @@
         <p class="content-top-other">
           <span>巡检编号</span>
           <span>
-            2121212121
+            {{oneRepairsMsg.taskNumber}}
           </span>
         </p>
         <p class="content-top-other">
           <span>巡检名称</span>
           <span>
-            {{name}}
+            {{oneRepairsMsg.taskName}}
           </span>
         </p>
         <p class="content-top-other">
           <span>当前次数</span>
           <span>
-            {{phoneNumber}}
+            {{oneRepairsMsg.currentTimes}}
           </span>
         </p>
         <p class="content-top-other">
           <span>时间</span>
           <span>
-            {{departmentName}}
+            {{oneRepairsMsg.startTime}}
           </span>
         </p>
       </div>
       <div class="content-middle">
         <p>巡检地点</p>
-        <ul>
-          <li v-for="(item,index) in viewPointList" :key="`${item}-${index}`">{{item}}</li>
+        <ul v-show="oneRepairsMsg.spaces ? oneRepairsMsg.spaces.length > 0 : false">
+          <li v-for="(item,index) in oneRepairsMsg.spaces" :key="`${item}-${index}`">{{item.depName}}</li>
         </ul>
       </div>
       <div class="content-bottom">
@@ -53,7 +53,8 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray } from '@/common/js/utils'
+  import {queryOneDepartmentService, verifyDepartment, updateDepartmentServiceTaskBeSigned} from '@/api/worker.js'
   export default {
     name: 'DepartmentWorkOrderDeatils',
     components:{
@@ -63,11 +64,9 @@
     },
     data() {
       return {
-        departmentWorkOrderMsg: '',
-        name: '撒飒飒',
-        phoneNumber: '132212121',
-        personPosition: '维修员',
-        viewPointList: ['科室一飒飒','科室一查询查询从','科室一想','科室一下载','科室一没那么','科室一婆婆','科室一的','科室一传','科室一辅导费','科室一']
+        oneRepairsMsg: '',
+        departmentId: '',
+        departmentNo: ''
       }
     },
     
@@ -76,14 +75,14 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
-          // if (this.departmentWorkOrderMsg.state == 7) {
-        //   this.changeIsFreshDepartmentServicePage(false)
-        // } else {
-        //   this.changeIsFreshDepartmentServicePage(true)
-        // };
-          this.$router.push({path: 'departmentService'});
-          this.changeTitleTxt({tit:'科室巡检'});
-          setStore('currentTitle','科室巡检')
+        if (this.departmentServiceMsg.state == 4) {
+          this.changeIsFreshDepartmentServicePage(false)
+        } else {
+          this.changeIsFreshDepartmentServicePage(true)
+        };
+        this.$router.push({path: 'departmentService'});
+        this.changeTitleTxt({tit:'科室巡检'});
+        setStore('currentTitle','科室巡检')
         })
       };
       // 二维码回调方法绑定到window下面,提供给外部调用
@@ -91,6 +90,7 @@
       window['scanQRcodeCallback'] = (code) => {
         me.scanQRcodeCallback(code);
       };
+      this.getOneDepartmentService()
     },
     
     watch: {
@@ -99,7 +99,9 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
-        'departmentServiceMsg'
+        'departmentServiceMsg',
+        'userInfo',
+        'isCurrentDepartmentServiceVerifySweepCode'
       ]),
       userName () {
        return this.userInfo.userName
@@ -127,36 +129,177 @@
     methods:{
       ...mapMutations([
         'changeTitleTxt',
-        'changeIsFreshDepartmentServicePage'
+        'changeIsFreshDepartmentServicePage',
+        'changeIsDepartmentServiceVerifySweepCode',
+        'changeIsCurrentDepartmentServiceVerifySweepCode'
       ]),
-
-      // 摄像头扫码后的回调
-      scanQRcodeCallback(code) {
-        if (code) {}
-      },
 
       //返回上一页
       backTo () {
-        // if (this.departmentWorkOrderMsg.state == 7) {
-        //   this.changeIsFreshDepartmentServicePage(false)
-        // } else {
-        //   this.changeIsFreshDepartmentServicePage(true)
-        // };
+        if (this.departmentServiceMsg.state == 4) {
+          this.changeIsFreshDepartmentServicePage(false)
+        } else {
+          this.changeIsFreshDepartmentServicePage(true)
+        };
         this.$router.push({path: 'departmentService'});
         this.changeTitleTxt({tit:'科室巡检'});
         setStore('currentTitle','科室巡检')
       },
 
+      // 查询单条科室巡检任务信息
+      getOneDepartmentService () {
+        queryOneDepartmentService(this.taskId).then((res) => {
+          if(res && res.data.code == 200) {
+            let temporaryOneRepairsMsg = res.data.data;
+            temporaryOneRepairsMsg.spaces = JSON.parse(res.data.data.spaces);
+            for (let item of temporaryOneRepairsMsg.spaces) {
+              item.checked = false
+            };
+            this.oneRepairsMsg = temporaryOneRepairsMsg
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+          message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
       // 扫一扫
       fillConsumable () {
-        this.$router.push({path: 'departmentServiceBill'});
-        this.changeTitleTxt({tit:'科室巡检单'});
-        setStore('currentTitle','科室巡检单')
+           this.$router.push({path: 'departmentServiceBill'});
+            this.changeTitleTxt({tit:'科室巡检单'});
+            setStore('currentTitle','科室巡检单')
         // window.android.scanQRcode()
+      },
+
+      // 校验当前科室二维码
+      juddgeCurrentDepartment(data) {
+        verifyDepartment(data).then((res) => {
+          if (res && res.data.code == 200) {
+            // 存储扫码校验通过的科室编号
+            this.storeDepartmentNumber(data.depNo);
+            // 存储当前扫码校验通过的科室id
+            this.storeCurrentDepartmentNumber(data.depId);
+            this.$router.push({path: 'departmentServiceBill'});
+            this.changeTitleTxt({tit:'科室巡检单'});
+            setStore('currentTitle','科室巡检单')
+          } else {
+            this.$toast(`${res.data.msg}`)
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      // 摄像头扫码后的回调
+      scanQRcodeCallback(code) {
+        if (code) {
+          let codeData = code.split('|');
+          if (codeData.length > 0) {
+            this.departmentId = codeData[0];
+            this.departmentNo = codeData[1];
+            this.juddgeCurrentDepartment({
+              id: this.taskId,  //任务ID
+              depNo: this.departmentNo, //项目编号
+              depId: this.departmentId,  //科室ID
+              workerId: this.workerId // 用户id
+            })
+          }
+        } else {
+          this.$dialog.alert({
+            message: '当前没有扫描到任何信息,请重新扫描'
+          }).then(() => {
+            this.fillConsumable()
+          });
+        }
+      },
+
+      // 存储扫码校验通过的科室编号
+      storeDepartmentNumber (departmentNumber) {
+        let temporaryOfficeList = [];
+        let temporaryDepartmentId = [];
+        temporaryOfficeList = deepClone(this.isDepartmentServiceVerifySweepCode);
+        if (this.isDepartmentServiceVerifySweepCode.length > 0 ) {
+          let temporaryIndex = this.isDepartmentServiceVerifySweepCode.indexOf(this.isDepartmentServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (temporaryIndex != -1) {
+            temporaryDepartmentId = temporaryOfficeList[temporaryIndex]['officeList'];
+            temporaryDepartmentId.push(departmentNumber);
+            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId)
+          } else {
+            temporaryDepartmentId.push(departmentNumber);
+            temporaryOfficeList.push(
+              { 
+                officeList: repeArray(temporaryDepartmentId),
+                taskId: this.taskId
+              }
+            )
+          }
+        } else {
+          temporaryDepartmentId.push(departmentNumber);
+          temporaryOfficeList.push(
+            { 
+              officeList: repeArray(temporaryDepartmentId),
+              taskId: this.taskId
+            }
+          )
+        };
+        this.changeIsDepartmentServiceVerifySweepCode(temporaryOfficeList);
+        setStore('isDepartmentServiceVerifySweepCode', {"sweepCodeInfo": temporaryOfficeList})
+      },
+
+      // 存储当前扫码校验通过的科室编号
+      storeCurrentDepartmentNumber (departmentNumber) {
+        let temporaryDepartmentNumber = [];
+        temporaryDepartmentNumber = deepClone(this.isCurrentDepartmentServiceVerifySweepCode);
+        if (temporaryDepartmentNumber.length > 0 ) {
+          let temporaryIndex = this.isCurrentDepartmentServiceVerifySweepCode.indexOf(this.isCurrentDepartmentServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (temporaryIndex != -1) {
+            temporaryDepartmentNumber[temporaryIndex]['number'] = departmentNumber
+          } else {
+            temporaryDepartmentNumber.push(
+              { 
+                number: departmentNumber,
+                taskId: this.taskId
+              }
+            )
+          };
+        } else {
+          temporaryDepartmentNumber.push(
+            { 
+              number:departmentNumber,
+              taskId: this.taskId
+            }
+          )
+        };
+        this.changeCurrentDepartmentNumber(temporaryDepartmentNumber);
+        setStore('changeIsCurrentDepartmentServiceVerifySweepCode', {"number": temporaryDepartmentNumber});
       },
 
       // 完成巡检
       completeTask () {
+        updateDepartmentServiceTaskBeSigned(this.proId, this.taskId).then((res) => {
+          if (res && res.data.code == 200) {
+            this.$router.push({path: 'departmentService'});
+            this.changeTitleTxt({tit:'科室巡检'});
+            setStore('currentTitle','科室巡检')
+          } else {
+            this.$toast(`${res.data.msg}`)
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`
+          }).then(() => {
+          })
+        })
       }
     }
   }
@@ -252,7 +395,7 @@
         border-top: 4px solid #f7f7f7;
         width: 100%;
         overflow: auto;
-        font-size: 13px;
+        font-size: 14px;
         background: #fff;
         padding: 10px;
         position: relative;

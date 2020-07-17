@@ -54,6 +54,7 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  import {queryOneDepartmentService} from '@/api/worker.js'
   export default {
     name: 'DeviceServiceDetails',
     components:{

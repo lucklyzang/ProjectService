@@ -231,7 +231,19 @@
         // 重新存入当前报修工单上传的图片
         if (getStore('completPhotoInfo')) {
           this.$store.commit('changeIsCompletePhotoList', JSON.parse(getStore('completPhotoInfo'))['photoInfo']);
-        }
+        };
+        // 重新存入科室巡检信息
+        if (getStore('departmentServiceMsg')) {
+          this.$store.commit('changeDepartmentServiceMsg', JSON.parse(getStore('departmentServiceMsg')));
+        };
+        // 重新存入科室巡检扫码校验通过的科室编号
+        if (getStore('isDepartmentServiceVerifySweepCode')) {
+          this.$store.commit('changeIsDepartmentServiceVerifySweepCode', JSON.parse(getStore('isDepartmentServiceVerifySweepCode'))['sweepCodeInfo']);
+        };
+        // 重新存入当前科室巡检扫码校验通过的科室编号
+        if (getStore('isCurrentDepartmentServiceVerifySweepCode')) {
+          this.$store.commit('changeIsCurrentDepartmentServiceVerifySweepCode', JSON.parse(getStore('isCurrentDepartmentServiceVerifySweepCode'))['number']);
+        };
       }
     }
   }

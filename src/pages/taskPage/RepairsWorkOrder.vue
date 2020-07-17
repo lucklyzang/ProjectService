@@ -217,10 +217,10 @@
             return '未分配'
             break;
           case 1 :
-            return '未获取'
+            return '待确认'
             break;
           case 2 :
-            return '未开始'
+            return '待完成'
             break;
           case 3 :
             return '进行中'
@@ -318,6 +318,7 @@
 
       // 查询报修项目列表
       getRepairsProjectList (data,index) {
+        this.noDataShow = false;
         this.showLoadingHint = true;
         queryRepairsProjectList(data)
         .then((res) => {

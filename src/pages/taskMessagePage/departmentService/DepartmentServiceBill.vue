@@ -8,13 +8,13 @@
       <!-- 内容部分 -->
       <div class="content-top">
         <div class="circulation-area-title">
-          当前巡检科室: 科室一
+          当前巡检科室: {{currentDepartmentName}}
         </div>
         <div class="circulation-area">
           <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
             <span>{{index + 1}}</span>
             <span>
-              {{item.consumableName}}
+              {{item.itemName}}
             </span>
             <span>
               <van-icon name="checked" :class="{styleRight: item.right}" @click="rightClick(item,index,'right')" />
@@ -43,7 +43,8 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, Dictionary } from '@/common/js/utils'
+  import {queryExamineItems,postCheckResult} from '@/api/worker.js'
   export default {
     name: 'DepartmentServiceBill',
     components:{
@@ -54,28 +55,9 @@
     data() {
       return {
         issueShow: false,
-        consumableMsgList: [
-          {
-            consumableName: '窗户是否完好窗户是否完好窗户是否完好窗户是否完好',
-            right: false,
-            error: false
-          },
-          {
-            consumableName: '消防设备是否完好',
-            right: false,
-            error: false
-          },
-          {
-            consumableName: '检查项',
-            right: false,
-            error: false
-          },
-          {
-            consumableName: '检查项',
-            right: false,
-            error: false
-          }
-        ]
+        currentDepartmentId: '',
+        currentDepartmentName: '',
+        consumableMsgList: []
       }
     },
     
@@ -88,7 +70,13 @@
           this.changeTitleTxt({tit:'工单详情'});
           setStore('currentTitle','工程详情')
         })
-      }
+      };
+      this.echoCurrentDepartmentId();
+      // 查询检查项
+      this.getExamineItems({
+        proId: this.proId,
+		    depId: '833'
+      })
     },
 
     activated () {
@@ -100,7 +88,8 @@
           this.changeTitleTxt({tit:'工单详情'});
           setStore('currentTitle','工程详情')
         })
-      }
+      };
+      this.echoCurrentDepartmentNumber()
     },
 
     beforeRouteEnter (to, from, next){
@@ -125,7 +114,10 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
-        'catch_components'
+        'catch_components',
+        'departmentServiceMsg',
+        'userInfo',
+        'isCurrentDepartmentServiceVerifySweepCode'
       ]),
       userName () {
        return this.userInfo.userName
@@ -160,6 +152,57 @@
         setStore('currentTitle','工程详情')
       },
 
+      // 回显当前检修科室名称
+      echoCurrentDepartmentId () {
+        // if (this.isCurrentDepartmentServiceVerifySweepCode.length == 0) { return };
+        // let echoIndex = this.isCurrentDepartmentServiceVerifySweepCode.indexOf(this.isCurrentDepartmentServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
+        // if (echoIndex == -1) { return };
+        // this.currentDepartmentId = this.isCurrentDepartmentServiceVerifySweepCode[echoIndex]['number'];
+        // 获取科室名称
+        this.currentDepartmentName = Dictionary(JSON.parse(getStore('departmentMessage')),'204')
+      },
+      
+      // 查询检查项
+      getExamineItems (data) {
+        queryExamineItems(data).then((res) => {
+          if (res && res.data.code == 200) {
+            this.consumableMsgList = [];
+            if (res.data.data.length > 0) {
+              for (let item of res.data.data) {
+                this.consumableMsgList.push({
+                  depId: item.depId,  //科室ID
+                  depName: item.depName,   //科室名称
+                  typeName: item.typeName,  //检测类型
+                  itemName: item.itemName,  //检测项
+                  itemId: item.itemId,    //检测项ID
+                  right: false,
+                  error: false
+                })
+              }
+            } else {
+              this.$dialog.alert({
+                message: '没有查询到检查项',
+                  closeOnPopstate: true
+                }).then(() => {
+              })
+            }
+          } else {
+            this.$dialog.alert({
+              message: `${res.data.msg}`,
+                closeOnPopstate: true
+              }).then(() => {
+            })
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+              closeOnPopstate: true
+            }).then(() => {
+          })
+        })
+      },
+
       //对号图标点击
       rightClick(item,index,type) {
         if (type == 'right') {
@@ -185,12 +228,39 @@
       },
 
       // 不上报问题弹
-      noReportProblem () {
-
-      },
+      noReportProblem () {},
 
       // 确认
       sure () {
+        let temporaryCheckItems = [];
+        for (let item of this.consumableMsgList) {
+          temporaryCheckItems.push({
+            itemId: item.itemId,
+            itemName: item.itemName,
+            checkResult: ''
+          })
+        };
+        let data = {
+          depId: this.currentDepartmentId,
+          checkItems: temporaryCheckItems
+        };
+        postCheckResult(data).then((res) => {
+          if (res && res.data.code == 200) {
+            this.$toast('上报成功');
+            this.$router.push({path: 'departmentWorkOrderDeatils'});
+            this.changeTitleTxt({tit:'工单详情'});
+            setStore('currentTitle','工程详情')
+          } else {
+            this.$toast(`${res.data.msg}`);
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+            }).then(() => {
+          })
+        })
       }
     }
   }
