@@ -35,10 +35,10 @@
       <div class="content-middle">
         <p>巡检地点</p>
         <ul v-show="oneRepairsMsg.spaces ? oneRepairsMsg.spaces.length > 0 : false">
-          <li v-for="(item,index) in oneRepairsMsg.spaces" :key="`${item}-${index}`">{{item.depName}}</li>
+          <li v-for="(item,index) in oneRepairsMsg.spaces" :key="`${item}-${index}`" :class="{listStyle: item.checked}">{{item.depName}}</li>
         </ul>
       </div>
-      <div class="content-bottom">
+      <div class="content-bottom" v-show="departmentServiceMsg.state !== 4">
         <p class="back-home"  @click="fillConsumable">扫一扫</p>
         <p class="quit-account" @click="completeTask">完成巡检</p>
       </div>
@@ -53,7 +53,7 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray } from '@/common/js/utils'
+  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray, deepClone } from '@/common/js/utils'
   import {queryOneDepartmentService, verifyDepartment, updateDepartmentServiceTaskBeSigned} from '@/api/worker.js'
   export default {
     name: 'DepartmentWorkOrderDeatils',
@@ -101,7 +101,10 @@
         'navTopTitle',
         'departmentServiceMsg',
         'userInfo',
-        'isCurrentDepartmentServiceVerifySweepCode'
+        'isCurrentDepartmentServiceVerifySweepCode',
+        'completeDepartmentServiceOfficeInfo',
+        'isDepartmentServiceVerifySweepCode',
+        'completeDepartmentServiceCheckedItemList'
       ]),
       userName () {
        return this.userInfo.userName
@@ -131,7 +134,9 @@
         'changeTitleTxt',
         'changeIsFreshDepartmentServicePage',
         'changeIsDepartmentServiceVerifySweepCode',
-        'changeIsCurrentDepartmentServiceVerifySweepCode'
+        'changeIsCurrentDepartmentServiceVerifySweepCode',
+        'changeDepartmentServiceOfficeId',
+        'changeCompleteDepartmentServiceCheckedItemList'
       ]),
 
       //返回上一页
@@ -155,7 +160,25 @@
             for (let item of temporaryOneRepairsMsg.spaces) {
               item.checked = false
             };
-            this.oneRepairsMsg = temporaryOneRepairsMsg
+            this.oneRepairsMsg = temporaryOneRepairsMsg;
+            // 为完成巡检的科室增加标记
+            if (this.completeDepartmentServiceOfficeInfo.length > 0) {
+              for (let w = 0, wLen = this.completeDepartmentServiceOfficeInfo.length; w < wLen; w++) {
+                if (this.oneRepairsMsg['id'] == this.completeDepartmentServiceOfficeInfo[w]['taskId']) {
+                  if (this.completeDepartmentServiceOfficeInfo[w]['officeList'].length > 0) {
+                    for (let i = 0, len1 = this.completeDepartmentServiceOfficeInfo[w]['officeList'].length; i < len1; i++) {
+                      if (this.oneRepairsMsg['spaces'].length > 0) {
+                        for (let j = 0, len2 = this.oneRepairsMsg['spaces'].length; j < len2; j++) {
+                          if (this.oneRepairsMsg['spaces'][j]['depNo'] == this.completeDepartmentServiceOfficeInfo[w]['officeList'][i]) {
+                            this.oneRepairsMsg['spaces'][j]['checked'] = true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         })
         .catch((err) => {
@@ -169,10 +192,11 @@
 
       // 扫一扫
       fillConsumable () {
-           this.$router.push({path: 'departmentServiceBill'});
-            this.changeTitleTxt({tit:'科室巡检单'});
-            setStore('currentTitle','科室巡检单')
-        // window.android.scanQRcode()
+        if (this.departmentServiceMsg.state == 3) {
+          this.$toast('该任务状态为待签字,不能执行该操作');
+          return
+        };
+        window.android.scanQRcode()
       },
 
       // 校验当前科室二维码
@@ -183,6 +207,9 @@
             this.storeDepartmentNumber(data.depNo);
             // 存储当前扫码校验通过的科室id
             this.storeCurrentDepartmentNumber(data.depId);
+            // 存储当前扫码校验通过的科室编号
+            this.changeDepartmentServiceOfficeId(data.depNo);
+            setStore('departmentServiceId',data.depNo);
             this.$router.push({path: 'departmentServiceBill'});
             this.changeTitleTxt({tit:'科室巡检单'});
             setStore('currentTitle','科室巡检单')
@@ -206,9 +233,19 @@
           if (codeData.length > 0) {
             this.departmentId = codeData[0];
             this.departmentNo = codeData[1];
+            // 如果当前扫码科室是第一次扫码，则清除上一科室保存的已完成检查的检查项信息
+            let isExistTaskId = '',
+            isExistOfficeId = '';
+            isExistTaskId = this.isDepartmentServiceVerifySweepCode.indexOf(this.isDepartmentServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
+            if (isExistTaskId != -1) {
+              isExistOfficeId = this.isDepartmentServiceVerifySweepCode[isExistTaskId]['officeList'].indexOf( this.departmentNo);
+            };
+            if (isExistTaskId !== -1 && isExistOfficeId == -1) {
+              this.clearCheckedInfo()
+            };
             this.juddgeCurrentDepartment({
               id: this.taskId,  //任务ID
-              depNo: this.departmentNo, //项目编号
+              depNo: this.departmentNo, //科室编号
               depId: this.departmentId,  //科室ID
               workerId: this.workerId // 用户id
             })
@@ -220,6 +257,13 @@
             this.fillConsumable()
           });
         }
+      },
+
+      // 清除当前房间存储的检查项信息
+      clearCheckedInfo () {
+        let temporaryInfo = this.completeDepartmentServiceCheckedItemList.filter((item) => { return item.taskId !== this.taskId});
+        this.changeCompleteDepartmentServiceCheckedItemList(temporaryInfo);
+        setStore('isCompleteDepartmentServiceCheckedItemList', {"sweepCodeInfo": temporaryInfo});
       },
 
       // 存储扫码校验通过的科室编号
@@ -279,14 +323,35 @@
             }
           )
         };
-        this.changeCurrentDepartmentNumber(temporaryDepartmentNumber);
-        setStore('changeIsCurrentDepartmentServiceVerifySweepCode', {"number": temporaryDepartmentNumber});
+        this.changeIsCurrentDepartmentServiceVerifySweepCode(temporaryDepartmentNumber);
+        setStore('isCurrentDepartmentServiceVerifySweepCode', {"number": temporaryDepartmentNumber})
       },
 
       // 完成巡检
       completeTask () {
+        let flag = this.oneRepairsMsg.spaces.some((item) => { return item.checked == false});
+        if (flag) {
+          this.$toast('请完成所有房间的巡检');
+          return
+        };
+        if (this.departmentServiceMsg.state == 3) {
+          this.$router.push({path: 'departmentServiceSignature'});
+          this.changeTitleTxt({tit:'签字'});
+          setStore('currentTitle','签字');
+          return
+        };
         updateDepartmentServiceTaskBeSigned(this.proId, this.taskId).then((res) => {
           if (res && res.data.code == 200) {
+            // 删除当前任务存储的扫码校验校验通过的科室编号信息
+            let temporaryCurrentDepartmentNUmInfo = this.isDepartmentServiceVerifySweepCode.filter((item) => { return item.taskId !== this.taskId});
+            this.changeIsDepartmentServiceVerifySweepCode(temporaryCurrentDepartmentNUmInfo);
+            setStore('isDepartmentServiceVerifySweepCode', {"sweepCodeInfo": temporaryCurrentDepartmentNUmInfo});
+
+            // 删除当前任务存储的当前扫码校验校验通过的科室编号信息
+            let temporaryInfo = this.isCurrentDepartmentServiceVerifySweepCode.filter((item) => { return item.taskId !== this.taskId});
+            this.changeIsCurrentDepartmentServiceVerifySweepCode(temporaryInfo);
+            setStore('isCurrentDepartmentServiceVerifySweepCode', {"number": temporaryInfo});
+
             this.$router.push({path: 'departmentService'});
             this.changeTitleTxt({tit:'科室巡检'});
             setStore('currentTitle','科室巡检')
@@ -329,7 +394,6 @@
     };
     .worker-show {
       .content-wrapper();
-      overflow: auto;
       .content-top {
         font-size: 14px;
         background: #fff;
@@ -416,6 +480,9 @@
             background: #8e9397;
             color: #fff;
             border-radius: 2px
+          };
+          .listStyle {
+            background: #2c65f7
           }
         }
       };

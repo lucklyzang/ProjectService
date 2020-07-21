@@ -104,7 +104,7 @@ export function queryRepairsTaskPhoto(data) {
   })
 };
 
-// 保存物流信息 
+// 保存物料信息 
 export function saveMate(data) {
   return request({
     url: 'bxTask/saveMate',
@@ -203,5 +203,22 @@ export function updateDepartmentServiceTaskBeCompleted(proId,taskId) {
   return request({
     url: `xjTask/signToCompleteXjTask/${proId}/${taskId}`,
     method: 'put'
+  })
+};
+
+// 查询巡检任务已选择的物料信息
+export function queryDepartmentMaterial(taskId) {
+  return request({
+    url: `xjCheckMaterial/queryMaterial/${taskId}`,
+    method: 'get'
+  })
+};
+
+// 保存巡检任务物料
+export function saveDepartmentMate(data) {
+  return request({
+    url: 'xjCheckMaterial/saveMate',
+    method: 'post',
+    data
   })
 };

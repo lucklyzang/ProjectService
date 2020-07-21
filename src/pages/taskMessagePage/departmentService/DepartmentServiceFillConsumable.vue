@@ -78,10 +78,10 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import {queryMaterialById,queryAllMaterial,saveMate,completeRepairsTask} from '@/api/worker.js'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray } from '@/common/js/utils'
+  import {queryDepartmentMaterial,queryAllMaterial,saveDepartmentMate} from '@/api/worker.js'
+  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, deepClone, repeArray } from '@/common/js/utils'
   export default {
-    name: 'FillConsumable',
+    name: 'DepartmentServiceFillConsumable',
     components:{
       HeaderTop,
       FooterBottom,
@@ -101,9 +101,9 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
-          this.$router.push({path: 'workOrderDetails'});
-          this.changeTitleTxt({tit:'工单详情'});
-          setStore('currentTitle','工单详情')
+          this.$router.push({path: 'departmentServiceBill'});
+          this.changeTitleTxt({tit:'科室巡检单'});
+          setStore('currentTitle','科室巡检单')
         })
       };
       this.getMaterialById(this.taskId)
@@ -115,10 +115,11 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
-        'repairsWorkOrderMsg',
+        'departmentServiceMsg',
         'userInfo',
         'completeRoomList',
-        'isCompleteRepairsWorkOrderPhotoList'
+        'currentDepartmentServiceCheckedItemId',
+        'completeDepartmentServiceCheckedItemList'
       ]),
       userName () {
        return this.userInfo.userName
@@ -139,27 +140,27 @@
         return this.userInfo.name
       },
       taskId () {
-        return this.repairsWorkOrderMsg.id
+        return this.departmentServiceMsg.id
       }
     },
 
     methods:{
       ...mapMutations([
         'changeTitleTxt',
-        'changeCompleteRoomList',
-        'changeIsCompletePhotoList'
+        'changeCompleteDepartmentServiceCheckedItemList',
+        'changeCurrentDepartmentServiceCheckedItemId'
       ]),
 
       //返回上一页
       backTo () {
-        this.$router.push({path: 'workOrderDetails'});
-        this.changeTitleTxt({tit:'工单详情'});
-        setStore('currentTitle','工单详情')
+        this.$router.push({path: 'departmentServiceBill'});
+        this.changeTitleTxt({tit:'科室巡检单'});
+        setStore('currentTitle','科室巡检单')
       },
 
       //查询任务关联的物料信息
       getMaterialById (taskId) {
-        queryMaterialById(taskId)
+        queryDepartmentMaterial(taskId)
         .then((res) => {
           if(res && res.data.code == 200) {
             if (res.data.data.length > 0) {
@@ -259,11 +260,58 @@
 
       },
 
+      // 存储完成问题上报的检查项信息
+      storageCompleteCheckItemInfo () {
+        let temporaryOfficeList = [];
+        let temporaryDepartmentId = [];
+        temporaryOfficeList = deepClone(this.completeDepartmentServiceCheckedItemList);
+        if (this.completeDepartmentServiceCheckedItemList.length > 0 ) {
+          let temporaryIndex = this.completeDepartmentServiceCheckedItemList.indexOf(this.completeDepartmentServiceCheckedItemList.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (temporaryIndex != -1) {
+            temporaryDepartmentId = temporaryOfficeList[temporaryIndex]['officeList'];
+            // 存储问题的解决方式
+            let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
+            // 删除重复的id
+            temporaryDepartmentId = temporaryDepartmentId.filter((item) => {return item.id !== this.currentDepartmentServiceCheckedItemId.id});
+            temporaryCheckItemInfo['checkResult'] = 1;
+            this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
+            temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
+            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId)
+          } else {
+            // 存储问题的解决方式
+            let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
+            temporaryCheckItemInfo['checkResult'] = 1;
+            this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
+            temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
+            temporaryOfficeList.push(
+              { 
+                officeList: repeArray(temporaryDepartmentId),
+                taskId: this.taskId
+              }
+            )
+          }
+        } else {
+          // 存储问题的解决方式
+          let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
+          temporaryCheckItemInfo['checkResult'] = 1;
+          this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
+          temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
+          temporaryOfficeList.push(
+            { 
+              officeList: repeArray(temporaryDepartmentId),
+              taskId: this.taskId
+            }
+          )
+        };
+        this.changeCompleteDepartmentServiceCheckedItemList(temporaryOfficeList);
+        setStore('isCompleteDepartmentServiceCheckedItemList', {"sweepCodeInfo": temporaryOfficeList})
+      },
+
       // 确认
       sure () {
         let mateMsg = {
           proId: this.proId,
-          id: this.taskId,
+          taskId: this.taskId,
           materials: []
         };
         let temporaryConsumableMsgList = this.consumableMsgList.filter((item) => {return item.number > 0});
@@ -275,49 +323,19 @@
           mateMsg.materials.push(
             {
               proId: this.proId, 
-              proName: item.mateName,
+              proName: this.proName,
               mateId: item.mateId,
               number: item.number
             }
           )
         };
-        saveMate(mateMsg).then((res) => {
+        saveDepartmentMate(mateMsg).then((res) => {
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
-            this.$dialog.alert({
-              message: '是否还有地点未完成',
-              closeOnPopstate: true,
-              showCancelButton: true
-            })
-            .then(() => {
-              this.$router.push({path: 'repairsWorkOrder'});
-              this.changeTitleTxt({tit:'报修工单'});
-              setStore('currentTitle','报修工单')
-            })
-            .catch(() => {
-              completeRepairsTask({
-                proId: this.proId,
-                taskId: this.taskId
-              })
-              .then((res) => {
-                if (res && res.data.code == 200) {
-                  this.$toast(`${res.data.msg}`);
-                  this.clearStoragePhoto();
-                  this.$router.push({path: 'repairsWorkOrder'});
-                  this.changeTitleTxt({tit:'报修工单'});
-                  setStore('currentTitle','报修工单')
-                } else {
-                  this.$toast(`${res.data.msg}`);
-                }
-              })
-              .catch((err) => {
-                this.$dialog.alert({
-                  message: `${err.message}`,
-                  closeOnPopstate: true
-                }).then(() => {
-                })
-              })
-            })
+            this.storageCompleteCheckItemInfo();
+            this.$router.push({path: 'departmentServiceBill'});
+            this.changeTitleTxt({tit:'科室巡检单'});
+            setStore('currentTitle','科室巡检单')
           } else {
             this.$toast(`${res.data.msg}`)
           }
@@ -329,47 +347,6 @@
           }).then(() => {
           })
         })
-      },
-
-      // 清除该任务存储的照片信息
-      clearStoragePhoto () {
-        if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
-        let temporaryPhotoList = this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId !== this.taskId});
-        this.changeIsCompletePhotoList(temporaryPhotoList);
-        setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
-      },
-
-      // 存储已完成检修的房间信息
-      storageCompletedRoom (departmentNo) {
-        let temporaryOfficeList = [];
-        let temporaryDepartmentId = [];
-        temporaryOfficeList = deepClone(this.completeRoomList);
-        if (this.completeRoomList.length > 0 ) {
-          let temporaryIndex = this.completeRoomList.indexOf(this.completeRoomList.filter((item) => {return item.taskId == this.taskId})[0]);
-          if (temporaryIndex != -1) {
-            temporaryDepartmentId = temporaryOfficeList[temporaryIndex]['officeList'];
-            temporaryDepartmentId.push(departmentNo);
-            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId)
-          } else {
-            temporaryDepartmentId.push(departmentNo);
-            temporaryOfficeList.push(
-              { 
-                officeList: repeArray(temporaryDepartmentId),
-                taskId: this.taskId
-              }
-            )
-          };
-        } else {
-          temporaryDepartmentId.push(departmentNo);
-          temporaryOfficeList.push(
-            { 
-              officeList: repeArray(temporaryDepartmentId),
-              taskId: this.taskId
-            }
-          )
-        };
-        this.changeCompleteRoomList(temporaryOfficeList);
-        setStore('completeRoomList', {"sweepCodeInfo": temporaryOfficeList})
       }
     }
   }

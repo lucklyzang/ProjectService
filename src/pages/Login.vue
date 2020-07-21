@@ -127,6 +127,7 @@ export default {
             setStore('isLogin', true);
             // 用户身份类别存入store和Locastorage
             this.storeUserInfo(JSON.parse(getStore('userInfo')));
+            this.proId = res.data.data['proId'];
             this.queryDepartmentMsg(res.data.data.proId)
           } else {
              this.$dialog.alert({
@@ -152,11 +153,10 @@ export default {
     queryDepartmentMsg (proId) {
       getDepartmentMsg(proId).then((res) => {
         if (res && res.data.code == 200) {
-          setStore('departmentMessage', res.data.data);
-          window.location.reload();
           this.$router.push({path:'/home'});
           this.changeTitleTxt({tit:'工程管理系统'});
-          this.proId = res.data.data['proId'];
+          setStore('departmentMessage', res.data.data);
+          window.location.reload()
         }
       })
       .catch((err) => {

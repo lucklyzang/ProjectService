@@ -46,9 +46,9 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
-          this.$router.push({path: 'fillConsumable'});
-          this.changeTitleTxt({tit:'填写耗材'});
-          setStore('currentTitle','填写耗材')
+          this.$router.push({path: 'workOrderDetails'});
+          this.changeTitleTxt({tit:'工单详情'});
+          setStore('currentTitle','工单详情')
         })
       }
     },
@@ -94,9 +94,9 @@
 
       //返回上一页
       backTo () {
-        this.$router.push({path: 'fillConsumable'});
-        this.changeTitleTxt({tit:'填写耗材'});
-        setStore('currentTitle','填写耗材')
+        this.$router.push({path: 'workOrderDetails'});
+        this.changeTitleTxt({tit:'工单详情'});
+        setStore('currentTitle','工单详情')
       },
 
       // 确认

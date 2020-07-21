@@ -295,8 +295,34 @@ export const repeArray = (targetArray) => {
     if(bool === -1){
       result.push(v);
     }
-    })
+    });
   return result;
+}
+
+/* 
+  * 数组去重方法(重复2的对象)
+  * @param{Array} obj
+*/
+export const deteleObject = (obj) => {
+  var uniques = [];
+  var stringify = {};
+  for (var i = 0; i < obj.length; i++) {
+      var keys = Object.keys(obj[i]);
+      keys.sort(function(a, b) {
+          return (Number(a) - Number(b));
+      });
+      var str = '';
+      for (var j = 0; j < keys.length; j++) {
+          str += JSON.stringify(keys[j]);
+          str += JSON.stringify(obj[i][keys[j]]);
+      }
+      if (!stringify.hasOwnProperty(str)) {
+          uniques.push(obj[i]);
+          stringify[str] = true;
+      }
+  }
+  uniques = uniques;
+  return uniques;
 }
 
 /* 
@@ -496,7 +522,9 @@ export const removeAllLocalStorage = () => {
   removeStore('userType');
   removeStore('completPhotoInfo'),
   removeStore('isDepartmentServiceVerifySweepCode'),
-  removeStore('isCurrentDepartmentServiceVerifySweepCode')
+  removeStore('isCurrentDepartmentServiceVerifySweepCode'),
+  removeStore('isCompleteDepartmentServiceOfficeInfo'),
+  removeStore('isCompleteDepartmentServiceCheckedItemList')
 }
 
 /*

@@ -42,6 +42,7 @@ export default {
     storeUserInfo (state, playLoad) {
       state.userInfo = playLoad
     },
+    
     changeRouterFlag (state, playLoad) {
       state.routerFlag = playLoad
     },

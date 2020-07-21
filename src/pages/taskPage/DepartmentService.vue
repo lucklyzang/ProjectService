@@ -19,7 +19,7 @@
       <van-pull-refresh v-model="isRefresh" @refresh="onRefresh" success-text="刷新成功">
         <div class="content-list-action-task-wrapper" v-show="currentIndex == 0">
           <div class="content-list-action-task-item" v-for="(item,index) in taskMessageList" :key="`${index}-${item}`">
-            <span class="status-box">{{stateTransfer(item.state)}}</span>
+            <span class="status-box" :class="{statusWaitFinish: item.state == 2,statusWaitSignature: item.state == 3}">{{stateTransfer(item.state)}}</span>
             <span class="task-date">{{item.startTime}}</span>
             <p class="task-btn">
               <span class="view"  :class="{viewStyle: item.state == 1}" @click="taskView(item)">查看任务</span>
@@ -38,11 +38,11 @@
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">已完成点位:</span>
-              <span class="name"></span>
+              <span class="name">{{item.hasSpaces ? calculateCount(item.hasSpaces) : 0}}</span>
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">未完成点位:</span>
-              <span class="name"></span>
+              <span class="name">{{item.hasSpaces ? calculateCountUnfinish(item,item.spaces,item.hasSpaces) : calculateCount(item.spaces)}}</span>
             </p>
           </div>
         </div>
@@ -67,11 +67,11 @@
               </p>
               <p class="work-info-other work-info-other-row">
                 <span class="tit">已完成点位:</span>
-                <span class="name"></span>
+                <span class="name">{{item.hasSpaces ? calculateCount(item.hasSpaces) : 0}}</span>
               </p>
               <p class="work-info-other work-info-other-row">
                 <span class="tit">未完成点位:</span>
-                <span class="name"></span>
+                <span class="name">{{item.hasSpaces ? calculateCountUnfinish(item,item.spaces,item.hasSpaces) : calculateCount(item.spaces)}}</span>
               </p>
           </div>
         </div>
@@ -100,10 +100,10 @@
   import Loading from '@/components/Loading'
   import { mapGetters, mapMutations } from 'vuex'
   import store from '@/store'
-  import { formatTime, setStore, getStore, removeStore, IsPC, judgeOverTime, removeAllLocalStorage } from '@/common/js/utils'
+  import { formatTime, setStore, getStore, removeStore, IsPC, judgeOverTime, removeAllLocalStorage, deteleObject } from '@/common/js/utils'
   import {queryDepartmentServiceList} from '@/api/worker.js'
   export default {
-    name: 'RepairsWorkOrder',
+    name: 'DepartmentService',
     data () {
       return {
         currentIndex: 0,
@@ -231,6 +231,16 @@
         }
       },
 
+      // 计算点位数量(已完成)
+      calculateCount (number) {
+        return deteleObject(JSON.parse(number)).length
+      },
+
+      // 计算点位数量(未完成)
+      calculateCountUnfinish (item,sum,finishNum) {
+        return deteleObject(JSON.parse(sum)).length - deteleObject(JSON.parse(finishNum)).length
+      },
+
       // tab点击事件
       liClickEvent (item,index) {
         this.currentIndex = index;
@@ -286,7 +296,8 @@
                     currentTimes: item.currentTimes,
                     id: item.id,
                     isMe: item.isMe,
-                    spaces: item.spaces
+                    spaces: item.spaces,
+                    hasSpaces: item.hasSpaces
                   })
                 } else {
                   this.taskCompleteMessageList.push({
@@ -297,7 +308,8 @@
                     currentTimes: item.currentTimes,
                     id: item.id,
                     isMe: item.isMe,
-                    spaces: item.spaces
+                    spaces: item.spaces,
+                    hasSpaces: item.hasSpaces
                   })
                 }
               }
@@ -311,7 +323,8 @@
             message: `${err.message}`,
             closeOnPopstate: true
           }).then(() => {
-          })
+          });
+          this.showLoadingHint = false
         })
       },
 
@@ -445,7 +458,13 @@
             top: 15px;
             right: 15px;
             font-size: 13px;
-            color: red
+            color: #8e9397
+          };
+          .statusWaitFinish {
+            color: #2c65f7
+          };
+          .statusWaitSignature {
+            color: #06e606
           };
           .task-date {
             position: absolute;

@@ -81,6 +81,22 @@ new Vue({
     if (getStore('isCurrentDepartmentServiceVerifySweepCode')) {
       this.$store.commit('changeIsCurrentDepartmentServiceVerifySweepCode', JSON.parse(getStore('isCurrentDepartmentServiceVerifySweepCode'))['number']);
     };
+    // 重新存入当前进行巡检的科室id
+    if (getStore('departmentServiceId')) {
+      store.commit('changeDepartmentServiceOfficeId',getStore('departmentServiceId'))
+    };
+    // 重新存入完成巡检任务的科室编号
+    if (getStore('isCompleteDepartmentServiceOfficeInfo')) {
+      store.commit('changeCompleteDepartmentServiceOfficeInfo',JSON.parse(getStore('isCompleteDepartmentServiceOfficeInfo'))['sweepCodeInfo'])
+    };
+    // 重新存入科室巡检当前点击的检查项id
+    if (getStore('checkedItemId')) {
+      this.$store.commit('changeCurrentDepartmentServiceCheckedItemId', JSON.parse(getStore('checkedItemId')));
+    };
+    // 重新存入完成巡检任务中检查项上报的id
+    if (getStore('isCompleteDepartmentServiceCheckedItemList')) {
+      store.commit('changeCompleteDepartmentServiceCheckedItemList',JSON.parse(getStore('isCompleteDepartmentServiceCheckedItemList'))['sweepCodeInfo'])
+    };
   },
   template: '<App/>'
 })

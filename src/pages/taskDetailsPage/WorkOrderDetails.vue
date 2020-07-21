@@ -1,6 +1,6 @@
 <template>
   <div class="content-wrapper">
-     <van-overlay :show="overlayShow"/>
+    <van-overlay :show="overlayShow"/>
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
@@ -99,12 +99,15 @@
         <p class="quit-account" @click="completeTask">完成工单</p>
       </div>
       <div class="choose-photo-box" v-show="photoBox">
-        <div class="choose-photo">
-          <input name="uploadImg1" id="demo1" @change="previewFileOne" type="file" accept="image/album"/>从图库中选择
-        </div>
         <div class="photo-graph">
+          <van-icon name="photograph" />
           <input name="uploadImg2" id="demo2"  @change="previewFileTwo" type="file" accept="image/camera"/>拍照
         </div>
+        <div class="choose-photo">
+          <van-icon name="photo" />
+          <input name="uploadImg1" id="demo1" @change="previewFileOne" type="file" accept="image/album"/>去相册选择
+        </div>
+        <div class="photo-cancel" @click="photoCancel">取消</div>
       </div>
     </div>
     <van-dialog v-model="enlargeImgShow" width="90%">
@@ -137,6 +140,7 @@
         overlayShow: false,
         showUploadPhoto: false,
         imgType: '',
+        photoType: '',
         loadinText: '',
         clickIssue: false,
         clickComplete: false,
@@ -167,18 +171,19 @@
         })
       };
       document.addEventListener('click', (e) => {
-        if(e.target.className!='van-icon van-icon-plus'){
+        if(e.target.className!='van-icon van-icon-plus' && e.target.className != 'back-home'){
           this.photoBox = false;
+          this.overlayShow = false
         }
       });
       if (this.repairsWorkOrderMsg.state == 5) {
         this.getOneRepairsProjectNoComplete(this.taskId);
         this.parallelFunction()
       } else {
+        this.echoPhoto();
         this.getOneRepairsProjectNoComplete(this.taskId)
       };
       this.changeElementSite();
-      this.echoPhoto();
       console.log('sasas',this.isCompleteRepairsWorkOrderPhotoList);
     },
     
@@ -350,7 +355,8 @@
         this.photoType = 1;
         this.photoBox = true;
         this.clickIssue = true;
-        this.clickComplete = false
+        this.clickComplete = false;
+        this.overlayShow = true
       },
 
       // 拍照完成照片点击
@@ -358,17 +364,28 @@
         this.photoType = 2;
         this.photoBox = true;
         this.clickIssue = false;
-        this.clickComplete = true
+        this.clickComplete = true;
+        this.overlayShow = true
       },
 
       // 问题照片删除
       issueDelete (index) {
-        this.issueImageList.splice(index,1)
+        this.photoType = 1;
+        this.issueImageList.splice(index,1);
+        this.storePhoto(this.issueImageList,this.photoType)
       },
 
-      // 问题照片删除
+      // 完成照片删除
       completeDelete (index) {
-        this.completeImageList.splice(index,1)
+        this.photoType = 2;
+        this.completeImageList.splice(index,1);
+        this.storePhoto(this.completeImageList,this.photoType)
+      },
+
+      // 拍照取消
+      photoCancel () {
+        this.photoBox = false;
+        this.overlayShow = false
       },
 
       // 图片上传预览
@@ -394,11 +411,14 @@
           img.onload = function () {
             let src = compress(img,Orientation);
             if (_this.clickIssue) {
-              _this.issueImageList.push(reader.result)
+              _this.issueImageList.push(src);
+              // 存储上传的照片
+              _this.storePhoto(_this.issueImageList,_this.photoType)
             } else {
-              _this.completeImageList.push(reader.result)
-            };
-             _this.storePhoto(reader.result,_this.photoType)
+              _this.completeImageList.push(src);
+              // 存储上传的照片
+              _this.storePhoto(_this.completeImageList,_this.photoType)
+            }
           }
         }, false);
         if (file) {
@@ -429,13 +449,15 @@
           img.onload = function () {
             let src = compress(img,Orientation);
             if (_this.clickIssue) {
-                _this.issueImageList.push(reader.result)
+              _this.issueImageList.push(src);
+              // 存储上传的照片
+              _this.storePhoto(_this.issueImageList,_this.photoType)
             } else {
-              _this.completeImageList.push(reader.result)
-            };
-            // 存储上传的照片
-            _this.storePhoto(reader.result,_this.photoType)
+              _this.completeImageList.push(src);
+              // 存储上传的照片
+              _this.storePhoto(_this.completeImageList,_this.photoType)
             }
+          }
         }, false);
         if (file) {
           reader.readAsDataURL(file);
@@ -445,31 +467,48 @@
       // 存储已经上传的照片
       storePhoto (photoId,type) {
         let temporaryPhotoList = [];
-        let temporaryPhotoId = [];
         temporaryPhotoList = deepClone(this.isCompleteRepairsWorkOrderPhotoList);
         if (this.isCompleteRepairsWorkOrderPhotoList.length > 0 ) {
           let temporaryIndex = this.isCompleteRepairsWorkOrderPhotoList.indexOf(this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId == this.taskId})[0]);
-          if (temporaryIndex != -1) {
-            temporaryPhotoId = temporaryPhotoList[temporaryIndex]['phototList'];
-            temporaryPhotoId.push({photoId,type});
-            temporaryPhotoList[temporaryIndex]['phototList'] = temporaryPhotoId
+          if (temporaryIndex !== -1) {
+            if (type === 1) {
+              temporaryPhotoList[temporaryIndex]['issuePhototList'] = photoId;
+            } else if (type === 2) {
+              temporaryPhotoList[temporaryIndex]['completePhototList'] = photoId
+            }
           } else {
-            temporaryPhotoId.push({photoId,type});
+            if (type === 1) {
+              temporaryPhotoList.push(
+                { 
+                  issuePhototList: photoId,
+                  taskId: this.taskId
+                }
+              )
+            } else if (type === 2) {
+               temporaryPhotoList.push(
+                { 
+                  completePhototList: photoId,
+                  taskId: this.taskId
+                }
+              )
+            }
+          };
+        } else {
+          if (type === 1) {
             temporaryPhotoList.push(
               { 
-                phototList: temporaryPhotoId,
+                issuePhototList: photoId,
                 taskId: this.taskId
               }
             )
-          };
-        } else {
-          temporaryPhotoId.push({photoId,type});
-          temporaryPhotoList.push(
-            { 
-              phototList: temporaryPhotoId,
-              taskId: this.taskId
-            }
-          )
+          } else if (type === 2) {
+            temporaryPhotoList.push(
+              { 
+                completePhototList: photoId,
+                taskId: this.taskId
+              }
+            )
+          }
         };
         this.changeIsCompletePhotoList(temporaryPhotoList);
         setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList})
@@ -479,26 +518,27 @@
       echoPhoto () {
         this.historyIssueImageList = [];
         this.historyCompleteImageList = [];
+        this.issueImageList = [];
+        this.completeImageList = [];
         if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
         let echoIndex = this.isCompleteRepairsWorkOrderPhotoList.indexOf(this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId == this.taskId})[0]);
-        if (echoIndex == -1) { return };
-        let temporaryPhotoInfo = this.isCompleteRepairsWorkOrderPhotoList[echoIndex]['phototList'];
-        for (let i = 0, len = temporaryPhotoInfo.length; i < len; i++) {
-          if (temporaryPhotoInfo[i].type == 1) {
-            this.issueImageList.push(temporaryPhotoInfo[i].photoId)
-          } else if (temporaryPhotoInfo[i].type == 2) {
-            this.completeImageList.push(temporaryPhotoInfo[i].photoId)
-          };
+        if (echoIndex === -1) { return };
+        if (this.isCompleteRepairsWorkOrderPhotoList[echoIndex]['issuePhototList']) {
+          this.issueImageList = deepClone(this.isCompleteRepairsWorkOrderPhotoList[echoIndex]['issuePhototList'])
+        };
+        if (this.isCompleteRepairsWorkOrderPhotoList[echoIndex]['completePhototList']) {
+          this.completeImageList = deepClone(this.isCompleteRepairsWorkOrderPhotoList[echoIndex]['completePhototList'])
         }
       },
 
       // 上传图片
       uploadPhoto () {
-        if (this.issueImageList.length > 0 && this.completeImageList.length > 0) {
-          this.$toast('只能同时提交一种类型的照片');
-          return
-        };
+        // if (this.issueImageList.length > 0 && this.completeImageList.length > 0) {
+        //   this.$toast('只能同时提交一种类型的照片');
+        //   return
+        // };
         this.loadinText = '上传中,请稍等···';
+        this.overlayShow = true;
         this.showLoadingHint = true;
         this.overlayShow = true;
         let imageType;
@@ -515,7 +555,8 @@
               image: item
             })
           }
-        } else {
+        };
+        if (this.completeImageList.length > 0) {
           imageType = 2;
           for (let item of this.completeImageList) {
             photoMsg.images.push({
@@ -528,14 +569,16 @@
         .then((res) => {
           this.showLoadingHint = false;
           this.overlayShow = false;
+          this.overlayShow = false;
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
             if (this.issueImageList.length > 0) {
               this.issueImageList = []
-            } else if (this.completeImageList.length > 0) {
-              this.showUploadPhoto = false
+            }
+            if (this.completeImageList.length > 0) {
               this.completeImageList = []
             };
+            this.showUploadPhoto = false;
             this.clearPhotoList()
           } else {
             this.$toast(`${res.data.msg}`);
@@ -548,6 +591,7 @@
           }).then(() => {
           });
           this.showLoadingHint = false;
+          this.overlayShow = false;
           this.overlayShow = false
         })
       },
@@ -559,7 +603,8 @@
         if (echoIndex == -1) { return };
         let temporaryPhotoList = deepClone(this.isCompleteRepairsWorkOrderPhotoList);
         let temporaryPhotoId = [];
-        temporaryPhotoList[echoIndex]['phototList'] = temporaryPhotoId
+        temporaryPhotoList[echoIndex]['completePhototList'] = temporaryPhotoId;
+        temporaryPhotoList[echoIndex]['issuePhototList'] = temporaryPhotoId;
         this.changeIsCompletePhotoList(temporaryPhotoList);
         setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
       },
@@ -817,33 +862,41 @@
       };
       .choose-photo-box {
         position: fixed;
+        margin: auto;
         left: 0;
         bottom: 0;
-        background: #fff;
         width: 100%;
         z-index: 1000;
+        font-size: 0px;
         > div {
           width: 100%;
-          text-align: center
+          text-align: center;
+          font-size: 16px;
+          background: #f6f6f6
         }
         .choose-photo {
           padding: 8px 10px;
           height: 30px;
+          .bottom-border-1px(#cbcbcb);
           line-height: 30px;
           position: relative;
           cursor: pointer;
-          color: #888;
-          background: #fff;
-          border-bottom: 1px solid #ddd;
+          color: #2c65f7;
           overflow: hidden;
           display: inline-block;
           *display: inline;
           *zoom: 1;
+          /deep/ .van-icon {
+            vertical-align: middle;
+            margin-top: -4px;
+            font-size: 20px
+          };
           input {
             position: absolute;
             font-size: 100px;
             right: 0;
             top: 0;
+            height: 100%;
             opacity: 0;
             filter: alpha(opacity=0);
             cursor: pointer
@@ -852,20 +905,38 @@
         .photo-graph {
           position: relative;
           display: inline-block;
-          background: #fff;
           padding: 8px 12px;
           overflow: hidden;
-          color: #1E88C7;
+         .bottom-border-1px(#cbcbcb);
+          color: #2c65f7;
           text-decoration: none;
           text-indent: 0;
           line-height: 30px;
+          /deep/ .van-icon {
+            vertical-align: middle;
+            margin-top: -2px;
+            font-size: 20px
+          };
           input {
             position: absolute;
             font-size: 100px;
             right: 0;
+            height: 100%;
             top: 0;
             opacity: 0;
           }
+        };
+        .photo-cancel {
+          position: relative;
+          width: 100%;
+          display: inline-block;
+          padding: 8px 12px;
+          overflow: hidden;
+          color: #2c65f7;
+          text-decoration: none;
+          text-indent: 0;
+          line-height: 30px;
+          font-weight: 600
         }
       }
     }

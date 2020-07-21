@@ -16,25 +16,25 @@
         <p class="content-top-other">
           <span>姓名</span>
           <span>
-            {{name}}
+            {{userInfo.name}}
           </span>
         </p>
         <p class="content-top-other">
           <span>手机号码</span>
           <span>
-            {{phoneNumber}}
+            无
           </span>
         </p>
         <p class="content-top-other">
           <span>公司部门</span>
           <span>
-            {{departmentName}}
+            {{userInfo.extendData.proName}}
           </span>
         </p>
         <p class="content-top-other">
           <span>职位</span>
           <span>
-            {{personPosition}}
+            {{userInfo.extendData.userType}}
           </span>
         </p>
       </div>
@@ -70,10 +70,6 @@
     },
     data() {
       return {
-        name: '撒飒飒',
-        phoneNumber: '132212121',
-        departmentName: '工程部',
-        personPosition: '维修员',
         defaultPersonPng: require('@/common/images/home/default-person.jpg')
       }
     },

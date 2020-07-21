@@ -19,7 +19,7 @@
       <van-pull-refresh v-model="isRefresh" @refresh="onRefresh" success-text="刷新成功">
         <div class="content-list-action-task-wrapper" v-show="currentIndex === 0">
           <div class="content-list-action-task-item" v-for="(item,index) in taskMessageList" :key="`${index}-${item}`">
-            <span class="status-box">{{stateTransfer(item.state)}}</span>
+            <span class="status-box" :class="{statusWaitSure:item.state == 1,statusWaitFinish: item.state == 3,statusWaitSignature: item.state == 4}">{{stateTransfer(item.state)}}</span>
             <span class="task-date">{{item.planStartTime}}</span>
             <p class="task-btn">
               <span class="back" @click="taskBack(item)" v-show="item.state == 1 || item.state == 2">退回</span>
@@ -106,6 +106,8 @@
         tabTitleList: ['待办任务','已完成'],
         reasonShow: false,
         isRefresh: false,
+        noDataShow: false,
+        showLoadingHint: false,
         reasonOperationList: [],
         reasonIndex: '',
         reasonText: '',
@@ -574,7 +576,16 @@
             top: 15px;
             right: 15px;
             font-size: 13px;
+            color: #8e9397
+          };
+          .statusWaitSure {
             color: red
+          };
+          .statusWaitFinish {
+            color: #2c65f7
+          };
+          .statusWaitSignature {
+            color: #06e606
           };
           .task-date {
             position: absolute;

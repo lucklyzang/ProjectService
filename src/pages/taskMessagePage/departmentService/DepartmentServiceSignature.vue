@@ -27,7 +27,7 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
-  import {submitDepartMentServiceSignInfo} from '@/api/worker.js'
+  import {submitDepartMentServiceSignInfo, updateDepartmentServiceTaskBeCompleted} from '@/api/worker.js'
   export default {
     name: 'DepartmentServiceSignature',
     components:{
@@ -61,7 +61,8 @@
         'navTopTitle',
         'currentElectronicSignature',
         'userInfo',
-        'departmentServiceMsg'
+        'departmentServiceMsg',
+        'completeDepartmentServiceOfficeInfo'
       ]),
       userName () {
        return this.userInfo.userName
@@ -88,7 +89,8 @@
 
     methods:{
       ...mapMutations([
-        'changeTitleTxt'
+        'changeTitleTxt',
+        'changeCompleteDepartmentServiceOfficeInfo'
       ]),
 
       //返回上一页
@@ -125,9 +127,14 @@
       updateTaskComplete (proId,taskId) {
         updateDepartmentServiceTaskBeCompleted(proId,taskId).then((res) => {
           if(res && res.data.code == 200) {
+            // 删除当前任务存储的已完成的科室信息
+            this.$toast('该任务已完成');
+            let temporaryInfo = this.completeDepartmentServiceOfficeInfo.filter((item) => { return item.taskId !== this.taskId});
+            this.changeCompleteDepartmentServiceOfficeInfo(temporaryInfo);
+            setStore('isCompleteDepartmentServiceOfficeInfo', {"sweepCodeInfo": temporaryInfo});
             this.$router.push({path: 'departmentService'});
             this.changeTitleTxt({tit:'科室巡检'});
-            setStore('currentTitle','科室巡检')
+            setStore('currentTitle','科室巡检');
           } else {
             this.$toast(`${res.data.msg}`)
           }

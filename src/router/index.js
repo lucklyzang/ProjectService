@@ -19,6 +19,7 @@ const DeviceServiceDetails = () => import('@/pages/taskDetailsPage/DeviceService
 const OperateRecordOrderDetails = () => import('@/pages/taskDetailsPage/OperateRecordOrderDetails')
 const DeviceServiceBill = () => import('@/pages/taskMessagePage/deviceService/DeviceServiceBill')
 const OperateRecordBill = () => import('@/pages/taskMessagePage/deviceService/OperateRecordBill')
+const DepartmentServiceFillConsumable = () => import('@/pages/taskMessagePage/departmentService/DepartmentServiceFillConsumable')
 Vue.use(Router) 
 
 let baseRoute  = [
@@ -106,6 +107,11 @@ let baseRoute  = [
     path: '/operateRecordOrderDetails',
     name: 'operateRecordOrderDetails',
     component: OperateRecordOrderDetails
+  },
+  {
+    path: '/departmentServiceFillConsumable',
+    name: 'departmentServiceFillConsumable',
+    component: DepartmentServiceFillConsumable
   }
 ];
 let router = new Router({
