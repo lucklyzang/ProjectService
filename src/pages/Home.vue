@@ -154,7 +154,8 @@
     methods:{
       ...mapMutations([
         'changeTitleTxt',
-        'changeIsFreshRepairsWorkOrderPage'
+        'changeIsFreshRepairsWorkOrderPage',
+        'changeIsFreshDepartmentServicePage'
       ]),
 
       juddgeIspc () {
@@ -191,6 +192,7 @@
           this.changeTitleTxt({tit:'设备巡检'});
           setStore('currentTitle','设备巡检')
         } else {
+          this.changeIsFreshDepartmentServicePage(true);
           this.$router.push({path: 'departmentService'});
           this.changeTitleTxt({tit:'科室巡检'});
           setStore('currentTitle','科室巡检')

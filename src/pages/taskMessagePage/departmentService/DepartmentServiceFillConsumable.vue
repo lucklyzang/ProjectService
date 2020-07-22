@@ -117,9 +117,7 @@
         'navTopTitle',
         'departmentServiceMsg',
         'userInfo',
-        'completeRoomList',
-        'currentDepartmentServiceCheckedItemId',
-        'completeDepartmentServiceCheckedItemList'
+        'completeRoomList'
       ]),
       userName () {
        return this.userInfo.userName
@@ -146,9 +144,7 @@
 
     methods:{
       ...mapMutations([
-        'changeTitleTxt',
-        'changeCompleteDepartmentServiceCheckedItemList',
-        'changeCurrentDepartmentServiceCheckedItemId'
+        'changeTitleTxt'
       ]),
 
       //返回上一页
@@ -260,53 +256,6 @@
 
       },
 
-      // 存储完成问题上报的检查项信息
-      storageCompleteCheckItemInfo () {
-        let temporaryOfficeList = [];
-        let temporaryDepartmentId = [];
-        temporaryOfficeList = deepClone(this.completeDepartmentServiceCheckedItemList);
-        if (this.completeDepartmentServiceCheckedItemList.length > 0 ) {
-          let temporaryIndex = this.completeDepartmentServiceCheckedItemList.indexOf(this.completeDepartmentServiceCheckedItemList.filter((item) => {return item.taskId == this.taskId})[0]);
-          if (temporaryIndex != -1) {
-            temporaryDepartmentId = temporaryOfficeList[temporaryIndex]['officeList'];
-            // 存储问题的解决方式
-            let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
-            // 删除重复的id
-            temporaryDepartmentId = temporaryDepartmentId.filter((item) => {return item.id !== this.currentDepartmentServiceCheckedItemId.id});
-            temporaryCheckItemInfo['checkResult'] = 1;
-            this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
-            temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
-            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId)
-          } else {
-            // 存储问题的解决方式
-            let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
-            temporaryCheckItemInfo['checkResult'] = 1;
-            this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
-            temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
-            temporaryOfficeList.push(
-              { 
-                officeList: repeArray(temporaryDepartmentId),
-                taskId: this.taskId
-              }
-            )
-          }
-        } else {
-          // 存储问题的解决方式
-          let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
-          temporaryCheckItemInfo['checkResult'] = 1;
-          this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
-          temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
-          temporaryOfficeList.push(
-            { 
-              officeList: repeArray(temporaryDepartmentId),
-              taskId: this.taskId
-            }
-          )
-        };
-        this.changeCompleteDepartmentServiceCheckedItemList(temporaryOfficeList);
-        setStore('isCompleteDepartmentServiceCheckedItemList', {"sweepCodeInfo": temporaryOfficeList})
-      },
-
       // 确认
       sure () {
         let mateMsg = {
@@ -332,7 +281,6 @@
         saveDepartmentMate(mateMsg).then((res) => {
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
-            this.storageCompleteCheckItemInfo();
             this.$router.push({path: 'departmentServiceBill'});
             this.changeTitleTxt({tit:'科室巡检单'});
             setStore('currentTitle','科室巡检单')
@@ -409,7 +357,7 @@
                 }
                 &:last-child {
                   position: absolute;
-                  top: 6px;
+                  top: 12px;
                   right: 0
                 }
               }

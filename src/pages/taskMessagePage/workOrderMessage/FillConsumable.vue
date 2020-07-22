@@ -68,6 +68,10 @@
             </div>
           </div>
     </van-dialog>
+     <van-dialog v-model="isFinishShow"  title="是否还有地点未完成" show-cancel-button
+        @confirm="isFinishSure" @cancel="isFinishCancel"
+      >
+    </van-dialog>
   </div>
 </template>
 <script>
@@ -90,6 +94,7 @@
     data() {
       return {
         toolShow: false,
+        isFinishShow: false,
         searchValue: '',
         consumableMsgList: [],
         inventoryMsgList: [],
@@ -101,6 +106,11 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
+          pushHistory();
+          if (this.isFinishShow)  {
+            this.isFinishShow = true;
+            return
+          };
           this.$router.push({path: 'workOrderDetails'});
           this.changeTitleTxt({tit:'工单详情'});
           setStore('currentTitle','工单详情')
@@ -284,42 +294,42 @@
         saveMate(mateMsg).then((res) => {
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
-            this.$dialog.alert({
-              message: '是否还有地点未完成',
-              closeOnPopstate: true,
-              showCancelButton: true
-            })
-            .then(() => {
-              this.$router.push({path: 'repairsWorkOrder'});
-              this.changeTitleTxt({tit:'报修工单'});
-              setStore('currentTitle','报修工单')
-            })
-            .catch(() => {
-              completeRepairsTask({
-                proId: this.proId,
-                taskId: this.taskId
-              })
-              .then((res) => {
-                if (res && res.data.code == 200) {
-                  this.$toast(`${res.data.msg}`);
-                  this.clearStoragePhoto();
-                  this.$router.push({path: 'repairsWorkOrder'});
-                  this.changeTitleTxt({tit:'报修工单'});
-                  setStore('currentTitle','报修工单')
-                } else {
-                  this.$toast(`${res.data.msg}`);
-                }
-              })
-              .catch((err) => {
-                this.$dialog.alert({
-                  message: `${err.message}`,
-                  closeOnPopstate: true
-                }).then(() => {
-                })
-              })
-            })
+            this.isFinishShow = true
           } else {
             this.$toast(`${res.data.msg}`)
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      // 是否还有地点未完成确认
+      isFinishSure () {
+        this.$router.push({path: 'repairsWorkOrder'});
+        this.changeTitleTxt({tit:'报修工单'});
+        setStore('currentTitle','报修工单')
+      },
+
+      // 是否还有地点未完成取消
+      isFinishCancel () {
+        completeRepairsTask({
+          proId: this.proId,
+          taskId: this.taskId
+        })
+        .then((res) => {
+          if (res && res.data.code == 200) {
+            this.$toast(`${res.data.msg}`);
+            this.clearStoragePhoto();
+            this.$router.push({path: 'repairsWorkOrder'});
+            this.changeTitleTxt({tit:'报修工单'});
+            setStore('currentTitle','报修工单')
+          } else {
+            this.$toast(`${res.data.msg}`);
           }
         })
         .catch((err) => {
@@ -432,7 +442,7 @@
                 }
                 &:last-child {
                   position: absolute;
-                  top: 6px;
+                  top: 12px;
                   right: 0
                 }
               }

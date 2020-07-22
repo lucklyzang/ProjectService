@@ -66,17 +66,19 @@
         <p class="back-home"  @click="cancel">取消</p>
         <p class="quit-account" @click="completeTask">确认上报</p>
       </div>
-      <div class="choose-photo-box" v-show="photoBox">
-        <div class="choose-photo">
-          <van-icon name="photo" />
-          <input name="uploadImg1" id="demo1" @change="previewFileOne" type="file" accept="image/album"/>从图库中选择
+      <transition name="van-slide-up">
+        <div class="choose-photo-box" v-show="photoBox">
+          <div class="choose-photo">
+            <van-icon name="photo" />
+            <input name="uploadImg1" id="demo1" @change="previewFileOne" type="file" accept="image/album"/>从图库中选择
+          </div>
+          <div class="photo-graph">
+            <van-icon name="photograph" />
+            <input name="uploadImg2" id="demo2"  @change="previewFileTwo" type="file" accept="image/camera"/>拍照
+          </div>
+          <div class="photo-cancel" @click="photoCancel">取消</div>
         </div>
-        <div class="photo-graph">
-          <van-icon name="photograph" />
-          <input name="uploadImg2" id="demo2"  @change="previewFileTwo" type="file" accept="image/camera"/>拍照
-        </div>
-        <div class="photo-cancel" @click="photoCancel">取消</div>
-      </div>
+      </transition>
     </div>
     <van-popup v-model="endTimePop" title="" position="bottom" :overlay="true"> 
       <van-datetime-picker  v-model="currentDateStart" type="datetime"  :min-date="minDateEnd"
@@ -652,7 +654,7 @@
           *zoom: 1;
           /deep/ .van-icon {
             vertical-align: middle;
-            margin-top: -4px;
+            margin-top: 0;
             font-size: 20px
           };
           input {
@@ -669,16 +671,16 @@
         .photo-graph {
           position: relative;
           display: inline-block;
-          padding: 8px 12px;
+          height: 50px;
           overflow: hidden;
          .bottom-border-1px(#cbcbcb);
           color: #2c65f7;
           text-decoration: none;
           text-indent: 0;
-          line-height: 30px;
+          line-height: 50px;
           /deep/ .van-icon {
             vertical-align: middle;
-            margin-top: -2px;
+            margin-top: 1px;
             font-size: 20px
           };
           input {
@@ -699,7 +701,7 @@
           text-decoration: none;
           text-indent: 0;
           line-height: 30px;
-          font-weight: 600
+          font-weight: bold
         }
       }
     }

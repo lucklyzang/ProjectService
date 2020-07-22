@@ -1,12 +1,16 @@
 <template>
   <div class="content-wrapper">
+    <van-overlay :show="overlayShow" />
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
         <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
       </HeaderTop>
+      <div class="loading">
+        <loading :isShow="showLoadingHint" :textContent="loadinText" textColor="#2895ea"></loading>
+      </div>
       <!-- 内容部分 -->
-      <div class="content-top">
+      <div class="content-top" ref="contentTop">
         <ElectronicSignature ref="mychild"></ElectronicSignature>
       </div>
       <div class="content-bottom">
@@ -34,14 +38,19 @@
       HeaderTop,
       FooterBottom,
       VanFieldSelectPicker,
-      ElectronicSignature
+      ElectronicSignature,
+      Loading
     },
     data() {
       return {
+        showLoadingHint: false,
+        loadinText: '',
+        overlayShow: false
       }
     },
     
     mounted() {
+      this.$refs.contentTop.style.zIndex = 100;
       // 控制设备物理返回按键测试
       if (!IsPC()) {
         pushHistory();
@@ -105,6 +114,10 @@
         if (this.currentElectronicSignature == this.originalSignature || !this.currentElectronicSignature) {
           return
         };
+        this.$refs.contentTop.style.zIndex = 0;
+        this.loadinText = '上报中,请稍等···';
+        this.showLoadingHint = true;
+        this.overlayShow = true;
         let photoMsg = {
           taskId: this.taskId,  //任务ID
           images: []
@@ -116,6 +129,8 @@
         });
         uploadRepairsTaskPhoto(photoMsg)
         .then((res) => {
+          this.showLoadingHint = false;
+          this.overlayShow = false;
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
             this.rewrite ();
@@ -129,7 +144,9 @@
             message: `${err.message}`,
             closeOnPopstate: true
           }).then(() => {
-          })
+          });
+          this.showLoadingHint = false;
+          this.overlayShow = false
         })
         console.log('sas1',this.currentElectronicSignature);
       },
@@ -193,10 +210,11 @@
     .loading {
       position: absolute;
       top: 280px;
-      left: 13%;
+      left: 0;
       width: 100%;
       height: 100px;
       text-align: center;
+      z-index: 10
     };
     .worker-show {
       .content-wrapper();
@@ -209,7 +227,7 @@
       .content-bottom {
         width: 90%;
         margin: 0 auto;
-        height: 300px;
+        height: 150px;
         margin-top: 20px;
         position: relative;
         > span {
@@ -224,17 +242,18 @@
           &:first-child {
             background: #2c65f7;
             color: #fff;
-            top: 55px
+            top: 0
           };
           &:nth-child(2) {
             border: 1px solid #7198fa;
             color: #7198fa;
-            bottom: 105px
+            bottom: 53px;
+            box-sizing: border-box
           }
           &:last-child {
             background: #999ea1;
             color: #fff;
-            bottom: 10px
+            bottom: 1px
           }
         }
       }

@@ -98,17 +98,19 @@
         <p class="back-home"  @click="fillConsumable" v-show="!showUploadPhoto && repairsWorkOrderMsg.state !== 4 && repairsWorkOrderMsg.state !== 5">填写耗材</p>
         <p class="quit-account" @click="completeTask">完成工单</p>
       </div>
-      <div class="choose-photo-box" v-show="photoBox">
-        <div class="photo-graph">
-          <van-icon name="photograph" />
-          <input name="uploadImg2" id="demo2"  @change="previewFileTwo" type="file" accept="image/camera"/>拍照
+      <transition name="van-slide-up">
+        <div class="choose-photo-box" v-show="photoBox">
+          <div class="photo-graph">
+            <van-icon name="photograph" />
+            <input name="uploadImg2" id="demo2"  @change="previewFileTwo" type="file" accept="image/camera"/>拍照
+          </div>
+          <div class="choose-photo">
+            <van-icon name="photo" />
+            <input name="uploadImg1" id="demo1" @change="previewFileOne" type="file" accept="image/album"/>去相册选择
+          </div>
+          <div class="photo-cancel" @click="photoCancel">取消</div>
         </div>
-        <div class="choose-photo">
-          <van-icon name="photo" />
-          <input name="uploadImg1" id="demo1" @change="previewFileOne" type="file" accept="image/album"/>去相册选择
-        </div>
-        <div class="photo-cancel" @click="photoCancel">取消</div>
-      </div>
+      </transition>
     </div>
     <van-dialog v-model="enlargeImgShow" width="90%">
       <img :src="enlargeImgUrl">
@@ -620,8 +622,8 @@
       completeTask () {
         if (this.repairsWorkOrderMsg.state == 4) {
           this.$router.push({path: 'workOrderSignature'});
-          this.changeTitleTxt({tit:'签字'});
-          setStore('currentTitle','签字')
+          this.changeTitleTxt({tit:'工单完成签名'});
+          setStore('currentTitle','工单完成签名')
         } else {
           this.$toast('任务状态为待签字时才能完成任务');
         }
@@ -888,7 +890,7 @@
           *zoom: 1;
           /deep/ .van-icon {
             vertical-align: middle;
-            margin-top: -4px;
+            margin-top: 0;
             font-size: 20px
           };
           input {
@@ -905,16 +907,16 @@
         .photo-graph {
           position: relative;
           display: inline-block;
-          padding: 8px 12px;
+          height: 50px;
           overflow: hidden;
          .bottom-border-1px(#cbcbcb);
           color: #2c65f7;
           text-decoration: none;
           text-indent: 0;
-          line-height: 30px;
+          line-height: 50px;
           /deep/ .van-icon {
             vertical-align: middle;
-            margin-top: -2px;
+            margin-top: 1px;
             font-size: 20px
           };
           input {
@@ -930,13 +932,13 @@
           position: relative;
           width: 100%;
           display: inline-block;
-          padding: 8px 12px;
+          padding: 8px 0;
           overflow: hidden;
           color: #2c65f7;
           text-decoration: none;
           text-indent: 0;
           line-height: 30px;
-          font-weight: 600
+          font-weight: bold
         }
       }
     }

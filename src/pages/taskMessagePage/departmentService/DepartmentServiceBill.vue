@@ -24,6 +24,7 @@
         </div>
       </div>
       <div class="content-bottom">
+        <p class="back-home"  @click="fillConsumable" v-show="showFillConsumable">填写耗材</p>
         <p class="quit-account" @click="sure">确认</p>
       </div>
     </div>
@@ -55,6 +56,7 @@
     data() {
       return {
         issueShow: false,
+        showFillConsumable: false,
         currentDepartmentId: '',
         currentDepartmentName: '',
         consumableMsgList: []
@@ -179,6 +181,13 @@
           this.$toast(`${err}`)
         }
       },
+
+       // 填写耗材
+      fillConsumable () {
+        this.$router.push({path: 'departmentServiceFillConsumable'});
+        this.changeTitleTxt({tit:'填写耗材'});
+        setStore('currentTitle','填写耗材')
+      },
       
       // 查询检查项
       getExamineItems (data) {
@@ -256,7 +265,7 @@
       },
 
       // 存储完成问题上报的检查项信息
-      storageCompleteCheckItemInfo () {
+      storageCompleteCheckItemInfo (number) {
         let temporaryOfficeList = [];
         let temporaryDepartmentId = [];
         temporaryOfficeList = deepClone(this.completeDepartmentServiceCheckedItemList);
@@ -266,16 +275,16 @@
             temporaryDepartmentId = temporaryOfficeList[temporaryIndex]['officeList'];
             // 存储问题的解决方式
             let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
-            // 删除重复的id
+            // 删除重复存的id
             temporaryDepartmentId = temporaryDepartmentId.filter((item) => {return item.id !== this.currentDepartmentServiceCheckedItemId.id});
-            temporaryCheckItemInfo['checkResult'] = 0;
+            temporaryCheckItemInfo['checkResult'] = number;
             this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
             temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
             temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId)
           } else {
             // 存储问题的解决方式
             let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
-            temporaryCheckItemInfo['checkResult'] = 0;
+            temporaryCheckItemInfo['checkResult'] = nember;
             this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
             temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
             temporaryOfficeList.push(
@@ -288,7 +297,7 @@
         } else {
           // 存储问题的解决方式
           let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
-          temporaryCheckItemInfo['checkResult'] = 0;
+          temporaryCheckItemInfo['checkResult'] = number;
           this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
           temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
           temporaryOfficeList.push(
@@ -311,7 +320,7 @@
         if (type == 'right') {
           this.changeCurrentDepartmentServiceCheckedItemId({id: item.itemId,type:'right'});
           setStore("checkedItemId",{id: item.itemId,type:'right'});
-          this.storageCompleteCheckItemInfo();
+          this.storageCompleteCheckItemInfo(0);
           this.consumableMsgList[index].right = !this.consumableMsgList[index].right;
           if (this.consumableMsgList[index].error == true) {
             this.consumableMsgList[index].error = false
@@ -325,11 +334,12 @@
           };
           this.issueShow = true
         };
+        this.showFillConsumable = false;
         // 重新查询检查项并给相关字段赋值
         this.getExamineItems({
           proId: this.proId,
           depId: this.currentDepartmentId
-        })
+        });
         console.log(this.consumableMsgList);
       },
 
@@ -342,9 +352,13 @@
 
       // 不上报问题弹框
       noReportProblem () {
-        this.$router.push({path: 'departmentServiceFillConsumable'});
-        this.changeTitleTxt({tit:'填写耗材'});
-        setStore('currentTitle','填写耗材')
+        this.storageCompleteCheckItemInfo(1);
+        this.showFillConsumable = true;
+        // 重新查询检查项并给相关字段赋值
+        this.getExamineItems({
+          proId: this.proId,
+          depId: this.currentDepartmentId
+        })
       },
 
       // 存储完成巡检的科室编号

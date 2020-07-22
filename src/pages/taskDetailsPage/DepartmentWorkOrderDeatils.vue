@@ -192,6 +192,10 @@
 
       // 扫一扫
       fillConsumable () {
+        if (this.oneRepairsMsg.spaces.every((item) => {return item.checked == true})) {
+          this.$toast('该任务下所有科室都已完成检修,不能执行该操作');
+          return
+        };
         if (this.departmentServiceMsg.state == 3) {
           this.$toast('该任务状态为待签字,不能执行该操作');
           return
@@ -336,8 +340,8 @@
         };
         if (this.departmentServiceMsg.state == 3) {
           this.$router.push({path: 'departmentServiceSignature'});
-          this.changeTitleTxt({tit:'签字'});
-          setStore('currentTitle','签字');
+          this.changeTitleTxt({tit:'巡检签名'});
+          setStore('currentTitle','巡检签名');
           return
         };
         updateDepartmentServiceTaskBeSigned(this.proId, this.taskId).then((res) => {

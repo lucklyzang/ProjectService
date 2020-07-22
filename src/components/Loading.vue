@@ -1,5 +1,5 @@
 <template>
-  <div class="loading-hint" v-show="isShow">
+  <div class="loading-hint" v-if="isShow">
     <van-loading :size="size" :type="typeShape" :text-size="textSize" vertical :color="textColor">
       {{textContent}}
     </van-loading>
