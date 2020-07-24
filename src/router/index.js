@@ -127,21 +127,23 @@ let router = new Router({
     }
   }
 });
-// router.beforeEach((to, from, next) => {
-//   if (getStore('isLogin')) {
-//     if (to.name === 'login') {
-//       // 判断登录方式(用户名密码登录或扫码登录)PadDispatchTaskCancelForm
-//       if (getStore('userName') && getStore('userPassword')) {
-//         next({path: '/home'})
-//       } else {
-//         next()
-//       }
-//     } else {
-//       next()
-//     }
-//   } else {
-//     next()
-//   }
-// });
+
+router.beforeEach((to, from, next) => {
+  let login = getStore('isLogin');
+  let name = to.name;
+  if (name === 'login') {
+    if (login) {
+      next({path: '/home'})
+    } else {
+      next()
+    }
+  } else {
+    if (login) {
+      next()
+    } else {
+      next({path: '/'})
+    }
+  }
+});
 export default router
 

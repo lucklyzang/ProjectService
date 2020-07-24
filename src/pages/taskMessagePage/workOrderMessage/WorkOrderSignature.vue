@@ -115,7 +115,7 @@
           return
         };
         this.$refs.contentTop.style.zIndex = 0;
-        this.loadinText = '上报中,请稍等···';
+        this.loadinText = '上传中,请稍等···';
         this.showLoadingHint = true;
         this.overlayShow = true;
         let photoMsg = {

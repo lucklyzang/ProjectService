@@ -117,7 +117,7 @@
           return
         };
         this.$refs.contentTop.style.zIndex = 0;
-        this.loadinText = '上报中,请稍等···';
+        this.loadinText = '上传中,请稍等···';
         this.showLoadingHint = true;
         this.overlayShow = true;
         submitDepartMentServiceSignInfo({
@@ -148,7 +148,7 @@
       updateTaskComplete (proId,taskId) {
         updateDepartmentServiceTaskBeCompleted(proId,taskId).then((res) => {
           if(res && res.data.code == 200) {
-            // 删除当前任务存储的已完成的科室信息
+            // 删除当前任务存储的已完成巡检的科室信息
             this.$toast('该任务已完成');
             let temporaryInfo = this.completeDepartmentServiceOfficeInfo.filter((item) => { return item.taskId !== this.taskId});
             this.changeCompleteDepartmentServiceOfficeInfo(temporaryInfo);

@@ -34,6 +34,10 @@
       @cancel="reportProblem"
       >
     </van-dialog>
+     <van-dialog v-model="isBackShow"  title="返回上级将不会保存本科室检查结果,确定返回?" show-cancel-button
+        @confirm="isBackSure" @cancel="isBackCancel"
+      >
+    </van-dialog>
   </div>
 </template>
 <script>
@@ -56,6 +60,7 @@
     data() {
       return {
         issueShow: false,
+        isBackShow: false,
         showFillConsumable: false,
         currentDepartmentId: '',
         currentDepartmentName: '',
@@ -68,6 +73,13 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
+          pushHistory();
+          this.issueShow = false;
+          this.isBackShow = true;
+          if (this.isBackShow)  {
+            this.isBackShow = true;
+            return
+          };
           this.$router.push({path: 'departmentWorkOrderDeatils'});
           this.changeTitleTxt({tit:'工单详情'});
           setStore('currentTitle','工程详情')
@@ -86,6 +98,13 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
+          pushHistory();
+          this.issueShow = false;
+          this.isBackShow = true;
+          if (this.isBackShow)  {
+            this.isBackShow = true;
+            return
+          };
           this.$router.push({path: 'departmentWorkOrderDeatils'});
           this.changeTitleTxt({tit:'工单详情'});
           setStore('currentTitle','工程详情')
@@ -96,22 +115,6 @@
         proId: this.proId,
 		    depId: this.currentDepartmentId
       })
-    },
-
-    beforeRouteEnter (to, from, next){
-      let catch_components = store.state.catchComponent.catch_components;
-      let i = catch_components.indexOf('DepartmentServiceBill');
-      i === -1 && catch_components.push('DepartmentServiceBill');
-      next();
-    },
-
-    beforeRouteLeave(to, from, next) {
-      let catch_components = this.catch_components;
-      if (to.name !== 'departmentServiceIssueReport' && to.name !== 'departmentServiceFillConsumable'){
-        let i = catch_components.indexOf('DepartmentServiceBill');
-        i > -1 && this.changeCatchComponent([]);
-      }
-      next()
     },
     
     watch: {
@@ -163,9 +166,28 @@
 
       //返回上一页
       backTo () {
+        this.issueShow = false;
+        this.isBackShow = true;
+        if (this.isBackShow)  {
+          this.isBackShow = true;
+          return
+        };
         this.$router.push({path: 'departmentWorkOrderDeatils'});
         this.changeTitleTxt({tit:'工单详情'});
         setStore('currentTitle','工程详情')
+      },
+
+      // 确定返回
+      isBackSure () {
+        this.clearCheckedInfo();
+        this.$router.push({path: 'departmentWorkOrderDeatils'});
+        this.changeTitleTxt({tit:'工单详情'});
+        setStore('currentTitle','工程详情')
+      },
+
+      // 取消返回
+      isBackCancel () {
+        this.isBackShow = false
       },
 
       // 回显当前检修科室名称
@@ -211,27 +233,29 @@
               };
               // 为完成问题上报的巡检项增加标记
               if (this.completeDepartmentServiceCheckedItemList.length > 0) {
-                for (let w = 0, wLen = this.completeDepartmentServiceCheckedItemList.length; w < wLen; w++) {
-                  if (this.consumableMsgList.length > 0) {
-                    for (let n = 0, nLen = this.consumableMsgList.length; n < nLen; n++) {
-                      if (this.taskId == this.completeDepartmentServiceCheckedItemList[w]['taskId']) {
-                        if (this.completeDepartmentServiceCheckedItemList[w]['officeList'].length > 0) {
-                          for (let i = 0, len1 = this.completeDepartmentServiceCheckedItemList[w]['officeList'].length; i < len1; i++) {
-                            if (this.consumableMsgList[n]['itemId'] == this.completeDepartmentServiceCheckedItemList[w]['officeList'][i]['id']) {
-                              if (this.completeDepartmentServiceCheckedItemList[w]['officeList'][i]['type'] == "error") {
-                                this.consumableMsgList[n]['errorClicked'] = true;
-                                this.consumableMsgList[n]['rightClicked'] = false;
-                                this.consumableMsgList[n]['right'] = false;
-                                this.consumableMsgList[n]['error'] = true;
-                                this.consumableMsgList[n]['checkResult'] = this.completeDepartmentServiceCheckedItemList[w]['officeList'][i]['checkResult']
-                              } else {
-                                this.consumableMsgList[n]['errorClicked'] = false;
-                                this.consumableMsgList[n]['rightClicked'] = true;
-                                this.consumableMsgList[n]['right'] = true;
-                                this.consumableMsgList[n]['error'] = false;
-                                this.consumableMsgList[n]['checkResult'] = 0
-                              }
-                            }
+                let echoIndex = this.completeDepartmentServiceCheckedItemList.indexOf(this.completeDepartmentServiceCheckedItemList.filter((item) => {return item.taskId == this.taskId})[0]);
+                if (echoIndex == -1) { return };
+                if (this.completeDepartmentServiceCheckedItemList[echoIndex]['depId'] != this.currentDepartmentId) {
+                  this.clearCheckedInfo();
+                  return
+                };
+                if (this.consumableMsgList.length > 0) {
+                  for (let n = 0, nLen = this.consumableMsgList.length; n < nLen; n++) {
+                    if (this.completeDepartmentServiceCheckedItemList[echoIndex]['officeList'].length > 0) {
+                      for (let i = 0, len1 = this.completeDepartmentServiceCheckedItemList[echoIndex]['officeList'].length; i < len1; i++) {
+                        if (this.consumableMsgList[n]['itemId'] == this.completeDepartmentServiceCheckedItemList[echoIndex]['officeList'][i]['id']) {
+                          if (this.completeDepartmentServiceCheckedItemList[echoIndex]['officeList'][i]['type'] == "error") {
+                            this.consumableMsgList[n]['errorClicked'] = true;
+                            this.consumableMsgList[n]['rightClicked'] = false;
+                            this.consumableMsgList[n]['right'] = false;
+                            this.consumableMsgList[n]['error'] = true;
+                            this.consumableMsgList[n]['checkResult'] = this.completeDepartmentServiceCheckedItemList[echoIndex]['officeList'][i]['checkResult']
+                          } else {
+                            this.consumableMsgList[n]['errorClicked'] = false;
+                            this.consumableMsgList[n]['rightClicked'] = true;
+                            this.consumableMsgList[n]['right'] = true;
+                            this.consumableMsgList[n]['error'] = false;
+                            this.consumableMsgList[n]['checkResult'] = 0
                           }
                         }
                       }
@@ -280,17 +304,19 @@
             temporaryCheckItemInfo['checkResult'] = number;
             this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
             temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
-            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId)
+            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId);
+            temporaryOfficeList[temporaryIndex]['depId'] = this.currentDepartmentId
           } else {
             // 存储问题的解决方式
             let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
-            temporaryCheckItemInfo['checkResult'] = nember;
+            temporaryCheckItemInfo['checkResult'] = number;
             this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
             temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
             temporaryOfficeList.push(
               { 
                 officeList: repeArray(temporaryDepartmentId),
-                taskId: this.taskId
+                taskId: this.taskId,
+                depId: this.currentDepartmentId
               }
             )
           }
@@ -303,7 +329,8 @@
           temporaryOfficeList.push(
             { 
               officeList: repeArray(temporaryDepartmentId),
-              taskId: this.taskId
+              taskId: this.taskId,
+              depId: this.currentDepartmentId
             }
           )
         };

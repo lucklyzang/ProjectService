@@ -40,7 +40,8 @@
       </div>
       <div class="content-bottom" v-show="departmentServiceMsg.state !== 4">
         <p class="back-home"  @click="fillConsumable">扫一扫</p>
-        <p class="quit-account" @click="completeTask">完成巡检</p>
+        <p class="quit-account" v-show="departmentServiceMsg.state != 3" @click="completeTask">完成巡检</p>
+        <p class="quit-account" v-show="departmentServiceMsg.state == 3" @click="signatureClick">签字</p>
       </div>
     </div>
   </div>
@@ -103,8 +104,7 @@
         'userInfo',
         'isCurrentDepartmentServiceVerifySweepCode',
         'completeDepartmentServiceOfficeInfo',
-        'isDepartmentServiceVerifySweepCode',
-        'completeDepartmentServiceCheckedItemList'
+        'isDepartmentServiceVerifySweepCode'
       ]),
       userName () {
        return this.userInfo.userName
@@ -135,8 +135,7 @@
         'changeIsFreshDepartmentServicePage',
         'changeIsDepartmentServiceVerifySweepCode',
         'changeIsCurrentDepartmentServiceVerifySweepCode',
-        'changeDepartmentServiceOfficeId',
-        'changeCompleteDepartmentServiceCheckedItemList'
+        'changeDepartmentServiceOfficeId'
       ]),
 
       //返回上一页
@@ -237,15 +236,12 @@
           if (codeData.length > 0) {
             this.departmentId = codeData[0];
             this.departmentNo = codeData[1];
-            // 如果当前扫码科室是第一次扫码，则清除上一科室保存的已完成检查的检查项信息
-            let isExistTaskId = '',
-            isExistOfficeId = '';
-            isExistTaskId = this.isDepartmentServiceVerifySweepCode.indexOf(this.isDepartmentServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
-            if (isExistTaskId != -1) {
-              isExistOfficeId = this.isDepartmentServiceVerifySweepCode[isExistTaskId]['officeList'].indexOf( this.departmentNo);
-            };
-            if (isExistTaskId !== -1 && isExistOfficeId == -1) {
-              this.clearCheckedInfo()
+            // 如果当前科室已完成检查结果上报,则禁止在次校验
+            let temporaryFlagOne = this.oneRepairsMsg.spaces.filter((item) => {return item.checked == true});
+            let temporaryFlagTwo = temporaryFlagOne.some((item) => {return item.depNo == this.departmentNo});
+            if (temporaryFlagTwo) {
+              this.$toast('当前扫码科室巡检已完成,禁止此操作');
+              return
             };
             this.juddgeCurrentDepartment({
               id: this.taskId,  //任务ID
@@ -261,13 +257,6 @@
             this.fillConsumable()
           });
         }
-      },
-
-      // 清除当前房间存储的检查项信息
-      clearCheckedInfo () {
-        let temporaryInfo = this.completeDepartmentServiceCheckedItemList.filter((item) => { return item.taskId !== this.taskId});
-        this.changeCompleteDepartmentServiceCheckedItemList(temporaryInfo);
-        setStore('isCompleteDepartmentServiceCheckedItemList', {"sweepCodeInfo": temporaryInfo});
       },
 
       // 存储扫码校验通过的科室编号
@@ -331,17 +320,18 @@
         setStore('isCurrentDepartmentServiceVerifySweepCode', {"number": temporaryDepartmentNumber})
       },
 
+      // 签字
+      signatureClick () {
+        this.$router.push({path: 'departmentServiceSignature'});
+        this.changeTitleTxt({tit:'巡检签名'});
+        setStore('currentTitle','巡检签名')
+      },
+
       // 完成巡检
       completeTask () {
         let flag = this.oneRepairsMsg.spaces.some((item) => { return item.checked == false});
         if (flag) {
           this.$toast('请完成所有房间的巡检');
-          return
-        };
-        if (this.departmentServiceMsg.state == 3) {
-          this.$router.push({path: 'departmentServiceSignature'});
-          this.changeTitleTxt({tit:'巡检签名'});
-          setStore('currentTitle','巡检签名');
           return
         };
         updateDepartmentServiceTaskBeSigned(this.proId, this.taskId).then((res) => {

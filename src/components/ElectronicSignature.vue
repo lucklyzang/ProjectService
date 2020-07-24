@@ -57,6 +57,7 @@ import { base64ImgtoFile } from '@/common/js/utils'
       this.ctx = board.getContext('2d');  // 二维绘图
       this.ctx.strokeStyle = '#000';  // 颜色
       this.ctx.lineWidth = 2; // 线条宽度
+      this.changeCurrentElectronicSignature({DtMsg: this.$refs.board.toDataURL("image/png")});
       this.changeOriginalSignature(this.$refs.board.toDataURL("image/png"));
     },
      computed:{

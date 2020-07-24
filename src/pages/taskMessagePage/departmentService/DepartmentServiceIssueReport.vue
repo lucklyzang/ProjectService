@@ -322,7 +322,8 @@
             temporaryCheckItemInfo['checkResult'] = 2;
             this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
             temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
-            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId)
+            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId);
+            temporaryOfficeList[temporaryIndex]['depId'] = this.currentDepartmentId
           } else {
             // 存储问题的解决方式
             let temporaryCheckItemInfo = this.currentDepartmentServiceCheckedItemId;
@@ -332,7 +333,8 @@
             temporaryOfficeList.push(
               { 
                 officeList: repeArray(temporaryDepartmentId),
-                taskId: this.taskId
+                taskId: this.taskId,
+                depId: this.currentDepartmentId
               }
             )
           }
@@ -345,7 +347,8 @@
           temporaryOfficeList.push(
             { 
               officeList: repeArray(temporaryDepartmentId),
-              taskId: this.taskId
+              taskId: this.taskId,
+              depId: this.currentDepartmentId
             }
           )
         };

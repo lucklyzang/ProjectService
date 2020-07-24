@@ -23,11 +23,11 @@
         </p>
       </div>
     </div>
-    <div class="btn-box" @click="login">
+    <div class="btn-box" @click="loginEvent">
       <img :src="loginBtnPng" alt="">
     </div>
     <div class="loading-btn">
-      <loading :isShow="showLoadingHint" textContent="登录中,请稍候····" textColor="#2895ea"></loading>
+      <loading :isShow="showLoadingHint" :textContent="loadingText" textColor="#2895ea"></loading>
     </div>
   </div>
 </template>
@@ -48,31 +48,23 @@ export default {
     return {
       username: '',
       password: '',
+      loadingText: '登录中,请稍候···',
       showAccountLogin: true,
       showLoadingHint: false,
-      proId: '',
       logoTopPng: require('@/components/images/logo-top.png'),
-      loginBtnPng: require('@/components/images/login-btn.png'),
-    };
+      loginBtnPng: require('@/components/images/login-btn.png')
+    }
   },
 
   watch: {
   },
 
   computed: {
-    loginName () {
-      return getStore('userName') ? getStore('userName') : ''
-    },
-    loginPassword () {
-      return getStore('userPassword') ? getStore('userPassword') : ''
-    },
     ...mapGetters([
     ])
   },
 
   mounted () {
-    this.username = getStore('userName') ? getStore('userName') : '';
-    this.password = getStore('userPassword') ? getStore('userPassword') : '';
     // 控制设备物理返回按键
     if (!IsPC()) {
       let that = this;
@@ -82,7 +74,7 @@ export default {
         this.$router.push({path: '/'});  //输入要返回的上一级路由地址
       });
     };
-
+    this.echoUserInfo();
     // 监控键盘弹起
     let originalHeight = document.documentElement.clientHeight || document.body.clientHeight;
     window.onresize = ()=>{
@@ -100,67 +92,86 @@ export default {
   methods: {
     ...mapMutations([
       'storeUserInfo',
-      'changeTitleTxt'
+      'changeTitleTxt',
+      'changeOverDueWay'
     ]),
 
-    // 账号密码登录方法
+    // 回显用户名和密码
+    echoUserInfo () {
+      this.username = getStore('userName') ? getStore('userName') : '';
+      this.password = getStore('userPassword') ? getStore('userPassword') : '';
+    },
+
+    // 登录验证方法
     login () {
-      this.$router.push({path:'/home'});
-      this.changeTitleTxt({tit:'工程管理系统'});
-      let loginMessage;
-      this.showLoadingHint = true;
-        loginMessage = {
+      return new Promise((resolve,reject) => {
+        this.showLoadingHint = true;
+        let loginMessage = {
           username: this.username,
           password: this.password,
           rememberMe: 1
         };
-      logIn(loginMessage).then((res)=>{
-        if (res) {
-          if (res.data.code == 200) {
-            // 重置过期方式
-            if (this.showAccountLogin) {
-              setStore('userName', this.username);
-              setStore('userPassword', this.password);
-            };
-            // 登录用户名密码及用户信息存入Locastorage
-            setStore('userInfo', res.data.data);
-            setStore('isLogin', true);
-            // 用户身份类别存入store和Locastorage
-            this.storeUserInfo(JSON.parse(getStore('userInfo')));
-            this.proId = res.data.data['proId'];
-            this.queryDepartmentMsg(res.data.data.proId)
-          } else {
-             this.$dialog.alert({
-              message: `${res.data.msg}`,
-              closeOnPopstate: true
-            }).then(() => {
-            });
-          }
-        };
-        this.showLoadingHint = false
-      })
-      .catch((err) => {
-        this.showLoadingHint = false;
-        this.$dialog.alert({
-          message: `${err.message}`,
-          closeOnPopstate: true
-        }).then(() => {
+        logIn(loginMessage).then((res)=>{
+          if (res) {
+            if (res.data.code == 200) {
+              // 重置过期方式
+              this.changeOverDueWay(false);
+              setStore('storeOverDueWay',false);
+              // 存储用户名和密码
+              if (this.showAccountLogin) {
+                setStore('userName', this.username);
+                setStore('userPassword', this.password);
+              };
+              // 存储用户相关的登录后的信息和是否登录
+              setStore('userInfo', res.data.data);
+              setStore('isLogin', true);
+              // 用户相关的登录后的信息存入store
+              this.storeUserInfo(JSON.parse(getStore('userInfo')));
+              resolve(res.data.data.proId)
+            } else {
+              this.$toast(`${res.data.msg}`)
+            }
+          };
+          this.showLoadingHint = false
+        })
+        .catch((err) => {
+          this.showLoadingHint = false;
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
         })
       })
     },
 
     // 获取科室信息字典值
     queryDepartmentMsg (proId) {
-      getDepartmentMsg(proId).then((res) => {
-        if (res && res.data.code == 200) {
-          this.$router.push({path:'/home'});
-          this.changeTitleTxt({tit:'工程管理系统'});
-          setStore('departmentMessage', res.data.data);
-          window.location.reload()
-        }
+      return new Promise((resolve,reject) => {
+        getDepartmentMsg(proId).then((res) => {
+          if (res && res.data.code == 200) {
+            resolve(res.data.data)
+          } else {
+            this.$toast(`${res.data.msg}`)
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
       })
-      .catch((err) => {
-      })
+    },
+
+    async loginEvent () {
+      const resultOne = await this.login();
+      const resultTwo = await this.queryDepartmentMsg(resultOne);
+      this.$router.push({path:'/home'});
+      this.changeTitleTxt({tit:'工程管理系统'});
+      setStore('departmentMessage', resultTwo);
+      window.location.reload()
     }
   } 
 }
