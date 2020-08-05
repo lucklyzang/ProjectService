@@ -32,7 +32,7 @@
         </div>
       </div>
       <div class="content-bottom">
-        <p class="back-home"  @click="addConsumable">添加物质</p>
+        <p class="back-home"  @click="addConsumable">添加物资</p>
         <p class="quit-account" @click="sure">确认</p>
       </div>
     </div>
@@ -68,10 +68,6 @@
             </div>
           </div>
     </van-dialog>
-     <van-dialog v-model="isFinishShow"  title="是否还有地点未完成" show-cancel-button
-        @confirm="isFinishSure" @cancel="isFinishCancel"
-      >
-    </van-dialog>
   </div>
 </template>
 <script>
@@ -94,7 +90,6 @@
     data() {
       return {
         toolShow: false,
-        isFinishShow: false,
         searchValue: '',
         consumableMsgList: [],
         inventoryMsgList: [],
@@ -107,10 +102,6 @@
         pushHistory();
         this.gotoURL(() => {
           pushHistory();
-          if (this.isFinishShow)  {
-            this.isFinishShow = true;
-            return
-          };
           this.$router.push({path: 'workOrderDetails'});
           this.changeTitleTxt({tit:'工单详情'});
           setStore('currentTitle','工单详情')
@@ -294,7 +285,7 @@
         saveMate(mateMsg).then((res) => {
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
-            this.isFinishShow = true
+            this.backTo()
           } else {
             this.$toast(`${res.data.msg}`)
           }
@@ -306,47 +297,6 @@
           }).then(() => {
           })
         })
-      },
-
-      // 是否还有地点未完成确认
-      isFinishSure () {
-        this.$router.push({path: 'repairsWorkOrder'});
-        this.changeTitleTxt({tit:'报修工单'});
-        setStore('currentTitle','报修工单')
-      },
-
-      // 是否还有地点未完成取消
-      isFinishCancel () {
-        completeRepairsTask({
-          proId: this.proId,
-          taskId: this.taskId
-        })
-        .then((res) => {
-          if (res && res.data.code == 200) {
-            this.$toast(`${res.data.msg}`);
-            this.clearStoragePhoto();
-            this.$router.push({path: 'repairsWorkOrder'});
-            this.changeTitleTxt({tit:'报修工单'});
-            setStore('currentTitle','报修工单')
-          } else {
-            this.$toast(`${res.data.msg}`);
-          }
-        })
-        .catch((err) => {
-          this.$dialog.alert({
-            message: `${err.message}`,
-            closeOnPopstate: true
-          }).then(() => {
-          })
-        })
-      },
-
-      // 清除该任务存储的照片信息
-      clearStoragePhoto () {
-        if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
-        let temporaryPhotoList = this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId !== this.taskId});
-        this.changeIsCompletePhotoList(temporaryPhotoList);
-        setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
       },
 
       // 存储已完成检修的房间信息

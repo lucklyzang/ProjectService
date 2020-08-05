@@ -521,6 +521,7 @@ export const removeAllLocalStorage = () => {
   removeStore('isLogin');
   removeStore('userType');
   removeStore('completPhotoInfo'),
+  removeStore('isFillMaterialList');
   removeStore('isDepartmentServiceVerifySweepCode'),
   removeStore('isCurrentDepartmentServiceVerifySweepCode'),
   removeStore('isCompleteDepartmentServiceOfficeInfo'),

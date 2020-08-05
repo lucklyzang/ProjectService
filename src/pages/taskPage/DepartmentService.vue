@@ -26,7 +26,7 @@
             </p>
             <p class="work-order-number">
               <span class="tit">巡检单号:</span>
-              <span class="name">{{item.taskNumber}}</span>
+              <span class="name ">{{item.taskNumber}}</span>
             </p>
             <p class="work-info-other">
               <span class="tit">巡检:</span>
@@ -502,7 +502,13 @@
           };
           .work-order-number {
             font-size: 14px;
-            color: #bbbaba
+            color: #bbbaba;
+            .name {
+              width: 70%;
+              display: inline-block;
+              overflow: auto;
+              vertical-align: top
+            }
           };
           .work-info-other-row {
             display: inline-block;

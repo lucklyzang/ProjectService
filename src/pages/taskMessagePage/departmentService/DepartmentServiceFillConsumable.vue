@@ -32,7 +32,7 @@
         </div>
       </div>
       <div class="content-bottom">
-        <p class="back-home"  @click="addConsumable">添加物质</p>
+        <p class="back-home"  @click="addConsumable">添加物资</p>
         <p class="quit-account" @click="sure">确认</p>
       </div>
     </div>

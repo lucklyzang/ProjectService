@@ -367,6 +367,7 @@
           depId: this.currentDepartmentId,      //科室ID   必输
           workerId: this.workerId,   //上报人ID，及当前登录用户ID 必输
           workerName: "",  //当前登录用户名 非必输
+          space: this.pointName,
           proId: this.proId,      //项目ID 必输
           images: this.issueImageList // 问题图片信息 非必输
         }

@@ -2,32 +2,20 @@
   <div id="LoginBox">
     <div class="bg-icon-wrapper" ref="bgIconWrapper">
       <div class="bg-icon">
-        <h3>登录</h3>
+        <img :src="logoTopPng" alt="">
       </div>
     </div>
     <div class="input-box"  ref="inputBox">
-      <div>
-        <p>
-          账号
-        </p>
-        <p>
-          <van-field type="text"  placeholder="请输入用户名" v-model="username"></van-field>
-        </p>
-      </div>
-      <div>
-        <p>
-          密码
-        </p>
-        <p>
-          <van-field type="password" placeholder="请输入密码" v-model="password"></van-field>
-        </p>
-      </div>
+      <van-cell-group>
+        <van-field label="用户名"  left-icon="contact" placeholder="请输入用户名" type="text" v-model="username"></van-field>
+        <van-field label="密码" left-icon="bag-o" placeholder="请输入密码" type="password" v-model="password"></van-field>
+      </van-cell-group>
     </div>
     <div class="btn-box" @click="loginEvent">
       <img :src="loginBtnPng" alt="">
     </div>
     <div class="loading-btn">
-      <loading :isShow="showLoadingHint" :textContent="loadingText" textColor="#2895ea"></loading>
+      <loading :isShow="showLoadingHint" textContent="登录中,请稍候····" textColor="#2895ea"></loading>
     </div>
   </div>
 </template>
@@ -180,53 +168,20 @@ export default {
 @import "../common/stylus/variable.less";
 @import "../common/stylus/mixin.less";
 @import "../common/stylus/modifyUi.less";
-  #LoginBox {
+   #LoginBox {
     .content-wrapper();
     .input-box {
       width: 100%;
       height: 190px;
+      padding-top: 50px;
       box-sizing: border-box;
-      > div {
-        width: 85%;
-        margin: 0 auto;
-        height: 50px;
-        margin-bottom: 20px;
-        position: relative;
-        > p {
-          font-size: 18px;
-          position: absolute;
-          top: 0;
-          display: inline-block;
-          height: 50px;
-          &:first-child {
-            left: 0;
-            line-height: 50px;
-            width: 20%
-          };
-          &:last-child {
-            right: 0;
-            width: 80%;
-            /deep/ .van-cell {
-              border: 1px solid #cdcdcd;
-              height: 100%;
-              padding: 0;
-              .van-cell__value {
-                .van-field__body {
-                  height: 100%;
-                  padding-left: 8px
-                }
-              }
-            }
-          }
-        }
-      }
     }
     .loading-btn {
       width: 100%;
       height: 50px;
     }
    .btn-box {
-      width: 85%;
+      width: 80%;
       height: 140px;
       margin: 0 auto;
       img {
@@ -242,11 +197,27 @@ export default {
       .bg-icon {
         width: 100%;
         height: 100%;
-        h3 {
-          font-size: 20px;
-          font-weight: bold;
-          line-height: 50px;
-          text-align: center
+        display: inline-block;
+        img {
+          width: 100%;
+          height: 100%
+        }
+      }
+    }
+    .van-hairline--top-bottom::after {
+      display: none
+    }
+    .van-cell-group {
+      width: 80%;
+      margin: 0 auto;
+      font-size: 14px;
+      .van-cell {
+        border-bottom: 1px solid #e8e8e8;
+        padding-left: 0;
+        .van-cell__title {
+          .van-field__label {
+            color: #6a6a6a
+          }
         }
       }
     }

@@ -270,6 +270,8 @@
               startDate	: '',
               endDate : ''
             },0)
+          } else {
+            this.$toast(`${res.data.msg}`)
           }
         })
         .catch((err) => {
@@ -627,7 +629,13 @@
           };
           .work-order-number {
             font-size: 14px;
-            color: #bbbaba
+            color: #bbbaba;
+            .name {
+              width: 70%;
+              display: inline-block;
+              overflow: auto;
+              vertical-align: top
+            }
           }
           &:last-child {
             margin-bottom: 0

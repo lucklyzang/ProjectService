@@ -26,9 +26,9 @@
         <p class="content-middle-title">任务看板</p>
         <ul class="content-middle-task-name">
           <li v-for="(item,index) in taskList" :key="index" @click="taskClickEvent(item,index)">
-            <span class="task-length" v-show="index == 0">{{repairsWorkerOrderCount}}</span>
-            <span class="task-length" v-show="index == 1">{{deviceServiceCount}}</span>
-            <span class="task-length" v-show="index == 2">{{departmentServieCount}}</span>
+            <span class="task-length" v-show="index == 0 && repairsWorkerOrderCount != 0 ">{{repairsWorkerOrderCount}}</span>
+            <span class="task-length" v-show="index == 1 && deviceServiceCount != 0 ">{{deviceServiceCount}}</span>
+            <span class="task-length" v-show="index == 2 && departmentServieCount != 0">{{departmentServieCount}}</span>
             <p class="task-button-wrapper">
               <img :src="btnTaskWrapperPng" alt="">
             </p>
@@ -71,6 +71,7 @@
   import { mapGetters, mapMutations } from 'vuex'
   import {queryTaskCount} from '@/api/worker.js'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  let windowTimer
   export default {
     name: 'home',
     components:{
@@ -83,6 +84,8 @@
     data() {
       return {
         btnIndex: 0,
+        noDataShow: false,
+        showLoadingHint: false,
         repairsWorkerOrderCount: '',
         deviceServiceCount: '',
         departmentServieCount: '',
@@ -109,6 +112,12 @@
         this.gotoURL(() => { 
         })
       };
+      if (!windowTimer) {
+        windowTimer = window.setInterval(() => {
+          setTimeout(this.getTaskCount(this.proId,this.workerId), 0)
+        }, 3000);
+        this.changeGlobalTimer(windowTimer)
+      };
       this.getTaskCount(this.proId,this.workerId)
     },
     
@@ -118,7 +127,8 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
-        'userInfo'
+        'userInfo',
+        'globalTimer'
       ]),
       userName () {
        return this.userInfo.userName
@@ -155,7 +165,8 @@
       ...mapMutations([
         'changeTitleTxt',
         'changeIsFreshRepairsWorkOrderPage',
-        'changeIsFreshDepartmentServicePage'
+        'changeIsFreshDepartmentServicePage',
+        'changeGlobalTimer'
       ]),
 
       juddgeIspc () {
@@ -165,6 +176,10 @@
       // 查询任务数量
       getTaskCount (proId,workerId) {
         queryTaskCount(proId,workerId).then((res) => {
+          // token过期,清除定时器
+          if (!res['headers']['token']) {
+            if(windowTimer) {window.clearInterval(windowTimer)}
+          };
           if (res && res.data.code == 200) {
             this.repairsWorkerOrderCount = res.data.data.bxTask;
             this.deviceServiceCount = res.data.data.sxTask;
@@ -233,6 +248,10 @@
         // 重新存入当前报修工单上传的图片
         if (getStore('completPhotoInfo')) {
           this.$store.commit('changeIsCompletePhotoList', JSON.parse(getStore('completPhotoInfo'))['photoInfo']);
+        };
+        // 重新存入当前是否填写过耗材
+        if (getStore('isFillMaterialList')) {
+          this.$store.commit('changeisFillMaterialList', JSON.parse(getStore('isFillMaterialList'))['number']);
         };
         // 重新存入科室巡检信息
         if (getStore('departmentServiceMsg')) {

@@ -3,13 +3,15 @@ export default {
     isFreshRepairsWorkOrderPage: true,
     repairsWorkOrderMsg: '',
     completeRoomList: [],
+    isFillMaterialList: [],
     isCompleteRepairsWorkOrderPhotoList: []
   },
   getters:{
     isFreshRepairsWorkOrderPage: state => state.isFreshRepairsWorkOrderPage,
     repairsWorkOrderMsg: state => state.repairsWorkOrderMsg,
     completeRoomList: state => state.completeRoomList,
-    isCompleteRepairsWorkOrderPhotoList: state => state.isCompleteRepairsWorkOrderPhotoList
+    isCompleteRepairsWorkOrderPhotoList: state => state.isCompleteRepairsWorkOrderPhotoList,
+    isFillMaterialList: state => state.isFillMaterialList
   },
   mutations:{
     // 改变是否刷新任务首页的状态
@@ -28,6 +30,10 @@ export default {
     changeIsCompletePhotoList (state, playLoad) {
       state.isCompleteRepairsWorkOrderPhotoList = playLoad
     },
+    // 改变是否填写耗材的状态
+     changeisFillMaterialList (state, playLoad) {
+      state.isFillMaterialList = playLoad
+    }
   },
   actions:{}
 }

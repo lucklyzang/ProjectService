@@ -94,9 +94,9 @@
         </p>
       </div>
       <div class="content-bottom" ref="contentBottom" v-show="repairsWorkOrderMsg.state !== 5">
-        <p class="back-home"  @click="uploadPhoto" v-show="showUploadPhoto">确定</p>
-        <p class="back-home"  @click="fillConsumable" v-show="!showUploadPhoto && repairsWorkOrderMsg.state !== 4 && repairsWorkOrderMsg.state !== 5">填写耗材</p>
-        <p class="quit-account" @click="completeTask">完成工单</p>
+        <p class="back-home" @click="fillConsumable" v-show="repairsWorkOrderMsg.state !== 4 && isChangeConsumableShow">修改耗材</p>
+        <p class="back-home"  @click="fillConsumable" v-show="repairsWorkOrderMsg.state !== 4 && !isChangeConsumableShow">填写耗材</p>
+        <p class="quit-account" @click="completeTask">{{repairsWorkOrderMsg.state == 4 ? "签字" : "完成工单"}}</p>
       </div>
       <transition name="van-slide-up">
         <div class="choose-photo-box" v-show="photoBox">
@@ -115,6 +115,10 @@
     <van-dialog v-model="enlargeImgShow" width="90%">
       <img :src="enlargeImgUrl">
     </van-dialog>
+    <van-dialog v-model="isFinishShow"  title="确定完成?" show-cancel-button
+        @confirm="isFinishSure" @cancel="isFinishCancel"
+      >
+    </van-dialog>
   </div>
 </template>
 <script>
@@ -125,7 +129,7 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import {queryOneRepairsProject,uploadRepairsTaskPhoto,queryRepairsTaskPhoto} from '@/api/worker.js'
+  import {queryOneRepairsProject,uploadRepairsTaskPhoto,queryRepairsTaskPhoto,completeRepairsTask} from '@/api/worker.js'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, deepClone, compress } from '@/common/js/utils'
   export default {
     name: 'WorkOrderDetails',
@@ -138,9 +142,10 @@
     data() {
       return {
         photoBox: false,
+        isFinishShow: false,
+        isChangeConsumableShow: false,
         showLoadingHint: false,
         overlayShow: false,
-        showUploadPhoto: false,
         imgType: '',
         photoType: '',
         loadinText: '',
@@ -161,6 +166,10 @@
       // 控制设备物理返回按键测试
       if (!IsPC()) {
         pushHistory();
+        if (this.isFinishShow)  {
+          this.isFinishShow = true;
+          return
+        };
         if (this.repairsWorkOrderMsg.state == 5) {
           this.changeIsFreshRepairsWorkOrderPage(false)
         } else {
@@ -185,8 +194,8 @@
         this.echoPhoto();
         this.getOneRepairsProjectNoComplete(this.taskId)
       };
+      this.echoIsMaterial();
       this.changeElementSite();
-      console.log('sasas',this.isCompleteRepairsWorkOrderPhotoList);
     },
     
     watch: {
@@ -194,10 +203,8 @@
         handler(newValue,oldValue) {
           if (newValue.length == 0) {
             if (this.completeImageList.length == 0) {
-              this.showUploadPhoto = false
             }
           } else {
-            this.showUploadPhoto = true
           }
         },
         immediate: true,
@@ -207,10 +214,8 @@
         handler(newValue,oldValue) {
           if (newValue.length == 0) {
             if (this.issueImageList.length == 0) {
-              this.showUploadPhoto = false
             }
           } else {
-            this.showUploadPhoto = true
           }
         },
         immediate: true,
@@ -223,7 +228,8 @@
         'navTopTitle',
         'repairsWorkOrderMsg',
         'userInfo',
-        'isCompleteRepairsWorkOrderPhotoList'
+        'isCompleteRepairsWorkOrderPhotoList',
+        'isFillMaterialList'
       ]),
       userName () {
        return this.userInfo.userName
@@ -252,7 +258,8 @@
       ...mapMutations([
         'changeTitleTxt',
         'changeIsFreshRepairsWorkOrderPage',
-        'changeIsCompletePhotoList'
+        'changeIsCompletePhotoList',
+        'changeisFillMaterialList'
       ]),
 
       //返回上一页
@@ -276,6 +283,54 @@
         } else {
           this.$refs.contentBottom.style.position = "relative"
         };
+      },
+
+      // 回显当前是否填写过耗材
+      echoIsMaterial () {
+        try {
+          if (this.isFillMaterialList.length == 0) { this.isChangeConsumableShow = false; return };
+          let echoIndex = this.isFillMaterialList.indexOf(this.isFillMaterialList.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (echoIndex == -1) { this.isChangeConsumableShow = false; return };
+          this.isChangeConsumableShow = this.isFillMaterialList[echoIndex]['isFilledMaterial']
+        } catch (err) {
+          this.$toast(`${err}`)
+        }
+      },
+
+      // 存储是否填写过耗材
+      storageIsMaterial () {
+        let temporaryDepartmentNumber = [];
+        temporaryDepartmentNumber = deepClone(this.isFillMaterialList);
+        if (temporaryDepartmentNumber.length > 0 ) {
+          let temporaryIndex = this.isFillMaterialList.indexOf(this.isFillMaterialList.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (temporaryIndex != -1) {
+            temporaryDepartmentNumber[temporaryIndex]['isFilledMaterial'] = true
+          } else {
+            temporaryDepartmentNumber.push(
+              { 
+                isFilledMaterial: true,
+                taskId: this.taskId
+              }
+            )
+          };
+        } else {
+          temporaryDepartmentNumber.push(
+            { 
+              isFilledMaterial:true,
+              taskId: this.taskId
+            }
+          )
+        };
+        this.changeisFillMaterialList(temporaryDepartmentNumber);
+        setStore('isFillMaterialList', {"number": temporaryDepartmentNumber})
+      },
+
+       // 清除该任务存储的是否填写耗材的状态
+      clearStorageMaterial () {
+        if (this.isFillMaterialList.length == 0) { return };
+        let temporaryPhotoList = this.isFillMaterialList.filter((item) => {return item.taskId !== this.taskId});
+        this.changeisFillMaterialList(temporaryPhotoList);
+        setStore('isFillMaterialList', {"number": temporaryPhotoList});
       },
 
       // 放大问题图片点击事件
@@ -516,6 +571,14 @@
         setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList})
       },
 
+      // 清除该任务存储的照片信息
+      clearStoragePhoto () {
+        if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
+        let temporaryPhotoList = this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId !== this.taskId});
+        this.changeIsCompletePhotoList(temporaryPhotoList);
+        setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
+      },
+
       // 回显照片
       echoPhoto () {
         this.historyIssueImageList = [];
@@ -535,10 +598,6 @@
 
       // 上传图片
       uploadPhoto () {
-        // if (this.issueImageList.length > 0 && this.completeImageList.length > 0) {
-        //   this.$toast('只能同时提交一种类型的照片');
-        //   return
-        // };
         this.loadinText = '上传中,请稍等···';
         this.overlayShow = true;
         this.showLoadingHint = true;
@@ -580,8 +639,9 @@
             if (this.completeImageList.length > 0) {
               this.completeImageList = []
             };
-            this.showUploadPhoto = false;
-            this.clearPhotoList()
+            this.clearStorageMaterial();
+            this.clearPhotoList();
+            this.isFinishShow = true
           } else {
             this.$toast(`${res.data.msg}`);
           }
@@ -613,9 +673,44 @@
 
       // 填写耗材
       fillConsumable () {
+        this.storageIsMaterial();
         this.$router.push({path: 'fillConsumable'});
         this.changeTitleTxt({tit:'填写耗材'});
         setStore('currentTitle','填写耗材')
+      },
+
+      // 是否确定完成确认
+      isFinishSure () {
+        completeRepairsTask({
+          proId: this.proId,
+          taskId: this.taskId
+        })
+        .then((res) => {
+          if (res && res.data.code == 200) {
+            this.$toast(`${res.data.msg}`);
+            // 清除任务存储的照片
+            this.clearStoragePhoto();
+            this.$router.push({path: 'repairsWorkOrder'});
+            this.changeTitleTxt({tit:'报修工单'});
+            setStore('currentTitle','报修工单')
+          } else {
+            this.$toast(`${res.data.msg}`);
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      // 是否确定完成取消
+      isFinishCancel () {
+        this.$router.push({path: 'repairsWorkOrder'});
+        this.changeTitleTxt({tit:'报修工单'});
+        setStore('currentTitle','报修工单')
       },
 
       // 完成工单
@@ -625,7 +720,15 @@
           this.changeTitleTxt({tit:'工单完成签名'});
           setStore('currentTitle','工单完成签名')
         } else {
-          this.$toast('任务状态为待签字时才能完成任务');
+          if (this.issueImageList.length == 0 || this.completeImageList.length == 0) {
+            this.$toast('请上传问题照片或完成照片');
+            return
+          };
+          if (!this.isChangeConsumableShow) {
+            this.$toast('请填写耗材');
+            return
+          };
+          this.uploadPhoto()
         }
       }
     }

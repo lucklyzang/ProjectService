@@ -7,7 +7,11 @@ import Vant from 'vant';
 import moment from 'moment'
 import {setStore, getStore, IsPC} from '@/common/js/utils.js'
 import echarts from 'echarts'
-
+if (process.env.NODE_ENV == 'development') {
+  Vue.config.devtools = true;
+} else {
+  Vue.config.devtools = false;
+};
 Vue.prototype.$echarts = echarts
 Vue.prototype.Base64 = require('js-base64').Base64;
 // 全局挂载时间格式化方法
@@ -69,6 +73,10 @@ new Vue({
     // 重新存入当前报修工单上传的图片
     if (getStore('completPhotoInfo')) {
       store.commit('changeIsCompletePhotoList', JSON.parse(getStore('completPhotoInfo'))['photoInfo']);
+    };
+    // 重新存入当前是否填写过耗材
+    if (getStore('isFillMaterialList')) {
+      store.commit('changeisFillMaterialList', JSON.parse(getStore('isFillMaterialList'))['number']);
     };
     // 重新存入科室巡检信息
     if (getStore('departmentServiceMsg')) {
