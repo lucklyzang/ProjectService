@@ -240,7 +240,7 @@
           left: 0;
           border-radius: 2px;
           &:first-child {
-            background: #2c65f7;
+            background: @color-theme;
             color: #fff;
             top: 0
           };

@@ -24,7 +24,7 @@ export default {
   @import "../common/stylus/mixin.less";
   @import "../common/stylus/variable.less";
   .header {
-    background: #2c65f7;
+    background: @color-theme;
     background-position: center center;
     background-size: 100% 100%;
     width: 100%;

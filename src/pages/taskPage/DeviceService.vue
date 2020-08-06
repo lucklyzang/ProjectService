@@ -277,7 +277,7 @@
             padding: 6px;
             .spanStyle {
               color: #fff;
-              background: #2895ea
+              background: @color-theme
             }
             span {
               display: inline-block;
@@ -328,8 +328,8 @@
           color: #bbbaba
         };
         .liStyle {
-          color: #2c65f7;
-          border-bottom: 1px solid #2c65f7
+          color: @color-theme;
+          border-bottom: 1px solid @color-theme
         }
       }
     };
@@ -384,7 +384,7 @@
               color: #fff
             };
             .view {
-              background: #2c65f7
+              background: @color-theme
             }
           }
           > p {

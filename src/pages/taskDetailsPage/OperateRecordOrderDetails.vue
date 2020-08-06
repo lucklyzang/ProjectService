@@ -190,7 +190,7 @@
               padding-left: 10px;
             };
             &:last-child {
-              color: #2c65f7;
+              color: @color-theme;
               font-weight: bold;
               right: 10px;
               top: 16px;
@@ -222,7 +222,7 @@
               padding-left: 10px;
             };
             &:last-child {
-              color: #2c65f7;
+              color: @color-theme;
               font-weight: bold;
               right: 10px;
               top: 0
@@ -277,10 +277,10 @@
           position: absolute;
           top: 20px;
           background: #fff;
-          color: #2c65f7;
+          color: @color-theme;
           font-weight: bold;
           text-align: center;
-          border: 1px solid #2c65f7
+          border: 1px solid @color-theme
         };
         .quit-account {
           height: 40px;
@@ -291,7 +291,7 @@
           margin-left: -110px;
           position: absolute;
           bottom: 20px;
-          background: #2c65f7;
+          background: @color-theme;
           color: #fff;
           font-weight: bold;
           text-align: center

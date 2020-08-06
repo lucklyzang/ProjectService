@@ -42,7 +42,7 @@
         <p class="app-version">
           <span>当前版本</span>
           <span>
-            1.0.1
+            {{versionNumber}}
           </span>
         </p>
         <p class="back-home"  @click="backTo">返回主页</p>
@@ -70,6 +70,7 @@
     },
     data() {
       return {
+        versionNumber: '',
         defaultPersonPng: require('@/common/images/home/default-person.jpg')
       }
     },
@@ -82,7 +83,8 @@
           this.$router.push({path: 'home'});
           this.changeTitleTxt({tit:'工程管理系统'});
           setStore('currentTitle','工程管理系统')
-        })
+        });
+        this.getVersionNumber()
       }
     },
     
@@ -132,6 +134,11 @@
         })
         .catch(() => {
         })
+      },
+
+       // 获取版本号
+      getVersionNumber () {
+        this.versionNumber = window.android.getVersion()
       },
         
       // 用户签退

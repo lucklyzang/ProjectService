@@ -454,7 +454,7 @@
               padding-left: 10px;
             };
             &:last-child {
-              color: #2c65f7;
+              color: @color-theme;
               width: 80%;
               font-weight: bold;
               right: 0;
@@ -487,7 +487,7 @@
               padding-left: 10px
             };
             &:last-child {
-              color: #2c65f7;
+              color: @color-theme;
               width: 80%;
               font-weight: bold;
               right: 0;
@@ -528,7 +528,7 @@
               position: absolute;
               top: 0;
               right:0;
-              color: #fff;
+              color: @color-theme;
               font-size: 20px;
             };
             img {
@@ -558,7 +558,7 @@
               padding-left: 10px;
             };
             &:last-child {
-              color: #2c65f7;
+              color: @color-theme;
               font-size: 34px;
               font-weight: bold;
               right: 10px;
@@ -610,10 +610,10 @@
           position: absolute;
           top: 5px;
           background: #fff;
-          color: #2c65f7;
+          color: @color-theme;
           font-weight: bold;
           text-align: center;
-          outline: 1px solid #2c65f7
+          outline: 1px solid @color-theme
         };
         .quit-account {
           height: 40px;
@@ -624,7 +624,7 @@
           margin-left: -110px;
           position: absolute;
           bottom: 5px;
-          background: #2c65f7;
+          background: @color-theme;
           color: #fff;
           font-weight: bold;
           text-align: center
@@ -651,15 +651,16 @@
           line-height: 30px;
           position: relative;
           cursor: pointer;
-          color: #2c65f7;
+          color: @color-theme;
           overflow: hidden;
           display: inline-block;
           *display: inline;
           *zoom: 1;
           /deep/ .van-icon {
-            vertical-align: middle;
-            margin-top: 0;
-            font-size: 20px
+            vertical-align: top;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 30px
           };
           input {
             position: absolute;
@@ -678,14 +679,15 @@
           height: 50px;
           overflow: hidden;
          .bottom-border-1px(#cbcbcb);
-          color: #2c65f7;
+          color: @color-theme;
           text-decoration: none;
           text-indent: 0;
           line-height: 50px;
           /deep/ .van-icon {
-            vertical-align: middle;
-            margin-top: 1px;
-            font-size: 20px
+            vertical-align: top;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 50px
           };
           input {
             position: absolute;
@@ -701,7 +703,7 @@
           display: inline-block;
           padding: 8px 12px;
           overflow: hidden;
-          color: #2c65f7;
+          color: @color-theme;
           text-decoration: none;
           text-indent: 0;
           line-height: 30px;

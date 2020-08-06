@@ -3,6 +3,9 @@
     <div class="bg-icon-wrapper" ref="bgIconWrapper">
       <div class="bg-icon">
         <img :src="logoTopPng" alt="">
+         <div class="bg-text">
+          工程维修
+        </div>
       </div>
     </div>
     <div class="input-box"  ref="inputBox">
@@ -12,7 +15,12 @@
       </van-cell-group>
     </div>
     <div class="btn-box" @click="loginEvent">
-      <img :src="loginBtnPng" alt="">
+      <span>
+        <img :src="loginBtnPng" alt="">
+      </span>
+      <span>
+        登 录
+      </span>
     </div>
     <div class="loading-btn">
       <loading :isShow="showLoadingHint" textContent="登录中,请稍候····" textColor="#2895ea"></loading>
@@ -175,7 +183,30 @@ export default {
       height: 190px;
       padding-top: 50px;
       box-sizing: border-box;
-    }
+        /deep/ .van-cell-group {
+        width: 80%;
+        margin: 0 auto;
+        font-size: 14px;
+        .van-cell {
+          border-bottom: 1px solid #e8e8e8;
+          padding-left: 0;
+          margin-bottom: 10px;
+          .van-field__label {
+            font-size: 14px;
+            color: #939393
+          };
+          .van-field__left-icon {
+            .van-icon {
+              font-size: 17px;
+              color: #4ec6ff
+            }
+          }
+          &:after {
+            display: none
+          } 
+        }
+      }
+    };
     .loading-btn {
       width: 100%;
       height: 50px;
@@ -184,42 +215,60 @@ export default {
       width: 80%;
       height: 140px;
       margin: 0 auto;
-      img {
+      position: relative;
+      span {
+        position: absolute;
+        top: 10px;
+        left: 0;
         width: 100%;
-        height: 60px
-      }
+        height: 50px;
+        img {
+          width: 100%;
+          height: 100%
+        };
+        &:last-child {
+          text-align: center;
+          line-height: 45px;
+          color: #fff;
+          font-size: 18px
+        }
+      };
    }
   .bg-icon-wrapper {
       flex:1;
       overflow: auto;
       margin: 0 auto;
       width: 100%;
+      background-image: linear-gradient(#20c4f8, #31abf8);
+      position: relative;
       .bg-icon {
-        width: 100%;
-        height: 100%;
-        display: inline-block;
+        width: 70%;
+        height: 50%;
+        margin: auto;  
+        position: absolute;
+        top: 0; 
+        left: 0; 
+        bottom: 0; 
+        right: 0;
         img {
           width: 100%;
           height: 100%
+        };
+        .bg-text {
+          position: absolute;
+          width: 100%;
+          height: 40px;
+          line-height: 40px;
+          left: 0;
+          bottom: 5px;
+          color: #fff;
+          text-align: center;
+          font-size: 24px
         }
       }
     }
     .van-hairline--top-bottom::after {
       display: none
-    }
-    .van-cell-group {
-      width: 80%;
-      margin: 0 auto;
-      font-size: 14px;
-      .van-cell {
-        border-bottom: 1px solid #e8e8e8;
-        padding-left: 0;
-        .van-cell__title {
-          .van-field__label {
-            color: #6a6a6a
-          }
-        }
-      }
     }
     .bottom-title {
       width: 100%;
@@ -233,7 +282,7 @@ export default {
       /deep/.van-loading {
         top: 90%;
         .van-loading__text {
-          color: #2895ea
+          color: #4ec6ff
         }
       } 
     }

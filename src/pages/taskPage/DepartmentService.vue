@@ -4,7 +4,7 @@
       <NoData></NoData>
     </div>
     <div class="loading">
-      <loading :isShow="showLoadingHint" textContent="加载中,请稍候····" textColor="#2895ea"></loading>
+      <loading :isShow="showLoadingHint" textContent="加载中,请稍候····" textColor="#2db8f9"></loading>
     </div>
     <!-- 顶部导航栏 -->
     <HeaderTop :title="navTopTitle">
@@ -371,7 +371,7 @@
             padding: 6px;
             .spanStyle {
               color: #fff;
-              background: #2895ea
+              background: @color-theme
             }
             span {
               display: inline-block;
@@ -423,8 +423,8 @@
           color: #bbbaba
         };
         .liStyle {
-          color: #2c65f7;
-          border-bottom: 1px solid #2c65f7
+          color: @color-theme;
+          border-bottom: 1px solid @color-theme
         }
       }
     };
@@ -461,7 +461,7 @@
             color: #8e9397
           };
           .statusWaitFinish {
-            color: #2c65f7
+            color: @color-theme
           };
           .statusWaitSignature {
             color: #06e606
@@ -488,7 +488,7 @@
               color: #fff
             };
             .view {
-              background: #2c65f7
+              background: @color-theme
             };
             .viewStyle {
               background: #8e9397
@@ -518,9 +518,6 @@
             margin-bottom: 0
           }
         }
-      };
-      .content-list-complete-task-wrapper {
-
       }
     }
   }

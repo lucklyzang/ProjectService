@@ -479,7 +479,7 @@
     .content-wrapper();
     /deep/ .van-dialog {
       .van-button--default {
-        background-color: #2c65f7;
+        background-color: @color-theme;
         color: #fff;
         border: none
       }
@@ -583,10 +583,10 @@
           position: absolute;
           top: 5px;
           background: #fff;
-          color: #2c65f7;
+          color: @color-theme;
           font-weight: bold;
           text-align: center;
-          border: 1px solid #2c65f7
+          border: 1px solid @color-theme
         };
         .quit-account {
           height: 40px;
@@ -597,7 +597,7 @@
           margin-left: -110px;
           position: absolute;
           bottom: 5px;
-          background: #2c65f7;
+          background: @color-theme;
           color: #fff;
           font-weight: bold;
           text-align: center

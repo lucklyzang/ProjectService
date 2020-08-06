@@ -32,12 +32,9 @@
             <p class="task-button-wrapper">
               <img :src="btnTaskWrapperPng" alt="">
             </p>
-            <p class="task-btn-img" :class="{taskBtnImgOne: index == 0,taskBtnImgTwo: index == 1,taskBtnImgThree: index == 2}">
+            <p class="task-btn-img">
               <span>
                 <img :src="item.imgUrl" alt="">
-              </span>
-              <span>
-                <img :src="item.imgUrlOther" alt="">
               </span>
             </p>
             <p  class="task-btn-tit">{{item.tit}}</p>
@@ -45,7 +42,7 @@
         </ul>
       </div>
       <div class="content-bottom">
-        <div class="btn-left" :class="{btnStyle: btnIndex == index}" v-for="(item,index) in btnList" :key="index" @click="bottomBtnClickEvent(item,index)">
+        <div class="btn-left" v-for="(item,index) in btnList" :key="index" @click="bottomBtnClickEvent(item,index)">
           <p :class="{pStyle: btnIndex == index}">
             <van-icon :name="`${item.icon}`" />
           </p>
@@ -62,11 +59,8 @@
   import Loading from '@/components/Loading'
   import store from '@/store'
   import departmentServiceOnePng from '@/common/images/home/department-service-one.png'
-  import departmentServiceTwoPng from '@/common/images/home/department-service-two.png'
   import deviceServiceOnePng from '@/common/images/home/device-service-one.png'
-  import deviceServiceTwoPng from '@/common/images/home/device-service-two.png'
   import repairsWorkOrderOnePng from '@/common/images/home/repairs-work-order-one.png'
-  import repairsWorkOrderTwoPng from '@/common/images/home/repairs-work-order-two.png'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import {queryTaskCount} from '@/api/worker.js'
@@ -90,9 +84,9 @@
         deviceServiceCount: '',
         departmentServieCount: '',
         taskList: [
-          {tit:'报修工单', imgUrl: repairsWorkOrderOnePng, imgUrlOther: repairsWorkOrderTwoPng}, 
-          {tit:'设备巡检', imgUrl: deviceServiceOnePng, imgUrlOther: deviceServiceTwoPng}, 
-          {tit:'科室巡检', imgUrl: departmentServiceOnePng, imgUrlOther: departmentServiceTwoPng}
+          {tit:'报修工单', imgUrl: repairsWorkOrderOnePng}, 
+          {tit:'设备巡检', imgUrl: deviceServiceOnePng}, 
+          {tit:'科室巡检', imgUrl: departmentServiceOnePng}
         ],
         btnList: [
           {name: '主页', icon: 'wap-home-o'},
@@ -365,6 +359,7 @@
         font-size: 13px;
         .content-middle-title {
           height: 45px;
+          font-size: 16px;
           line-height: 45px;
           color: #271010;
           font-weight: bold
@@ -411,37 +406,28 @@
               }
             }
             .task-btn-img {
-              width: 60px;
-              height: 60px;
-              line-height: 70px;
+              width: 56px;
+              height: 56px;
+              line-height: 60px;
               margin: 0 auto;
               border-radius: 4px;
               position: relative;
               span {
                 display: inline-block;
-                width: 40px;
-                height: 40px;
+                width: 56px;
+                height: 56px;
                 margin: 0 auto;
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                margin-top: -20px;
-                margin-left: -20px;
+                margin-top: -28px;
+                margin-left: -28px;
                 img {
                   width: 100%;
                   height: 100%;
                 };
               }
             };
-            .taskBtnImgOne {
-              background: #f56046
-            };
-            .taskBtnImgTwo {
-              background: #5b8eee
-            }
-            .taskBtnImgThree {
-              background: #3949e7
-            }
             .task-btn-tit {
               color: #271010;
               font-weight: bold;
@@ -465,9 +451,6 @@
         width: 100%;
         font-size: 13px;
         position: relative;
-        .btnStyle {
-          background: #298cf8;
-        }
         > div {
           width: 50%;
           height: 60px;
@@ -476,18 +459,23 @@
           text-align: center;
           line-height: 60px;
           .pStyle {
-            color: #fff !important
+            color: @color-theme!important
           }
           > p {
             height: 30px;
             line-height: 30px;
             &:first-child {
-              color: #4678f8;
-              font-size: 24px;
-              padding-top: 10px;
-              box-sizing: border-box
+              color: #333;
+              font-size: 26px;
+              padding-top: 8px;
+              box-sizing: border-box;
+              /deep/ .van-icon {
+                margin-top: -2px
+              }
             };
             &:last-child {
+              letter-spacing: 5px;              
+              text-indent: 5px;
               color: #271010;
               font-weight: bold;
             }  

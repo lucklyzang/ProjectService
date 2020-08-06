@@ -182,7 +182,7 @@
         })
       };
       document.addEventListener('click', (e) => {
-        if(e.target.className!='van-icon van-icon-plus' && e.target.className != 'back-home'){
+        if(e.target.className!='van-icon van-icon-plus' && e.target.className != 'back-home' && e.target.className != 'quit-account'){
           this.photoBox = false;
           this.overlayShow = false
         }
@@ -601,7 +601,6 @@
         this.loadinText = '上传中,请稍等···';
         this.overlayShow = true;
         this.showLoadingHint = true;
-        this.overlayShow = true;
         let imageType;
         let photoMsg = {
           taskId: this.taskId,  //任务ID
@@ -630,7 +629,6 @@
         .then((res) => {
           this.showLoadingHint = false;
           this.overlayShow = false;
-          this.overlayShow = false;
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
             if (this.issueImageList.length > 0) {
@@ -653,7 +651,6 @@
           }).then(() => {
           });
           this.showLoadingHint = false;
-          this.overlayShow = false;
           this.overlayShow = false
         })
       },
@@ -790,7 +787,7 @@
               padding-left: 10px;
             };
             &:last-child {
-              color: #2c65f7;
+              color: @color-theme;
               font-weight: bold;
               right: 10px;
               top: 16px;
@@ -825,7 +822,7 @@
               width: 70%;
               text-align: right;
               overflow: auto;
-              color: #2c65f7;
+              color: @color-theme;
               font-weight: bold;
               right: 10px;
               top: 0;
@@ -862,7 +859,7 @@
               position: absolute;
               top: 0;
               right:0;
-              color: #fff;
+              color: @color-theme;
               font-size: 20px;
             };
             img {
@@ -893,7 +890,7 @@
               padding-left: 10px;
             };
             &:last-child {
-              color: #2c65f7;
+              color: @color-theme;
               font-size: 34px;
               font-weight: bold;
               right: 10px;
@@ -920,7 +917,7 @@
               padding-left: 10px;
             };
             &:last-child {
-              color: #2c65f7;
+              color: @color-theme;
               font-size: 34px;
               font-weight: bold;
               right: 10px;
@@ -945,10 +942,10 @@
           position: absolute;
           bottom: 50px;
           background: #fff;
-          color: #2c65f7;
+          color: @color-theme;
           font-weight: bold;
           text-align: center;
-          border: 1px solid #2c65f7
+          border: 1px solid @color-theme
         };
         .quit-account {
           height: 40px;
@@ -959,7 +956,7 @@
           margin-left: -110px;
           position: absolute;
           bottom: 5px;
-          background: #2c65f7;
+          background: @color-theme;
           color: #fff;
           font-weight: bold;
           text-align: center
@@ -982,19 +979,20 @@
         .choose-photo {
           padding: 8px 10px;
           height: 30px;
+          display: inline-block;
           .bottom-border-1px(#cbcbcb);
           line-height: 30px;
           position: relative;
           cursor: pointer;
-          color: #2c65f7;
+          color: @color-theme;
           overflow: hidden;
-          display: inline-block;
           *display: inline;
           *zoom: 1;
           /deep/ .van-icon {
-            vertical-align: middle;
-            margin-top: 0;
-            font-size: 20px
+            vertical-align: top;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 30px
           };
           input {
             position: absolute;
@@ -1009,18 +1007,19 @@
         };
         .photo-graph {
           position: relative;
-          display: inline-block;
           height: 50px;
+          display: inline-block;
           overflow: hidden;
          .bottom-border-1px(#cbcbcb);
-          color: #2c65f7;
+          color: @color-theme;
           text-decoration: none;
           text-indent: 0;
           line-height: 50px;
           /deep/ .van-icon {
-            vertical-align: middle;
-            margin-top: 1px;
-            font-size: 20px
+            vertical-align: top;
+            font-size: 20px;
+            display: inline-block;
+            line-height: 50px
           };
           input {
             position: absolute;
@@ -1037,7 +1036,7 @@
           display: inline-block;
           padding: 8px 0;
           overflow: hidden;
-          color: #2c65f7;
+          color: @color-theme;
           text-decoration: none;
           text-indent: 0;
           line-height: 30px;
