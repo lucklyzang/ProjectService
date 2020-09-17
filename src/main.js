@@ -66,6 +66,10 @@ new Vue({
     if (getStore('questToken')) {
       store.commit('changeToken', getStore('questToken'));
     };
+    // 重新存入新任务列表
+    if (getStore('newTaskList')) {
+      store.commit('changeNewTaskList',JSON.parse(getStore('newTaskList'))['taskName']);
+    };
     // 重新存入当前报修工单信息
     if (getStore('repairsWorkOrderMsg')) {
       store.commit('changeRepairsWorkOrderMsg', JSON.parse(getStore('repairsWorkOrderMsg')));
@@ -82,13 +86,17 @@ new Vue({
     if (getStore('departmentServiceMsg')) {
       store.commit('changeDepartmentServiceMsg', JSON.parse(getStore('departmentServiceMsg')));
     };
+    // 重新存入设备巡检信息
+    if (getStore('deviceServiceMsg')) {
+      store.commit('changeDeviceServiceMsg', JSON.parse(getStore('deviceServiceMsg')));
+    };
     // 重新存入科室巡检扫码校验通过的科室编号
     if (getStore('isDepartmentServiceVerifySweepCode')) {
       store.commit('changeIsDepartmentServiceVerifySweepCode', JSON.parse(getStore('isDepartmentServiceVerifySweepCode'))['sweepCodeInfo']);
     };
     // 重新存入当前科室巡检扫码校验通过的科室编号
     if (getStore('isCurrentDepartmentServiceVerifySweepCode')) {
-      this.$store.commit('changeIsCurrentDepartmentServiceVerifySweepCode', JSON.parse(getStore('isCurrentDepartmentServiceVerifySweepCode'))['number']);
+      store.commit('changeIsCurrentDepartmentServiceVerifySweepCode', JSON.parse(getStore('isCurrentDepartmentServiceVerifySweepCode'))['number']);
     };
     // 重新存入当前进行巡检的科室id
     if (getStore('departmentServiceId')) {
@@ -100,11 +108,19 @@ new Vue({
     };
     // 重新存入科室巡检当前点击的检查项id
     if (getStore('checkedItemId')) {
-      this.$store.commit('changeCurrentDepartmentServiceCheckedItemId', JSON.parse(getStore('checkedItemId')));
+      store.commit('changeCurrentDepartmentServiceCheckedItemId', JSON.parse(getStore('checkedItemId')));
     };
     // 重新存入完成巡检任务中检查项上报的id
     if (getStore('isCompleteDepartmentServiceCheckedItemList')) {
       store.commit('changeCompleteDepartmentServiceCheckedItemList',JSON.parse(getStore('isCompleteDepartmentServiceCheckedItemList'))['sweepCodeInfo'])
+    };
+    // 重新存入设备巡检中能耗录入扫码校验通过的当前科室编号
+    if (getStore('isCurrentDeviceCopyServiceVerifySweepCode')) {
+      store.commit('changeIsCurrentDeviceCopyServiceVerifySweepCode', JSON.parse(getStore('isCurrentDeviceCopyServiceVerifySweepCode'))['number']);
+    };
+    // 重新存入当前设备能耗记录科室
+    if (getStore('energyRecordList')) {
+      store.commit('changeEnergyRecordList',JSON.parse(getStore('energyRecordList'))['energyRecord'])
     };
   },
   template: '<App/>'

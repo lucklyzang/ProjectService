@@ -18,10 +18,10 @@
     <div class="content-bottom">
       <div class="content-list-action-task-wrapper" v-show="currentIndex == 0">
         <div class="content-list-action-task-item" v-for="(item,index) in taskMessageList" :key="`${index}-${item}`">
-          <span class="status-box">待确认</span>
+          <span class="status-box">待领取</span>
           <span class="task-date">{{item.date}}</span>
           <p class="task-btn">
-            <span class="view"  @click="taskView(item)">查看任务</span>
+            <span class="view"  @click="taskView(item)">领取任务</span>
           </p>
           <p class="work-order-number">
             <span class="tit">巡检单号:</span>
@@ -51,7 +51,7 @@
       </div>
       <div class="content-list-action-task-wrapper content-list-complete-task-wrapper" v-show="currentIndex == 1">
         <div class="content-list-action-task-item">
-          <span class="status-box">待确认</span>
+          <span class="status-box">待完成</span>
           <span class="task-date">sasasas</span>
           <p class="task-btn">
             <span class="view"  @click="taskView(item)">查看任务</span>
@@ -84,7 +84,7 @@
       </div>
       <div class="content-list-action-task-wrapper content-list-complete-task-wrapper" v-show="currentIndex == 2">
         <div class="content-list-action-task-item">
-          <span class="status-box">待确认</span>
+          <span class="status-box">已完成</span>
           <span class="task-date">sasasas</span>
           <p class="task-btn">
             <span class="view"  @click="taskView(item)">查看任务</span>
@@ -169,7 +169,8 @@
             workOrderNumber: 'bx12131313131',
             workOrder: '灯管',
             taskType: '1',
-            taskPoint: '2'
+            taskPoint: '2',
+            type:3
           },
           {
             date: '2020-03-03 13:00',
@@ -192,7 +193,8 @@
     computed: {
       ...mapGetters([
         'navTopTitle',
-        'userInfo'
+        'userInfo',
+        'isFreshDeviceServicePage'
       ]),
       proId () {
         return this.userInfo.extendData.proId
@@ -203,6 +205,22 @@
     },
 
     watch : {
+    },
+
+    beforeRouteEnter (to, from, next){
+      let catch_components = store.state.catchComponent.catch_components;
+      let i = catch_components.indexOf('DeviceService');
+      i === -1 && catch_components.push('DeviceService');
+      next();
+    },
+
+    beforeRouteLeave(to, from, next) {
+      let catch_components = this.catch_components;
+      if (to.name !== 'CopyDetails' || to.name !== 'DeviceServiceDetails' || to.name !== 'OperateRecordOrderDetails'){
+        let i = catch_components.indexOf('DeviceService');
+        i > -1 && this.changeCatchComponent([]);
+      }
+      next()
     },
 
     mounted () {
@@ -222,7 +240,9 @@
 
     methods: {
       ...mapMutations([
-        'changeTitleTxt'
+        'changeTitleTxt',
+        'changeDeviceServiceMsg',
+        'changeCatchComponent'
       ]),
 
       // tab点击事件
@@ -236,11 +256,17 @@
           this.$router.push({path: 'deviceServiceDetails'});
           this.changeTitleTxt({tit:'设备巡检详情'});
           setStore('currentTitle','设备巡检详情')
-        } else {
+        } else if (item.type == 2){
           this.$router.push({path: 'operateRecordOrderDetails'});
           this.changeTitleTxt({tit:'设备巡检详情'});
           setStore('currentTitle','设备巡检详情')
-        }
+        } else if (item.type == 3){
+          this.$router.push({path: 'CopyDetails'});
+          this.changeTitleTxt({tit:'抄录详情'});
+          setStore('currentTitle','抄录详情')
+        };
+        this.changeDeviceServiceMsg(item);
+        setStore('deviceServiceMsg',item);
       },
 
       // 返回上一页

@@ -73,7 +73,7 @@ export default {
     this.echoUserInfo();
     // 监控键盘弹起
     let originalHeight = document.documentElement.clientHeight || document.body.clientHeight;
-    window.onresize = ()=>{
+    window.onresize = ()=> {
       let resizeHeight = document.documentElement.clientHeight || document.body.clientHeight;
       if (resizeHeight < originalHeight) {
         return (()=>{
@@ -96,6 +96,23 @@ export default {
     echoUserInfo () {
       this.username = getStore('userName') ? getStore('userName') : '';
       this.password = getStore('userPassword') ? getStore('userPassword') : '';
+    },
+
+    
+    // 注册channel
+    getChannel (data) {
+      return new Promise((resolve,reject) => {
+        registerChannel(data)
+        .then((res) => {
+          resolve()
+        })
+        .catch((err) => {
+         this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {})
+        })
+      })
     },
 
     // 登录验证方法
@@ -123,7 +140,7 @@ export default {
               setStore('isLogin', true);
               // 用户相关的登录后的信息存入store
               this.storeUserInfo(JSON.parse(getStore('userInfo')));
-              resolve(res.data.data.proId)
+              resolve(res.data.data)
             } else {
               this.$toast(`${res.data.msg}`)
             }
@@ -163,7 +180,22 @@ export default {
 
     async loginEvent () {
       const resultOne = await this.login();
-      const resultTwo = await this.queryDepartmentMsg(resultOne);
+      const resultTwo = await this.queryDepartmentMsg(resultOne.proId);
+      if (!IsPC()) {
+        // 注册channel
+        if (window.android.getChannelId() == '' || (!window.android.getChannelId() && typeof(window.android.getChannelId())!='undefined' && window.android.getChannelId() != 0)) {
+          this.$toast('未获取到channelId')
+        } else {
+          try {
+            await this.getChannel({proId:resultOne.proId,workerId:resultOne.id,type:2,channelId:window.android.getChannelId()});
+          } catch (err) {
+            this.$dialog.alert({
+              message: `${err.message}`,
+              closeOnPopstate: true
+            }).then(() => {})
+          }
+        }
+      };
       this.$router.push({path:'/home'});
       this.changeTitleTxt({tit:'工程管理系统'});
       setStore('departmentMessage', resultTwo);

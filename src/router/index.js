@@ -17,8 +17,10 @@ const DepartmentServiceBill = () => import('@/pages/taskMessagePage/departmentSe
 const DepartmentServiceIssueReport = () => import('@/pages/taskMessagePage/departmentService/DepartmentServiceIssueReport')
 const DeviceServiceDetails = () => import('@/pages/taskDetailsPage/DeviceServiceDetails')
 const OperateRecordOrderDetails = () => import('@/pages/taskDetailsPage/OperateRecordOrderDetails')
+const CopyDetails = () => import('@/pages/taskDetailsPage/CopyDetails')
 const DeviceServiceBill = () => import('@/pages/taskMessagePage/deviceService/DeviceServiceBill')
 const OperateRecordBill = () => import('@/pages/taskMessagePage/deviceService/OperateRecordBill')
+const CopyRecordBill = () => import('@/pages/taskMessagePage/deviceService/CopyRecordBill')
 const DepartmentServiceFillConsumable = () => import('@/pages/taskMessagePage/departmentService/DepartmentServiceFillConsumable')
 Vue.use(Router) 
 
@@ -104,9 +106,19 @@ let baseRoute  = [
     component: OperateRecordBill
   },
   {
+    path: '/copyRecordBill',
+    name: 'copyRecordBill',
+    component: CopyRecordBill
+  },
+  {
     path: '/operateRecordOrderDetails',
     name: 'operateRecordOrderDetails',
     component: OperateRecordOrderDetails
+  },
+  {
+    path: '/copyDetails',
+    name: 'copyDetails',
+    component: CopyDetails
   },
   {
     path: '/departmentServiceFillConsumable',

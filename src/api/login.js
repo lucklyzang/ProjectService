@@ -50,19 +50,19 @@ export function getdepartmentListNo (proId) {
   })
 }
 
+// 获取科室字典值
+export function getDepartmentMsg (proId) {
+  return request({
+    url: `department/dict/${proId}`,
+    method: 'get'
+  })
+}
+
 // 注册channel
 export function registerChannel (data) {
   return request({
     url: 'cloud/register',
     method: 'post',
     data
-  })
-}
-
-// 获取科室字典值
-export function getDepartmentMsg (proId) {
-  return request({
-    url: `department/dict/${proId}`,
-    method: 'get'
   })
 }

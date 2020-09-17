@@ -1,5 +1,13 @@
 import request from '@/utils/request'
 
+// 查询是否有新任务
+export function getNewWork (proId,workerId) {
+  return request({
+    url: `baseData/getNew/${proId}/${workerId}`,
+    method: 'get'
+  })
+}
+
 /*
  * 
  *  报修工单

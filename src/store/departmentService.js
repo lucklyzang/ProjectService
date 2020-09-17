@@ -24,7 +24,7 @@ export default {
     changeIsFreshDepartmentServicePage (state, playLoad) {
       state.isFreshDepartmentServicePage = playLoad
     },
-    // 改变巡检任务信信的状态
+    // 改变巡检任务信息的状态
     changeDepartmentServiceMsg (state, playLoad) {
       state.departmentServiceMsg = playLoad
     },

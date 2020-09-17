@@ -11,14 +11,10 @@ export default {
     overDueWay: false,
     originalSignature: null,
     currentElectronicSignature: null,
-    departmentInfoList: {},
-    departmentInfoListNo: {},
-    newTaskName: '',
-    taskDetailsMessage: {},
+    newTaskName: [],
     taskType: '',
     navTopTitle: '',
     globalTimer: null,
-    isFreshHomePage: false,
   },
   getters:{
     userInfo : state => state.userInfo,
@@ -27,13 +23,9 @@ export default {
     token : state => state.token,
     userType: state => state.userType,
     overDueWay: state => state.overDueWay,
-    departmentInfoList: state => state.departmentInfoList,
-    departmentInfoListNo: state => state.departmentInfoListNo,
     newTaskName: state => state.newTaskName,
-    taskDetailsMessage: state => state.taskDetailsMessage,
     taskType: state => state.taskType,
     globalTimer: state => state.globalTimer,
-    isFreshHomePage: state => state.isFreshHomePage,
     navTopTitle: state => state.navTopTitle,
     originalSignature: state => state.originalSignature,
     currentElectronicSignature: state => state.currentElectronicSignature,
@@ -42,7 +34,6 @@ export default {
     storeUserInfo (state, playLoad) {
       state.userInfo = playLoad
     },
-    
     changeRouterFlag (state, playLoad) {
       state.routerFlag = playLoad
     },
@@ -71,21 +62,9 @@ export default {
     changeOverDueWay (state, playLoad) {
       state.overDueWay = playLoad
     },
-    // 改变科室信息状态id
-    changeDepartmentInfoList (state, playLoad) {
-      state.departmentInfoList = playLoad
-    },
-    // 改变科室信息状态编号
-    changeDepartmentInfoListNo (state, playLoad) {
-      state.departmentInfoListNo = playLoad
-    },
     // 改变新任务列表状态
     changeNewTaskList (state, playLoad) {
       state.newTaskName = playLoad
-    },
-    // 改变历史任务详情
-    changeTaskDetailsMessage (state, playLoad) {
-      state.taskDetailsMessage = playLoad
     },
     // 改变任务类型状态
     changeTaskType (state, playLoad) {
@@ -94,10 +73,6 @@ export default {
     // 改变全局定时器的状态
     changeGlobalTimer (state, playLoad) {
       state.globalTimer = playLoad
-    },
-    // 改变是否刷新首页的状态
-    changeIsFreshHomePage (state, playLoad) {
-      state.isFreshHomePage = playLoad
     },
     // 改变路由标题状态
     changeTitleTxt (state, playLoad) {

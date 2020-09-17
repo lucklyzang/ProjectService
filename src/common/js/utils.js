@@ -403,52 +403,68 @@ export const compressImg = (originSite,callback) => {
   * 压缩图片
   * @param{String} img 图片对象
 */
-export const compress = (img,Orientation) => {
-  let canvas = document.createElement("canvas");
-  let ctx = canvas.getContext('2d');
-  //创建canvas
-  let tCanvas = document.createElement("canvas");
-  let tctx = tCanvas.getContext("2d");
-  let initSize = img.src.length;
-  let width = img.width;
-  let height = img.height;
-  //如果图片大于四百万像素，计算压缩比并将大小压至400万以下
-  let ratio;
-  if ((ratio = width * height / 4000000) > 1) {
-    console.log("大于400万像素")
-    ratio = Math.sqrt(ratio);
-    width /= ratio;
-    height /= ratio
-  } else {
-    ratio = 1;
-  };
-  canvas.width = width;
-  canvas.height = height;
-  //铺底色
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  //如果图片像素大于100万则使用canvas绘制
-  let count;
-  if ((count = width * height / 1000000) > 1) {
-    count = ~~(Math.sqrt(count) + 1); //计算要分成多少块瓦片
-    //计算每块canvas的宽和高
-    let nw = ~~(width / count);
-    let nh = ~~(height / count);
-    tCanvas.width = nw;
-    tCanvas.height = nh;
-    for (let i = 0; i < count; i++) {
-      for (let j = 0; j < count; j++) {
-          tctx.drawImage(img, i * nw * ratio, j * nh * ratio, nw * ratio, nh * ratio, 0, 0, nw, nh);
-          ctx.drawImage(tCanvas, i * nw, j * nh, nw, nh);
-      }
-    }
-  } else {
-    ctx.drawImage(img, 0, 0, width, height);
-  };
-  //进行最小压缩
-  let ndata = canvas.toDataURL('image/jpeg', 0.3);
-  tCanvas.width = tCanvas.height = canvas.width = canvas.height = 0;
-  return ndata
+export const compress = (image,Orientation) => {
+  // let canvas = document.createElement("canvas");
+  // let ctx = canvas.getContext('2d');
+  // //创建canvas
+  // let tCanvas = document.createElement("canvas");
+  // let tctx = tCanvas.getContext("2d");
+  // let initSize = img.src.length;
+  // let width = img.width;
+  // let height = img.height;
+  // //如果图片大于四百万像素，计算压缩比并将大小压至400万以下
+  // let ratio;
+  // if ((ratio = width * height / 4000000) > 1) {
+  //   console.log("大于400万像素")
+  //   ratio = Math.sqrt(ratio);
+  //   width /= ratio;
+  //   height /= ratio
+  // } else {
+  //   ratio = 1;
+  // };
+  // canvas.width = width;
+  // canvas.height = height;
+  // //铺底色
+  // ctx.fillStyle = "#fff";
+  // ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // //如果图片像素大于100万则使用canvas绘制
+  // let count;
+  // if ((count = width * height / 1000000) > 1) {
+  //   count = ~~(Math.sqrt(count) + 1); //计算要分成多少块瓦片
+  //   //计算每块canvas的宽和高
+  //   let nw = ~~(width / count);
+  //   let nh = ~~(height / count);
+  //   tCanvas.width = nw;
+  //   tCanvas.height = nh;
+  //   for (let i = 0; i < count; i++) {
+  //     for (let j = 0; j < count; j++) {
+  //         tctx.drawImage(img, i * nw * ratio, j * nh * ratio, nw * ratio, nh * ratio, 0, 0, nw, nh);
+  //         ctx.drawImage(tCanvas, i * nw, j * nh, nw, nh);
+  //     }
+  //   }
+  // } else {
+  //   ctx.drawImage(img, 0, 0, width, height);
+  // };
+  // //进行最小压缩
+  // let ndata = canvas.toDataURL('image/jpeg', 0.3);
+  // tCanvas.width = tCanvas.height = canvas.width = canvas.height = 0;
+  // return ndata
+    let canvas = document.createElement('canvas'),
+    context = canvas.getContext('2d');
+    let x = image.width/500;  //压缩倍数
+    if (image.width > 500) {
+      var imageWidth = image.width / x;   //压缩后图片的大小
+      var imageHeight = image.height / x;
+    } else {
+      var imageWidth = image.width / 1;   //不进行压缩大小
+      var imageHeight = image.height / 1;
+    };
+    let data = '';
+    canvas.width = imageWidth;
+    canvas.height = imageHeight;
+    context.drawImage(image, 0, 0, imageWidth, imageHeight);
+    data = canvas.toDataURL('image/jpeg');
+    return data
 }
 
 /* 
@@ -520,12 +536,15 @@ export const removeAllLocalStorage = () => {
   removeStore('userInfo');
   removeStore('isLogin');
   removeStore('userType');
+  removeStore('newTaskList');
   removeStore('completPhotoInfo'),
   removeStore('isFillMaterialList');
   removeStore('isDepartmentServiceVerifySweepCode'),
   removeStore('isCurrentDepartmentServiceVerifySweepCode'),
   removeStore('isCompleteDepartmentServiceOfficeInfo'),
-  removeStore('isCompleteDepartmentServiceCheckedItemList')
+  removeStore('isCompleteDepartmentServiceCheckedItemList'),
+  removeStore('energyRecordList'),
+  removeStore('isCurrentDeviceCopyServiceVerifySweepCode')
 }
 
 /*

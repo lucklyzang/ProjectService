@@ -40,7 +40,7 @@
       </div>
       <div class="content-bottom">
         <p class="back-home"  @click="fillConsumable">扫一扫</p>
-        <p class="quit-account" @click="completeTask">完成巡检</p>
+        <p class="quit-account" @click="completeTask">完成抄录</p>
       </div>
     </div>
   </div>
@@ -54,9 +54,8 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
-  import {queryOneDepartmentService} from '@/api/worker.js'
   export default {
-    name: 'DeviceServiceDetails',
+    name: 'OperateRecordOrderDetails',
     components:{
       HeaderTop,
       FooterBottom,
@@ -76,6 +75,11 @@
       if (!IsPC()) {
         pushHistory();
         this.gotoURL(() => {
+          if (this.deviceServiceMsg.state == 4) {
+            this.changeIsFreshDepartmentServicePage(false)
+          } else {
+            this.changeIsFreshDepartmentServicePage(true)
+          };
           this.$router.push({path: 'deviceService'});
           this.changeTitleTxt({tit:'设备巡检'});
           setStore('currentTitle','设备巡检')
@@ -94,7 +98,8 @@
     computed:{
       ...mapGetters([
         'navTopTitle',
-        'deviceServiceMsg'
+        'deviceServiceMsg',
+        'isCurrentDeviceCopyServiceVerifySweepCode'
       ]),
       userName () {
        return this.userInfo.userName
@@ -121,7 +126,9 @@
 
     methods:{
       ...mapMutations([
-        'changeTitleTxt'
+        'changeTitleTxt',
+        'changeIsFreshDepartmentServicePage',
+        'changeIsCurrentDeviceCopyServiceVerifySweepCode'
       ]),
 
       // 摄像头扫码后的回调
@@ -129,8 +136,41 @@
         if (code) {}
       },
 
+      // 存储当前扫码校验通过的科室编号
+      storeCurrentDepartmentNumber (departmentNumber) {
+        let temporaryDepartmentNumber = [];
+        temporaryDepartmentNumber = deepClone(this.isCurrentDeviceCopyServiceVerifySweepCode);
+        if (temporaryDepartmentNumber.length > 0 ) {
+          let temporaryIndex = this.isCurrentDeviceCopyServiceVerifySweepCode.indexOf(this.isCurrentDeviceCopyServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (temporaryIndex != -1) {
+            temporaryDepartmentNumber[temporaryIndex]['number'] = departmentNumber
+          } else {
+            temporaryDepartmentNumber.push(
+              { 
+                number: departmentNumber,
+                taskId: this.taskId
+              }
+            )
+          };
+        } else {
+          temporaryDepartmentNumber.push(
+            { 
+              number:departmentNumber,
+              taskId: this.taskId
+            }
+          )
+        };
+        this.changeIsCurrentDeviceCopyServiceVerifySweepCode(temporaryDepartmentNumber);
+        setStore('isCurrentDeviceCopyServiceVerifySweepCode', {"number": temporaryDepartmentNumber})
+      },
+
       //返回上一页
       backTo () {
+        if (this.deviceServiceMsg.state == 4) {
+          this.changeIsFreshDepartmentServicePage(false)
+        } else {
+          this.changeIsFreshDepartmentServicePage(true)
+        };
         this.$router.push({path: 'deviceService'});
         this.changeTitleTxt({tit:'设备巡检'});
         setStore('currentTitle','设备巡检')
@@ -138,9 +178,9 @@
 
       // 扫一扫
       fillConsumable () {
-        this.$router.push({path: 'deviceServiceBill'});
-        this.changeTitleTxt({tit:'设备巡检单'});
-        setStore('currentTitle','设备巡检单')
+        this.$router.push({path: 'CopyRecordBill'});
+        this.changeTitleTxt({tit:'设备参数单'});
+        setStore('currentTitle','设备参数单')
         // window.android.scanQRcode()
       },
 
