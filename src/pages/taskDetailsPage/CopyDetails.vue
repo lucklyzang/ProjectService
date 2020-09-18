@@ -53,7 +53,7 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, deepClone } from '@/common/js/utils'
   export default {
     name: 'OperateRecordOrderDetails',
     components:{
@@ -119,8 +119,8 @@
       name () {
         return this.userInfo.name
       },
-       taskId () {
-        return this.deviceServiceMsg.id
+      taskId () {
+        return this.deviceServiceMsg.taskId
       }
     },
 
@@ -180,7 +180,12 @@
       fillConsumable () {
         this.$router.push({path: 'CopyRecordBill'});
         this.changeTitleTxt({tit:'设备参数单'});
-        setStore('currentTitle','设备参数单')
+        setStore('currentTitle','设备参数单');
+        if (this.deviceServiceMsg.taskId == 11) {
+          this.storeCurrentDepartmentNumber(3)
+        } else {
+          this.storeCurrentDepartmentNumber(2)
+        }
         // window.android.scanQRcode()
       },
 

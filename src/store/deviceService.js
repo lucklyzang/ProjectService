@@ -3,13 +3,15 @@ export default {
     isFreshDeviceServicePage: true,
     deviceServiceMsg: '',
     energyRecordList: [],
-    isCurrentDeviceCopyServiceVerifySweepCode: []
+    isCurrentDeviceCopyServiceVerifySweepCode: [],
+    completeDeviceEnergyRecordServiceOfficeInfo: []
   },
   getters:{
     isFreshDeviceServicePage: state => state.isFreshDeviceServicePage,
     deviceServiceMsg: state => state.deviceServiceMsg,
     energyRecordList: state => state.energyRecordList,
-    isCurrentDeviceCopyServiceVerifySweepCode: state => state.isCurrentDeviceCopyServiceVerifySweepCode
+    isCurrentDeviceCopyServiceVerifySweepCode: state => state.isCurrentDeviceCopyServiceVerifySweepCode,
+    completeDeviceEnergyRecordServiceOfficeInfo: state => state.completeDeviceEnergyRecordServiceOfficeInfo
   },
   mutations:{
     changeIsFreshDeviceServicePage (state, playLoad) {
@@ -26,6 +28,10 @@ export default {
     // 改变设备巡检中能耗录入扫码校验通过的当前科室编号的状态
     changeIsCurrentDeviceCopyServiceVerifySweepCode (state, playLoad) {
       state.isCurrentDeviceCopyServiceVerifySweepCode = playLoad
+    },
+    // 改变设备巡检中完成能耗录入的当前科室编号的状态
+    changeCompleteDeviceEnergyRecordServiceOfficeInfo (state, playLoad) {
+      state.completeDeviceEnergyRecordServiceOfficeInfo = playLoad
     }
   },
   actions:{}

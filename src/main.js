@@ -118,9 +118,13 @@ new Vue({
     if (getStore('isCurrentDeviceCopyServiceVerifySweepCode')) {
       store.commit('changeIsCurrentDeviceCopyServiceVerifySweepCode', JSON.parse(getStore('isCurrentDeviceCopyServiceVerifySweepCode'))['number']);
     };
-    // 重新存入当前设备能耗记录科室
+    // 重新存入当前科室设备能耗记录信息
     if (getStore('energyRecordList')) {
       store.commit('changeEnergyRecordList',JSON.parse(getStore('energyRecordList'))['energyRecord'])
+    };
+    // 重新存入完成巡检任务的科室编号
+    if (getStore('isCompleteDeviceEnergyRecordServiceOfficeInfo')) {
+      store.commit('changeCompleteDeviceEnergyRecordServiceOfficeInfo',JSON.parse(getStore('isCompleteDeviceEnergyRecordServiceOfficeInfo'))['sweepCodeInfo'])
     };
   },
   template: '<App/>'

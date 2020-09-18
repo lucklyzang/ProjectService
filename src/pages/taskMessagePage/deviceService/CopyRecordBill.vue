@@ -41,7 +41,7 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray } from '@/common/js/utils'
+  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray, deepClone  } from '@/common/js/utils'
   export default {
     name: 'OperateRecordBill',
     components:{
@@ -87,7 +87,9 @@
           this.changeTitleTxt({tit:'设备巡检详情'});
           setStore('currentTitle','设备巡检详情')
         })
-      }
+      };
+      this.getDepartmentNumber();
+      this.isRequestEnergyList()
     },
     
     watch: {
@@ -98,7 +100,8 @@
         'navTopTitle',
         'energyRecordList',
         'deviceServiceMsg',
-        'isCurrentDeviceCopyServiceVerifySweepCode'
+        'isCurrentDeviceCopyServiceVerifySweepCode',
+        'completeDeviceEnergyRecordServiceOfficeInfo'
       ]),
       userName () {
        return this.userInfo.userName
@@ -119,14 +122,15 @@
         return this.userInfo.name
       },
       taskId () {
-        return this.deviceServiceMsg.id
+        return this.deviceServiceMsg.taskId
       }
     },
 
     methods:{
       ...mapMutations([
         'changeTitleTxt',
-        'changeEnergyRecordList'
+        'changeEnergyRecordList',
+        'changeCompleteDeviceEnergyRecordServiceOfficeInfo'
       ]),
 
       //返回上一页
@@ -149,8 +153,8 @@
         if (this.energyRecordList.length > 0) {
           let temporaryIndex = this.energyRecordList.indexOf(this.energyRecordList.filter((item) => {return item.taskId == this.taskId})[0]);
           if (temporaryIndex != -1) {
-            let temporaryDepartmentIdList = temporaryRecordList[temporaryIndex]['officeList'];
-            let temporaryOneRecordIndex = temporaryDepartmentIdList.indexOf(this.temporaryDepartmentIdList.filter((item) => {return item.officeId == this.departmentId})[0]);
+            let temporaryDepartmentIdList = this.energyRecordList[temporaryIndex]['officeList'];
+            let temporaryOneRecordIndex = temporaryDepartmentIdList.indexOf(temporaryDepartmentIdList.filter((item) => {return item.officeId == this.departmentNum})[0]);
             if (temporaryOneRecordIndex != -1) {
               // 从缓存数据里读取该任务下的科室记录的设备数据
               this.consumableMsgList = temporaryDepartmentIdList[temporaryOneRecordIndex]['oneRecordList']
@@ -176,7 +180,7 @@
           if (temporaryIndex != -1) {
             // 判断当前任务有没有存入过数据
             temporaryDepartmentIdList = temporaryRecordList[temporaryIndex]['officeList'];
-            let temporaryOneRecordIndex = temporaryDepartmentIdList.indexOf(this.temporaryDepartmentIdList.filter((item) => {return item.officeId == this.departmentNum})[0]);
+            let temporaryOneRecordIndex = temporaryDepartmentIdList.indexOf(temporaryDepartmentIdList.filter((item) => {return item.officeId == this.departmentNum})[0]);
             if (temporaryOneRecordIndex != -1) {
               // 判断当前科室有没有存入过数据
               temporaryDepartmentIdList[temporaryOneRecordIndex]['oneRecordList'] = this.consumableMsgList
@@ -213,6 +217,39 @@
         };
         this.changeEnergyRecordList(temporaryRecordList);
         setStore('energyRecordList', {"energyRecord": temporaryRecordList})
+      },
+
+      // 存储完成能耗录入的科室编号
+      storeCompleteDepartmentNumber () {
+        let temporaryOfficeList = [];
+        let temporaryDepartmentId = [];
+        temporaryOfficeList = deepClone(this.completeDeviceEnergyRecordServiceOfficeInfo);
+        if (this.completeDeviceEnergyRecordServiceOfficeInfo.length > 0 ) {
+          let temporaryIndex = this.completeDeviceEnergyRecordServiceOfficeInfo.indexOf(this.completeDeviceEnergyRecordServiceOfficeInfo.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (temporaryIndex != -1) {
+            temporaryDepartmentId = temporaryOfficeList[temporaryIndex]['officeList'];
+            temporaryDepartmentId.push(this.departmentNum);
+            temporaryOfficeList[temporaryIndex]['officeList'] = repeArray(temporaryDepartmentId)
+          } else {
+            temporaryDepartmentId.push(this.departmentNum);
+            temporaryOfficeList.push(
+              { 
+                officeList: repeArray(temporaryDepartmentId),
+                taskId: this.taskId
+              }
+            )
+          }
+        } else {
+          temporaryDepartmentId.push(this.departmentNum);
+          temporaryOfficeList.push(
+            { 
+              officeList: repeArray(temporaryDepartmentId),
+              taskId: this.taskId
+            }
+          )
+        };
+        this.changeCompleteDeviceEnergyRecordServiceOfficeInfo(temporaryOfficeList);
+        setStore('isCompleteDeviceEnergyRecordServiceOfficeInfo', {"sweepCodeInfo": temporaryOfficeList})
       },
 
       // 是否返回弹窗确定返回事件
@@ -253,6 +290,7 @@
           this.isAllRecordShow = true;
           return
         };
+        this.storeEnergyRecord()
         this.backTo()
       }
     }

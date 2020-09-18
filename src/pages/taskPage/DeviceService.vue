@@ -154,7 +154,8 @@
             workOrder: '灯管',
             taskType: '1',
             taskPoint: '2',
-            type: 1
+            type: 2,
+            taskId: 12
           },
           {
             date: '2020-03-03 13:00',
@@ -162,7 +163,8 @@
             workOrder: '灯管',
             taskType: '1',
             taskPoint: '2',
-            type:2
+            type:3,
+            taskId: 11
           },
           {
             date: '2020-03-03 13:00',
@@ -170,14 +172,16 @@
             workOrder: '灯管',
             taskType: '1',
             taskPoint: '2',
-            type:3
+            type:3,
+            taskId: 10
           },
           {
             date: '2020-03-03 13:00',
             workOrderNumber: 'bx12131313131',
             workOrder: '灯管',
             taskType: '1',
-            taskPoint: '2'
+            taskPoint: '2',
+            taskId: 13
           }
         ]
       };
@@ -194,6 +198,7 @@
       ...mapGetters([
         'navTopTitle',
         'userInfo',
+        'catch_components',
         'isFreshDeviceServicePage'
       ]),
       proId () {

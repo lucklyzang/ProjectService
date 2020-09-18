@@ -544,7 +544,8 @@ export const removeAllLocalStorage = () => {
   removeStore('isCompleteDepartmentServiceOfficeInfo'),
   removeStore('isCompleteDepartmentServiceCheckedItemList'),
   removeStore('energyRecordList'),
-  removeStore('isCurrentDeviceCopyServiceVerifySweepCode')
+  removeStore('isCurrentDeviceCopyServiceVerifySweepCode'),
+  removeStore('isCompleteDeviceEnergyRecordServiceOfficeInfo')
 }
 
 /*

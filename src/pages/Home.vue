@@ -375,9 +375,13 @@
         if (getStore('isCurrentDeviceCopyServiceVerifySweepCode')) {
           this.$store.commit('changeIsCurrentDeviceCopyServiceVerifySweepCode', JSON.parse(getStore('isCurrentDeviceCopyServiceVerifySweepCode'))['number']);
         };
-        // 重新存入完成能耗数据录入的任务信息列表
+        // 重新存入当前科室设备能耗记录信息列表
         if (getStore('energyRecordList')) {
           this.$store.commit('changeEnergyRecordList',JSON.parse(getStore('energyRecordList'))['energyRecord'])
+        };
+        // 重新存入完成巡检任务的科室编号
+        if (getStore('isCompleteDeviceEnergyRecordServiceOfficeInfo')) {
+          this.$store.commit('changeCompleteDeviceEnergyRecordServiceOfficeInfo',JSON.parse(getStore('isCompleteDeviceEnergyRecordServiceOfficeInfo'))['sweepCodeInfo'])
         };
       }
     }
