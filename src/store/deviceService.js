@@ -4,6 +4,7 @@ export default {
     deviceServiceMsg: '',
     energyRecordList: [],
     isCurrentDeviceCopyServiceVerifySweepCode: [],
+    currentDeviceCopyVerifySweepCodeDepNumber: '',
     completeDeviceEnergyRecordServiceOfficeInfo: []
   },
   getters:{
@@ -11,6 +12,7 @@ export default {
     deviceServiceMsg: state => state.deviceServiceMsg,
     energyRecordList: state => state.energyRecordList,
     isCurrentDeviceCopyServiceVerifySweepCode: state => state.isCurrentDeviceCopyServiceVerifySweepCode,
+    currentDeviceCopyVerifySweepCodeDepNumber: state => state.currentDeviceCopyVerifySweepCodeDepNumber,
     completeDeviceEnergyRecordServiceOfficeInfo: state => state.completeDeviceEnergyRecordServiceOfficeInfo
   },
   mutations:{
@@ -25,10 +27,15 @@ export default {
     changeDeviceServiceMsg (state, playLoad) {
       state.deviceServiceMsg = playLoad
     },
-    // 改变设备巡检中能耗录入扫码校验通过的当前科室编号的状态
+    // 改变设备巡检中能耗录入扫码校验通过的当前科室id的状态
     changeIsCurrentDeviceCopyServiceVerifySweepCode (state, playLoad) {
       state.isCurrentDeviceCopyServiceVerifySweepCode = playLoad
     },
+    // 改变设备巡检中能耗录入扫码校验通过的当前科室编号的状态
+    changeCurrentDeviceCopyVerifySweepCodeDepNumber (state, playLoad) {
+      state.currentDeviceCopyVerifySweepCodeDepNumber = playLoad
+    },
+
     // 改变设备巡检中完成能耗录入的当前科室编号的状态
     changeCompleteDeviceEnergyRecordServiceOfficeInfo (state, playLoad) {
       state.completeDeviceEnergyRecordServiceOfficeInfo = playLoad

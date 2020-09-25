@@ -2,7 +2,7 @@ import axios from 'axios'
 import store from '@/store'
 import router from '../router'
 import Vue from 'vue';
-import { removeAllLocalStorage } from '@/common/js/utils'
+import { removeAllLocalStorage,getStore } from '@/common/js/utils'
 import { Dialog, Toast } from 'vant';
 // 全局注册
 Vue.use(Dialog);
@@ -40,6 +40,9 @@ service.interceptors.response.use(
       setStore('questToken', response.headers['token']);
     };
     if (!response.headers.hasOwnProperty('token')) {
+      if (response.data.msg == `当前用户[${getStore('userName')}]已登陆,不可重复登陆`) {
+				return response
+		  };
       if (!store.getters.overDueWay) {
         Toast('token已过期,请重新登录');
         if(store.getters.globalTimer) {window.clearInterval(store.getters.globalTimer)};

@@ -10,32 +10,32 @@
         <p class="content-top-other">
           <span>巡检编号</span>
           <span>
-            2121212121
+           {{oneEnergyMsg.taskNumber}}
           </span>
         </p>
         <p class="content-top-other">
           <span>巡检名称</span>
           <span>
-            {{name}}
+             {{oneEnergyMsg.taskName}}
           </span>
         </p>
         <p class="content-top-other">
           <span>当前次数</span>
           <span>
-            {{phoneNumber}}
+            {{oneEnergyMsg.currentTimes}}
           </span>
         </p>
         <p class="content-top-other">
           <span>时间</span>
           <span>
-            {{departmentName}}
+            {{oneEnergyMsg.startTime}}
           </span>
         </p>
       </div>
       <div class="content-middle">
         <p>巡检设备</p>
-        <ul>
-          <li v-for="(item,index) in viewPointList" :key="`${item}-${index}`">{{item}}</li>
+        <ul v-show="oneEnergyMsg.spaces ? oneEnergyMsg.spaces.length > 0 : false">
+          <li v-for="(item,index) in oneEnergyMsg.spaces" :key="`${item}-${index}`" :class="{listStyle: item.checked}">{{item.depName}}</li>
         </ul>
       </div>
       <div class="content-bottom">
@@ -54,6 +54,7 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, deepClone } from '@/common/js/utils'
+  import {queryOneEnergyTask,verifyEnergyTaskDepartment} from '@/api/worker.js'
   export default {
     name: 'OperateRecordOrderDetails',
     components:{
@@ -63,10 +64,7 @@
     },
     data() {
       return {
-        name: '撒飒飒',
-        phoneNumber: '132212121',
-        personPosition: '维修员',
-        viewPointList: ['科室一飒飒','科室一查询查询从','科室一想','科室一下载','科室一没那么','科室一婆婆','科室一的','科室一传','科室一辅导费','科室一']
+        oneEnergyMsg: ''
       }
     },
     
@@ -76,9 +74,9 @@
         pushHistory();
         this.gotoURL(() => {
           if (this.deviceServiceMsg.state == 4) {
-            this.changeIsFreshDepartmentServicePage(false)
+            this.changeIsFreshDeviceServicePage(false)
           } else {
-            this.changeIsFreshDepartmentServicePage(true)
+            this.changeIsFreshDeviceServicePage(true)
           };
           this.$router.push({path: 'deviceService'});
           this.changeTitleTxt({tit:'设备巡检'});
@@ -90,6 +88,7 @@
       window['scanQRcodeCallback'] = (code) => {
         me.scanQRcodeCallback(code);
       };
+      this.getqueryOneEnergyTask()
     },
     
     watch: {
@@ -99,7 +98,8 @@
       ...mapGetters([
         'navTopTitle',
         'deviceServiceMsg',
-        'isCurrentDeviceCopyServiceVerifySweepCode'
+        'isCurrentDeviceCopyServiceVerifySweepCode',
+        'completeDeviceEnergyRecordServiceOfficeInfo'
       ]),
       userName () {
        return this.userInfo.userName
@@ -127,16 +127,99 @@
     methods:{
       ...mapMutations([
         'changeTitleTxt',
-        'changeIsFreshDepartmentServicePage',
-        'changeIsCurrentDeviceCopyServiceVerifySweepCode'
+        'changeIsFreshDeviceServicePage',
+        'changeIsCurrentDeviceCopyServiceVerifySweepCode',
+        'changeCurrentDeviceCopyVerifySweepCodeDepNumber'
       ]),
+
+      // 查询单条科室巡检任务信息
+      getqueryOneEnergyTask () {
+        queryOneEnergyTask(this.taskId).then((res) => {
+          if(res && res.data.code == 200) {
+            let temporaryOneRepairsMsg = res.data.data;
+            temporaryOneRepairsMsg.spaces = JSON.parse(res.data.data.spaces);
+            for (let item of temporaryOneRepairsMsg.spaces) {
+              item.checked = false
+            };
+            this.oneEnergyMsg = temporaryOneRepairsMsg;
+            // // 为完成巡检的科室增加标记
+            if (this.completeDeviceEnergyRecordServiceOfficeInfo.length > 0) {
+              for (let w = 0, wLen = this.completeDeviceEnergyRecordServiceOfficeInfo.length; w < wLen; w++) {
+                if (this.oneEnergyMsg['id'] == this.completeDeviceEnergyRecordServiceOfficeInfo[w]['taskId']) {
+                  if (this.completeDeviceEnergyRecordServiceOfficeInfo[w]['officeList'].length > 0) {
+                    for (let i = 0, len1 = this.completeDeviceEnergyRecordServiceOfficeInfo[w]['officeList'].length; i < len1; i++) {
+                      if (this.oneEnergyMsg['spaces'].length > 0) {
+                        for (let j = 0, len2 = this.oneEnergyMsg['spaces'].length; j < len2; j++) {
+                          if (this.oneEnergyMsg['spaces'][j]['depNo'] == this.completeDeviceEnergyRecordServiceOfficeInfo[w]['officeList'][i]) {
+                            this.oneEnergyMsg['spaces'][j]['checked'] = true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+          message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+       // 校验当前科室二维码
+      juddgeCurrentDepartment(data) {
+        verifyEnergyTaskDepartment(data).then((res) => {
+          if (res && res.data.code == 200) {
+            // 存储当前扫码校验通过的科室id
+            this.storeCurrentDepartmentNumber(data.depId);
+            // 存储当前扫码校验通过的科室编号
+            this.changeCurrentDeviceCopyVerifySweepCodeDepNumber(data.depNo);
+            setStore('energyDepartmentService',data.depNo);
+            this.$router.push({path: 'CopyRecordBill'});
+            this.changeTitleTxt({tit:'设备参数单'});
+            setStore('currentTitle','设备参数单')
+          } else {
+            this.$toast(`${res.data.msg}`)
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
 
       // 摄像头扫码后的回调
       scanQRcodeCallback(code) {
-        if (code) {}
+        if (code) {
+          let codeData = code.split('|');
+          if (codeData.length > 0) {
+            this.departmentId = codeData[0];
+            this.departmentNo = codeData[1];
+            this.juddgeCurrentDepartment({
+              id: this.taskId,  //任务ID
+              depNo: this.departmentNo, //科室编号
+              depId: this.departmentId,  //科室ID
+              workerId: this.workerId // 用户id
+            })
+          }
+        } else {
+          this.$dialog.alert({
+            message: '当前没有扫描到任何信息,请重新扫描'
+          }).then(() => {
+            this.fillConsumable()
+          });
+        }
       },
 
-      // 存储当前扫码校验通过的科室编号
+      // 存储当前扫码校验通过的科室id
       storeCurrentDepartmentNumber (departmentNumber) {
         let temporaryDepartmentNumber = [];
         temporaryDepartmentNumber = deepClone(this.isCurrentDeviceCopyServiceVerifySweepCode);
@@ -167,9 +250,9 @@
       //返回上一页
       backTo () {
         if (this.deviceServiceMsg.state == 4) {
-          this.changeIsFreshDepartmentServicePage(false)
+          this.changeIsFreshDeviceServicePage(false)
         } else {
-          this.changeIsFreshDepartmentServicePage(true)
+          this.changeIsFreshDeviceServicePage(true)
         };
         this.$router.push({path: 'deviceService'});
         this.changeTitleTxt({tit:'设备巡检'});
@@ -178,15 +261,7 @@
 
       // 扫一扫
       fillConsumable () {
-        this.$router.push({path: 'CopyRecordBill'});
-        this.changeTitleTxt({tit:'设备参数单'});
-        setStore('currentTitle','设备参数单');
-        if (this.deviceServiceMsg.taskId == 11) {
-          this.storeCurrentDepartmentNumber(3)
-        } else {
-          this.storeCurrentDepartmentNumber(2)
-        }
-        // window.android.scanQRcode()
+        window.android.scanQRcode()
       },
 
       // 完成巡检
@@ -307,6 +382,9 @@
             background: #8e9397;
             color: #fff;
             border-radius: 2px
+          };
+          .listStyle {
+            background: @color-theme
           }
         }
       };

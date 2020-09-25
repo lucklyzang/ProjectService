@@ -8,7 +8,7 @@
       <!-- 内容部分 -->
       <div class="content-top">
         <div class="circulation-area-title">
-          当前抄表设备: 科室一
+          当前抄表科室: {{currentDepartmentName}}
         </div>
         <div class="circulation-area">
           <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
@@ -42,6 +42,7 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray, deepClone  } from '@/common/js/utils'
+  import {getDeviceMessage, submitMeterReadingData} from '@/api/worker.js'
   export default {
     name: 'OperateRecordBill',
     components:{
@@ -53,24 +54,9 @@
       return {
         isAllRecordShow: false,
         departmentNum: '',
-        consumableMsgList: [
-          {
-            consumableName: '儿科电表一',
-            name: ''
-          },
-          {
-            consumableName: '儿科电表二',
-            name: ''
-          },
-          {
-            consumableName: '儿科电表三',
-            name: ''
-          },
-          {
-            consumableName: '儿科电表四',
-            name: ''
-          }
-        ]
+        currentDepartmentId: '',
+        currentDepartmentName: '',
+        consumableMsgList: []
       }
     },
     
@@ -88,8 +74,10 @@
           setStore('currentTitle','设备巡检详情')
         })
       };
+      this.echoCurrentDepartmentId();
       this.getDepartmentNumber();
-      this.isRequestEnergyList()
+      this.isRequestEnergyList();
+      this.queryDeviceMessage()
     },
     
     watch: {
@@ -101,7 +89,8 @@
         'energyRecordList',
         'deviceServiceMsg',
         'isCurrentDeviceCopyServiceVerifySweepCode',
-        'completeDeviceEnergyRecordServiceOfficeInfo'
+        'completeDeviceEnergyRecordServiceOfficeInfo',
+        'currentDeviceCopyVerifySweepCodeDepNumber'
       ]),
       userName () {
        return this.userInfo.userName
@@ -140,12 +129,23 @@
         setStore('currentTitle','抄录详情')
       },
 
+      // 回显当前检修科室名称
+      echoCurrentDepartmentId () {
+        try {
+          if (this.isCurrentDeviceCopyServiceVerifySweepCode.length == 0) { return };
+          let echoIndex = this.isCurrentDeviceCopyServiceVerifySweepCode.indexOf(this.isCurrentDeviceCopyServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (echoIndex == -1) { return };
+          this.currentDepartmentId = this.isCurrentDeviceCopyServiceVerifySweepCode[echoIndex]['number'];
+          // 获取科室名称
+          this.currentDepartmentName = Dictionary(JSON.parse(getStore('departmentMessage')),this.currentDepartmentId)
+        } catch (err) {
+          this.$toast(`${err}`)
+        }
+      },
+
       // 获取当前扫码通过科室的编号
       getDepartmentNumber () {
-        let temporaryIndex = this.isCurrentDeviceCopyServiceVerifySweepCode.indexOf(this.isCurrentDeviceCopyServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
-        if (temporaryIndex != -1) {
-          this.departmentNum = this.isCurrentDeviceCopyServiceVerifySweepCode[temporaryIndex]['number']
-        }
+        this.departmentNum = this.currentDeviceCopyVerifySweepCodeDepNumber
       },
 
       // 是否请求能耗记录列表
@@ -167,6 +167,42 @@
         } else {
           // 请求后台数据
         }
+      },
+
+      // 获取当前科室要抄录设备的信息
+      queryDeviceMessage () {
+        this.consumableMsgList = []
+        getDeviceMessage({
+          proId: this.proId, 
+          taskId: this.taskId,
+          depId: this.currentDepartmentId,
+          depNo: this.departmentNum,
+          deviceTypeId: this.deviceServiceMsg.deviceId,
+        }).then((res) => {
+          if (res && res.data.code == 200) {
+            if (res.data.data.length > 0) {
+              for (let item of res.data.data) {
+                this.consumableMsgList.push(
+                  {
+                    consumableName: item.deviceName,
+                    deviceNumber: item.deviceNumber,
+                    additional: item.additional,
+                    name: ''
+                  }
+                )
+              }
+            }
+          } else {
+            this.$toast(`${res.data.msg}`);
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
       },
 
       // 存储科室记录过的能耗数据
@@ -254,12 +290,49 @@
 
       // 是否返回弹窗确定返回事件
       isBackSure () {
+        this.storeEnergyRecord()
         this.backTo()
       },
 
       // 是否返回弹窗取消返回事件
-      isBackCancel () {
+      isBackCancel () {},
 
+      // 提交录入数据
+      submitEnteringData () {
+        let data = {
+          proId: this.proId, 
+          taskId: this.taskId,
+          depId: this.currentDepartmentId,
+          depNo: this.departmentNum,
+          deviceTypeId: this.deviceServiceMsg.deviceId,
+          checkItems: []
+        };
+        for (let item of this.consumableMsgList) {
+          data['checkItems'].push({
+            deviceNumber: item.deviceNumber,  //设备编号
+			      checkResult: item.name     //抄表数据
+          })
+        };
+        submitMeterReadingData(data).then((res) => {
+          if (res.data.code == 200) {
+            this.$toast('提交成功');
+            this.storeEnergyRecord();
+            this.backTo()
+          } else {
+            this.$dialog.alert({
+              message: `${res.data.msg}`,
+              closeOnPopstate: true
+            }).then(() => {
+            })
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
       },
 
       // 确认
@@ -290,8 +363,7 @@
           this.isAllRecordShow = true;
           return
         };
-        this.storeEnergyRecord()
-        this.backTo()
+        this.submitEnteringData()
       }
     }
   }

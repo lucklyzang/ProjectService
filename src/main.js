@@ -114,15 +114,19 @@ new Vue({
     if (getStore('isCompleteDepartmentServiceCheckedItemList')) {
       store.commit('changeCompleteDepartmentServiceCheckedItemList',JSON.parse(getStore('isCompleteDepartmentServiceCheckedItemList'))['sweepCodeInfo'])
     };
-    // 重新存入设备巡检中能耗录入扫码校验通过的当前科室编号
+    // 重新存入设备巡检中能耗录入扫码校验通过的当前科室id
     if (getStore('isCurrentDeviceCopyServiceVerifySweepCode')) {
       store.commit('changeIsCurrentDeviceCopyServiceVerifySweepCode', JSON.parse(getStore('isCurrentDeviceCopyServiceVerifySweepCode'))['number']);
+    };
+    // 重新存入设备巡检中能耗录入扫码校验通过的当前科室编号
+    if (getStore('energyDepartmentService')) {
+      store.commit('changeCurrentDeviceCopyVerifySweepCodeDepNumber', getStore('energyDepartmentService'));
     };
     // 重新存入当前科室设备能耗记录信息
     if (getStore('energyRecordList')) {
       store.commit('changeEnergyRecordList',JSON.parse(getStore('energyRecordList'))['energyRecord'])
     };
-    // 重新存入完成巡检任务的科室编号
+    // 重新存入完成能耗录入的科室编号信息
     if (getStore('isCompleteDeviceEnergyRecordServiceOfficeInfo')) {
       store.commit('changeCompleteDeviceEnergyRecordServiceOfficeInfo',JSON.parse(getStore('isCompleteDeviceEnergyRecordServiceOfficeInfo'))['sweepCodeInfo'])
     };

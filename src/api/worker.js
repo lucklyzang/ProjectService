@@ -230,3 +230,62 @@ export function saveDepartmentMate(data) {
     data
   })
 };
+
+/*
+ * 
+ *  能耗抄录
+ * 
+ * 
+*/
+
+// 查询所有能耗抄录任务
+export function queryAllEnergyTask(data) {
+  return request({
+    url: 'xjEnergyTask/queryAllTask',
+    method: 'get',
+    params: data
+  })
+};
+
+// 获取能耗抄录任务
+export function ensureEnergyTask(proId,taskId) {
+  return request({
+    url: `xjEnergyTask/ensure/${proId}/${taskId}`,
+    method: 'put'
+  })
+};
+
+// 查询单条能耗抄录任务
+export function queryOneEnergyTask(taskId) {
+  return request({
+    url: `xjEnergyTask/queryOneTask/${taskId}`,
+    method: 'get'
+  })
+};
+
+// 校验科室
+export function verifyEnergyTaskDepartment(data) {
+  return request({
+    url: 'xjEnergyTask/spacesVerify',
+    method: 'put',
+    data
+  })
+};
+
+// 根据设备Id和科室查询设备信息
+export function getDeviceMessage(data) {
+  return request({
+    url: 'xjDevice/getDevice',
+    method: 'get',
+    data
+  })
+};
+
+// 保存抄表数据
+export function submitMeterReadingData(data) {
+  return request({
+    url: 'xjCheckResult/submitResult',
+    method: 'put',
+    data
+  })
+};
