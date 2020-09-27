@@ -41,10 +41,10 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray, deepClone  } from '@/common/js/utils'
+  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray, deepClone, Dictionary } from '@/common/js/utils'
   import {getDeviceMessage, submitMeterReadingData} from '@/api/worker.js'
   export default {
-    name: 'OperateRecordBill',
+    name: 'CopyRecordBill',
     components:{
       HeaderTop,
       FooterBottom,
@@ -69,15 +69,12 @@
             this.isAllRecordShow = true;
             return
           };
-          this.$router.push({path: 'operateRecordOrderDetails'});
-          this.changeTitleTxt({tit:'设备巡检详情'});
-          setStore('currentTitle','设备巡检详情')
+          this.backTo()
         })
       };
       this.echoCurrentDepartmentId();
       this.getDepartmentNumber();
-      this.isRequestEnergyList();
-      this.queryDeviceMessage()
+      this.isRequestEnergyList()
     },
     
     watch: {
@@ -88,6 +85,7 @@
         'navTopTitle',
         'energyRecordList',
         'deviceServiceMsg',
+        'userInfo',
         'isCurrentDeviceCopyServiceVerifySweepCode',
         'completeDeviceEnergyRecordServiceOfficeInfo',
         'currentDeviceCopyVerifySweepCodeDepNumber'
@@ -124,6 +122,7 @@
 
       //返回上一页
       backTo () {
+        this.storeEnergyRecord();
         this.$router.push({path: 'CopyDetails'});
         this.changeTitleTxt({tit:'抄录详情'});
         setStore('currentTitle','抄录详情')
@@ -160,12 +159,15 @@
               this.consumableMsgList = temporaryDepartmentIdList[temporaryOneRecordIndex]['oneRecordList']
             } else {
               // 请求后台数据
+              this.queryDeviceMessage()
             }
           } else {
             // 请求后台数据
+            this.queryDeviceMessage()
           }
         } else {
           // 请求后台数据
+          this.queryDeviceMessage()
         }
       },
 
@@ -191,6 +193,8 @@
                   }
                 )
               }
+            } else {
+              this.$toast('没有查询到要抄录的设备');
             }
           } else {
             this.$toast(`${res.data.msg}`);
@@ -290,7 +294,6 @@
 
       // 是否返回弹窗确定返回事件
       isBackSure () {
-        this.storeEnergyRecord()
         this.backTo()
       },
 
@@ -304,7 +307,7 @@
           taskId: this.taskId,
           depId: this.currentDepartmentId,
           depNo: this.departmentNum,
-          deviceTypeId: this.deviceServiceMsg.deviceId,
+          deviceId: this.deviceServiceMsg.deviceId,
           checkItems: []
         };
         for (let item of this.consumableMsgList) {
@@ -317,6 +320,7 @@
           if (res.data.code == 200) {
             this.$toast('提交成功');
             this.storeEnergyRecord();
+            this.storeCompleteDepartmentNumber();
             this.backTo()
           } else {
             this.$dialog.alert({

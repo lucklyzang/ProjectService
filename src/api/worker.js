@@ -277,7 +277,7 @@ export function getDeviceMessage(data) {
   return request({
     url: 'xjDevice/getDevice',
     method: 'get',
-    data
+    params: data
   })
 };
 
@@ -285,7 +285,15 @@ export function getDeviceMessage(data) {
 export function submitMeterReadingData(data) {
   return request({
     url: 'xjCheckResult/submitResult',
-    method: 'put',
+    method: 'post',
     data
+  })
+};
+
+// 完成任务(能耗循环)
+export function completeEnergyRecodeTask(proId,taskId) {
+  return request({
+    url: `xjEnergyTask/ensure/${proId}/${taskId}`,
+    method: 'put'
   })
 };

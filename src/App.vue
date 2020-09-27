@@ -24,12 +24,13 @@ import { mapGetters} from 'vuex'
         'catch_components'
       ])
     },
-    // watch: {
-    //   catch_components: {
-    //    handler (){
-    //   },deep: true
-    //   }
-    // }
+    watch: {
+      catch_components: {
+       handler (value){
+         console.log(value)
+      },deep: true
+      }
+    }
   };
   //App接口
   window['setAppInfo'] =function (uid,os) {

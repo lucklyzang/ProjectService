@@ -19,7 +19,7 @@
       <van-pull-refresh v-model="isRefresh" @refresh="onRefresh" success-text="刷新成功">
         <div class="content-list-action-task-wrapper" v-show="currentIndex == 0">
           <div class="content-list-action-task-item" v-for="(item,index) in acceptableTaskList" :key="`${index}-${item}`">
-            <span class="status-box">{{stateTransfer(item.state)}}</span>
+            <span class="status-box" :class="{statusBoxStyle: item.state == 2}">{{stateTransfer(item.state)}}</span>
             <span class="task-date">{{item.startTime}}</span>
             <p class="task-btn">
               <span class="view"  @click="taskView(item)">领取任务</span>
@@ -38,21 +38,21 @@
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">类型:</span>
-              <span class="name">常规巡检</span>
+              <span class="name name-other">常规巡检</span>
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">已完成设备:</span>
-              <span class="name">{{item.hasInput}}</span>
+              <span class="name name-other">{{item.hasInput}}</span>
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">未完成设备:</span>
-              <span class="name">{{item.deviceCount - item.hasInput}}</span>
+              <span class="name name-other">{{item.deviceCount - item.hasInput}}</span>
             </p>
           </div>
         </div>
         <div class="content-list-action-task-wrapper content-list-complete-task-wrapper" v-show="currentIndex == 1">
           <div class="content-list-action-task-item" v-for="(item,index) in waitTaskList" :key="`${index}-${item}`">
-            <span class="status-box">{{stateTransfer(item.state)}}</span>
+            <span class="status-box" :class="{statusBoxStyle: item.state == 2}">{{stateTransfer(item.state)}}</span>
             <span class="task-date">{{item.startTime}}</span>
             <p class="task-btn">
               <span class="view"  @click="taskView(item)">查看任务</span>
@@ -71,21 +71,21 @@
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">类型:</span>
-              <span class="name">常规巡检</span>
+              <span class="name name-other">常规巡检</span>
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">已完成设备:</span>
-              <span class="name">{{item.hasInput}}</span>
+              <span class="name name-other">{{item.hasInput}}</span>
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">未完成设备:</span>
-              <span class="name">{{item.deviceCount - item.hasInput}}</span>
+              <span class="name name-other">{{item.deviceCount - item.hasInput}}</span>
             </p>
           </div>
         </div>
         <div class="content-list-action-task-wrapper content-list-complete-task-wrapper" v-show="currentIndex == 2">
           <div class="content-list-action-task-item" v-for="(item,index) in completeTaskList" :key="`${index}-${item}`">
-            <span class="status-box">{{stateTransfer(item.state)}}</span>
+            <span class="status-box" :class="{statusBoxStyle: item.state == 2}">{{stateTransfer(item.state)}}</span>
             <span class="task-date">{{item.startTime}}</span>
             <p class="task-btn">
               <span class="view"  @click="taskView(item)">查看任务</span>
@@ -104,15 +104,15 @@
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">类型:</span>
-              <span class="name">常规巡检</span>
+              <span class="name name-other">常规巡检</span>
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">已完成设备:</span>
-              <span class="name">{{item.hasInput}}</span>
+              <span class="name name-other">{{item.hasInput}}</span>
             </p>
             <p class="work-info-other work-info-other-row">
               <span class="tit">未完成设备:</span>
-              <span class="name">{{item.deviceCount - item.hasInput}}</span>
+              <span class="name name-other">{{item.deviceCount - item.hasInput}}</span>
             </p>
           </div>
         </div>
@@ -174,12 +174,13 @@
       let catch_components = store.state.catchComponent.catch_components;
       let i = catch_components.indexOf('DeviceService');
       i === -1 && catch_components.push('DeviceService');
+      console.log(store.state.catchComponent.catch_components);
       next();
     },
 
     beforeRouteLeave(to, from, next) {
       let catch_components = this.catch_components;
-      if (to.name !== 'CopyDetails' || to.name !== 'DeviceServiceDetails' || to.name !== 'OperateRecordOrderDetails'){
+      if (to.name !== 'copyDetails' && to.name !== 'deviceServiceDetails' && to.name !== 'operateRecordOrderDetails'){
         let i = catch_components.indexOf('DeviceService');
         i > -1 && this.changeCatchComponent([]);
       }
@@ -518,6 +519,9 @@
       background: #f7f7f7;
       position: relative;
       overflow: auto;
+      .van-pull-refresh {
+        overflow: auto;
+      };
       > div {
         width: 96%;
         margin: 0 auto;
@@ -538,7 +542,10 @@
             top: 15px;
             right: 15px;
             font-size: 13px;
-            color: red
+            color: #bbbaba
+          };
+          .statusBoxStyle {
+            color: #2db8f9
           };
           .task-date {
             position: absolute;
@@ -578,6 +585,9 @@
           .work-info-other-row {
             display: inline-block;
             width: 40%;
+            .name-other {
+              color: #2db8f9
+            }
           }
           &:last-child {
             margin-bottom: 0

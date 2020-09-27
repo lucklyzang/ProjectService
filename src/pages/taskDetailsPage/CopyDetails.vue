@@ -33,14 +33,14 @@
         </p>
       </div>
       <div class="content-middle">
-        <p>巡检设备</p>
+        <p>巡检科室</p>
         <ul v-show="oneEnergyMsg.spaces ? oneEnergyMsg.spaces.length > 0 : false">
           <li v-for="(item,index) in oneEnergyMsg.spaces" :key="`${item}-${index}`" :class="{listStyle: item.checked}">{{item.depName}}</li>
         </ul>
       </div>
       <div class="content-bottom">
-        <p class="back-home"  @click="fillConsumable">扫一扫</p>
-        <p class="quit-account" @click="completeTask">完成抄录</p>
+        <p class="back-home"  v-show="deviceServiceMsg.state != 4" @click="fillConsumable">扫一扫</p>
+        <p class="quit-account" v-show="deviceServiceMsg.state != 4" @click="completeTask">完成抄录</p>
       </div>
     </div>
   </div>
@@ -54,9 +54,9 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, deepClone } from '@/common/js/utils'
-  import {queryOneEnergyTask,verifyEnergyTaskDepartment} from '@/api/worker.js'
+  import {queryOneEnergyTask,verifyEnergyTaskDepartment,completeEnergyRecodeTask} from '@/api/worker.js'
   export default {
-    name: 'OperateRecordOrderDetails',
+    name: 'CopyDetails',
     components:{
       HeaderTop,
       FooterBottom,
@@ -64,7 +64,9 @@
     },
     data() {
       return {
-        oneEnergyMsg: ''
+        oneEnergyMsg: '',
+        departmentId: '',
+        departmentNo: ''
       }
     },
     
@@ -98,8 +100,10 @@
       ...mapGetters([
         'navTopTitle',
         'deviceServiceMsg',
+        'userInfo',
         'isCurrentDeviceCopyServiceVerifySweepCode',
-        'completeDeviceEnergyRecordServiceOfficeInfo'
+        'completeDeviceEnergyRecordServiceOfficeInfo',
+        'energyRecordList'
       ]),
       userName () {
        return this.userInfo.userName
@@ -129,7 +133,9 @@
         'changeTitleTxt',
         'changeIsFreshDeviceServicePage',
         'changeIsCurrentDeviceCopyServiceVerifySweepCode',
-        'changeCurrentDeviceCopyVerifySweepCodeDepNumber'
+        'changeCurrentDeviceCopyVerifySweepCodeDepNumber',
+        'changeEnergyRecordList',
+        'changeCompleteDeviceEnergyRecordServiceOfficeInfo'
       ]),
 
       // 查询单条科室巡检任务信息
@@ -180,7 +186,7 @@
             // 存储当前扫码校验通过的科室编号
             this.changeCurrentDeviceCopyVerifySweepCodeDepNumber(data.depNo);
             setStore('energyDepartmentService',data.depNo);
-            this.$router.push({path: 'CopyRecordBill'});
+            this.$router.push({path: 'copyRecordBill'});
             this.changeTitleTxt({tit:'设备参数单'});
             setStore('currentTitle','设备参数单')
           } else {
@@ -199,15 +205,24 @@
       // 摄像头扫码后的回调
       scanQRcodeCallback(code) {
         if (code) {
-          let codeData = code.split('|');
-          if (codeData.length > 0) {
-            this.departmentId = codeData[0];
-            this.departmentNo = codeData[1];
-            this.juddgeCurrentDepartment({
-              id: this.taskId,  //任务ID
-              depNo: this.departmentNo, //科室编号
-              depId: this.departmentId,  //科室ID
-              workerId: this.workerId // 用户id
+          try {
+            let codeData = code.split('|');
+            if (codeData.length > 0) {
+              this.departmentId = codeData[0];
+              this.departmentNo = codeData[1];
+              this.juddgeCurrentDepartment({
+                proId: this.proId,
+                id: this.taskId,  //任务ID 
+                depNo: this.departmentNo, //科室编号
+                depId: this.departmentId,  //科室ID 
+                workerId: this.workerId // 用户id
+              })
+            }
+          } catch (err) {
+            this.$dialog.alert({
+              message: `${err}`
+            }).then(() => {
+              this.fillConsumable()
             })
           }
         } else {
@@ -264,8 +279,56 @@
         window.android.scanQRcode()
       },
 
+      // 清除当前任务存储的所有科室设备录入数据
+      clearEnergyData () {
+        let temporaryInfo = this.energyRecordList.filter((item) => { return item.taskId !== this.taskId});
+        this.changeEnergyRecordList(temporaryInfo);
+        setStore('energyRecordList', {"energyRecord": temporaryInfo})
+      },
+
+      // 清除当前任务存储的完成能耗录入的科室编号
+      clearCompleteEnergyRecordDepartmentInfo () {
+        let temporaryInfo = this.completeDeviceEnergyRecordServiceOfficeInfo.filter((item) => { return item.taskId !== this.taskId});
+        this.changeCompleteDeviceEnergyRecordServiceOfficeInfo(temporaryInfo);
+        setStore('isCompleteDeviceEnergyRecordServiceOfficeInfo', {"sweepCodeInfo": temporaryInfo})
+      },
+
+      // 清除当前扫码校验通过的科室id
+      clearCurrentDepartmentNumber () {
+        let temporaryInfo = this.isCurrentDeviceCopyServiceVerifySweepCode.filter((item) => { return item.taskId !== this.taskId});
+        this.changeIsCurrentDeviceCopyServiceVerifySweepCode(temporaryInfo);
+        setStore('isCurrentDeviceCopyServiceVerifySweepCode', {"number": temporaryInfo})
+      },
+
       // 完成巡检
       completeTask () {
+        let flag = this.oneEnergyMsg.spaces.some((item) => { return item.checked == false});
+        if (flag) {
+          this.$toast('请完成所有房间的巡检');
+          return
+        };
+        completeEnergyRecodeTask(this.proId,this.taskId).then((res) => {
+          if (res && res.data.code == 200) {
+            this.$toast(`${res.data.msg}`);
+            this.clearEnergyData();
+            this.clearCompleteEnergyRecordDepartmentInfo();
+            this.clearCurrentDepartmentNumber();
+            this.backTo()
+          } else {
+            this.$dialog.alert({
+              message: `${res.data.msg}`,
+              closeOnPopstate: true
+            }).then(() => {
+            })
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
       }
     }
   }

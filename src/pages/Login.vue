@@ -36,7 +36,7 @@ import userPng from '@/components/images/user.png'
 import Loading from '@/components/Loading'
 import { setStore, getStore, IsPC, scanCode } from '@/common/js/utils'
 export default {
-  name: 'login',
+  name: 'Login',
   components: {
     Loading
   },
@@ -183,7 +183,7 @@ export default {
       const resultTwo = await this.queryDepartmentMsg(resultOne.proId);
       if (!IsPC()) {
         // 注册channel
-        if (window.android.getChannelId() == '' || (!window.android.getChannelId() && typeof(window.android.getChannelId())!='undefined' && window.android.getChannelId() != 0)) {
+        if (window.android.getChannelId() == '' || (!window.android.getChannelId() && typeof(window.android.getChannelId()) != 'undefined' && window.android.getChannelId() != 0) || typeof(window.android.getChannelId()) == 'undefined') {
           this.$toast('未获取到channelId')
         } else {
           try {

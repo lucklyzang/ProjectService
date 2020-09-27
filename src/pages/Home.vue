@@ -67,7 +67,7 @@
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, repeArray } from '@/common/js/utils'
   let windowTimer
   export default {
-    name: 'home',
+    name: 'Home',
     components:{
       HeaderTop,
       NoData,

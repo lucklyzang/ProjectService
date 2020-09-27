@@ -292,7 +292,7 @@
         setStore('isDepartmentServiceVerifySweepCode', {"sweepCodeInfo": temporaryOfficeList})
       },
 
-      // 存储当前扫码校验通过的科室编号
+      // 存储当前扫码校验通过的科室id
       storeCurrentDepartmentNumber (departmentNumber) {
         let temporaryDepartmentNumber = [];
         temporaryDepartmentNumber = deepClone(this.isCurrentDepartmentServiceVerifySweepCode);
