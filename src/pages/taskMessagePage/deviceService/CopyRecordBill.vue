@@ -17,7 +17,7 @@
               {{item.consumableName}}
             </span>
             <span>
-              <van-field v-model="item.name" type="digit" :error="item.name < 0"/>
+              <van-field v-model="item.name"  placeholder="请输入数据" type="digit" :error="item.name < 0"/>
             </span>
           </p>
         </div>
@@ -91,7 +91,7 @@
         'currentDeviceCopyVerifySweepCodeDepNumber'
       ]),
       userName () {
-       return this.userInfo.userName
+        return this.userInfo.userName
       },
       userTypeId () {
         return this.userInfo.extendData.user_type_id
@@ -403,59 +403,66 @@
         font-size: 14px;
         background: #f7f7f7;
         flex: 1;
+        display: flex;
+        flex-direction: column;
         overflow: auto;
         .circulation-area {
-          max-height: 90%;
-          margin: 0 auto;
-          overflow: auto;
-          font-size: 0;
-        > p {
-          position: relative;
-          height: 50px;
-          background: #fff;
-          margin-bottom: 6px;
-          &:last-child {
-            margin-bottom:0
-          }
-          span {
-            height: 50px;
-            line-height: 50px;
-            font-size: 16px;
-            display: inline-block;
-            text-align: center;
+            width:100%;
+            flex:1;
             overflow: auto;
-            &:first-child {
-              width: 10%
-            };
-            &:nth-child(2) {
-              width: 50%;
-              text-align: center;
-            };
+            font-size: 0;
+          > p {
+            position: relative;
+            height: 50px;
+            background: #fff;
+            margin-bottom: 6px;
             &:last-child {
-              width: 40%;
-              position: absolute;
-              top:0;
-              right: 0;
-              font-size: 28px;
-              /deep/ .van-cell{
-                color: #ababab;
-                border: 1px solid #b2b1b1;
-                padding: 4px;
-                margin-top: 8px;
-                width: 90%
+              margin-bottom:0
+            }
+            span {
+              height: 50px;
+              line-height: 50px;
+              font-size: 16px;
+              display: inline-block;
+              text-align: center;
+              overflow: auto;
+              &:first-child {
+                width: 10%
               };
+              &:nth-child(2) {
+                width: 50%;
+                text-align: center;
+              };
+              &:last-child {
+                width: 40%;
+                position: absolute;
+                padding: 7px 0 7px 0;
+                box-sizing: border-box;
+                top:0;
+                right: 0;
+                font-size: 28px;
+                /deep/ .van-cell{
+                  color: #ababab;
+                  border: 1px solid #b2b1b1;
+                  padding: 0;
+                  padding-left: 4px;
+                  height: 36px;
+                  line-height: 36px;
+                  box-sizing: border-box;
+                  width: 90%
+                };
+              }
             }
           }
-        }
-      };
-      .circulation-area-title {
-        height: 10%;
-        position: relative;
-        padding-left: 4px;
-        padding-top: 6%;
-        box-sizing: border-box;
-        font-size: 16px
-        }
+        };
+        .circulation-area-title {
+          height: 40px;
+          line-height: 40px;
+          position: relative;
+          padding-left: 4px;
+          box-sizing: border-box;
+          font-size: 16px
+          }
       };
       .content-bottom {
         height: 100px;

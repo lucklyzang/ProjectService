@@ -9,10 +9,10 @@ export function getNewWork (proId,workerId) {
 }
 
 /*
- * 
+ *
  *  报修工单
- * 
- * 
+ *
+ *
 */
 
 // 查询报修项目列表
@@ -103,7 +103,7 @@ export function uploadRepairsTaskPhoto(data) {
   })
 };
 
-// 查询任务下的图片信息 
+// 查询任务下的图片信息
 export function queryRepairsTaskPhoto(data) {
   return request({
     url: 'bxRepairTaskImage/queryAll',
@@ -112,7 +112,7 @@ export function queryRepairsTaskPhoto(data) {
   })
 };
 
-// 保存物料信息 
+// 保存物料信息
 export function saveMate(data) {
   return request({
     url: 'bxTask/saveMate',
@@ -130,10 +130,10 @@ export function queryTaskCount (proId,workerId) {
 }
 
 /*
- * 
+ *
  *  科室巡检
- * 
- * 
+ *
+ *
 */
 
 // 巡检任务列表查询
@@ -197,10 +197,19 @@ export function updateDepartmentServiceTaskBeSigned(proId,taskId) {
   })
 };
 
-// 提交签名信息
+// 提交签名信息(所有科室巡检完成签字)
 export function submitDepartMentServiceSignInfo(data) {
   return request({
     url: 'xjImage/submitSignInfoXjTask',
+    method: 'post',
+    data
+  })
+};
+
+// 提交签名信息(单个科室巡检完成)
+export function submitSingleDepartMentServiceSignInfo(data) {
+  return request({
+    url: 'xjDailyCheckHasSpaces/signToXjDailyCheckTask',
     method: 'post',
     data
   })
@@ -232,10 +241,10 @@ export function saveDepartmentMate(data) {
 };
 
 /*
- * 
+ *
  *  能耗抄录
- * 
- * 
+ *
+ *
 */
 
 // 查询所有能耗抄录任务
@@ -293,7 +302,7 @@ export function submitMeterReadingData(data) {
 // 完成任务(能耗循环)
 export function completeEnergyRecodeTask(proId,taskId) {
   return request({
-    url: `xjEnergyTask/ensure/${proId}/${taskId}`,
+    url: `xjEnergyTask/complete/${proId}/${taskId}`,
     method: 'put'
   })
 };

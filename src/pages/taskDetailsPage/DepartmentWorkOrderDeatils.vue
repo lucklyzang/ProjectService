@@ -3,7 +3,7 @@
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
-        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
       </HeaderTop>
       <!-- 内容部分 -->
       <div class="content-top">
@@ -70,7 +70,7 @@
         departmentNo: ''
       }
     },
-    
+
     mounted() {
       // 控制设备物理返回按键测试
       if (!IsPC()) {
@@ -93,10 +93,10 @@
       };
       this.getOneDepartmentService()
     },
-    
+
     watch: {
     },
-    
+
     computed:{
       ...mapGetters([
         'navTopTitle',
@@ -135,7 +135,8 @@
         'changeIsFreshDepartmentServicePage',
         'changeIsDepartmentServiceVerifySweepCode',
         'changeIsCurrentDepartmentServiceVerifySweepCode',
-        'changeDepartmentServiceOfficeId'
+        'changeDepartmentServiceOfficeId',
+        'changeIsSingleDepartmentSignature'
       ]),
 
       //返回上一页
@@ -155,7 +156,7 @@
         queryOneDepartmentService(this.taskId).then((res) => {
           if(res && res.data.code == 200) {
             let temporaryOneRepairsMsg = res.data.data;
-            temporaryOneRepairsMsg.spaces = JSON.parse(res.data.data.spaces);
+            temporaryOneRepairsMsg.spaces = res.data.data.spaces;
             for (let item of temporaryOneRepairsMsg.spaces) {
               item.checked = false
             };
@@ -273,7 +274,7 @@
           } else {
             temporaryDepartmentId.push(departmentNumber);
             temporaryOfficeList.push(
-              { 
+              {
                 officeList: repeArray(temporaryDepartmentId),
                 taskId: this.taskId
               }
@@ -282,7 +283,7 @@
         } else {
           temporaryDepartmentId.push(departmentNumber);
           temporaryOfficeList.push(
-            { 
+            {
               officeList: repeArray(temporaryDepartmentId),
               taskId: this.taskId
             }
@@ -302,7 +303,7 @@
             temporaryDepartmentNumber[temporaryIndex]['number'] = departmentNumber
           } else {
             temporaryDepartmentNumber.push(
-              { 
+              {
                 number: departmentNumber,
                 taskId: this.taskId
               }
@@ -310,7 +311,7 @@
           };
         } else {
           temporaryDepartmentNumber.push(
-            { 
+            {
               number:departmentNumber,
               taskId: this.taskId
             }
@@ -322,6 +323,7 @@
 
       // 签字
       signatureClick () {
+        this.changeIsSingleDepartmentSignature(false);
         this.$router.push({path: 'departmentServiceSignature'});
         this.changeTitleTxt({tit:'巡检签名'});
         setStore('currentTitle','巡检签名')
@@ -329,11 +331,11 @@
 
       // 完成巡检
       completeTask () {
-        let flag = this.oneRepairsMsg.spaces.some((item) => { return item.checked == false});
-        if (flag) {
-          this.$toast('请完成所有房间的巡检');
-          return
-        };
+        // let flag = this.oneRepairsMsg.spaces.some((item) => { return item.checked == false});
+        // if (flag) {
+        //   this.$toast('请完成所有房间的巡检');
+        //   return
+        // };
         updateDepartmentServiceTaskBeSigned(this.proId, this.taskId).then((res) => {
           if (res && res.data.code == 200) {
             // 删除当前任务存储的扫码校验校验通过的科室编号信息
@@ -403,7 +405,7 @@
             &:first-child {
               left: 0;
               top: 16px;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px;
             };
             &:last-child {
@@ -435,7 +437,7 @@
             &:first-child {
               left: 0;
               top: 0;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px;
             };
             &:last-child {
@@ -458,7 +460,7 @@
         padding: 10px;
         position: relative;
         > p {
-          color: #bbbaba;
+          color: black;
           height: 5%;
         };
         ul {

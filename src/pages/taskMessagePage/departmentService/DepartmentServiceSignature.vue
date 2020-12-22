@@ -4,7 +4,7 @@
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
-        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
       </HeaderTop>
       <div class="loading">
         <loading :isShow="showLoadingHint" :textContent="loadinText" textColor="#2895ea"></loading>
@@ -31,7 +31,7 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
-  import {submitDepartMentServiceSignInfo, updateDepartmentServiceTaskBeCompleted} from '@/api/worker.js'
+  import {submitDepartMentServiceSignInfo, submitSingleDepartMentServiceSignInfo,updateDepartmentServiceTaskBeCompleted} from '@/api/worker.js'
   export default {
     name: 'DepartmentServiceSignature',
     components:{
@@ -45,10 +45,11 @@
       return {
         showLoadingHint: false,
         loadinText: '',
-        overlayShow: false
+        overlayShow: false,
+        currentDepartmentId: ''
       }
     },
-    
+
     mounted() {
       this.$refs.contentTop.style.zIndex = 100;
       // 控制设备物理返回按键测试
@@ -59,12 +60,13 @@
           this.changeTitleTxt({tit:'工单详情'});
           setStore('currentTitle','工单详情')
         })
-      }
+      };
+      if (this.isSingleDepartmentSignature) { this.echoCurrentDepartmentId() }
     },
-    
+
     watch: {
     },
-    
+
     computed:{
       ...mapGetters([
         'navTopTitle',
@@ -72,7 +74,10 @@
         'userInfo',
         'originalSignature',
         'departmentServiceMsg',
-        'completeDepartmentServiceOfficeInfo'
+        'completeDepartmentServiceOfficeInfo',
+        'isSingleDepartmentSignature',
+        'departmentServiceOfficeId',
+        'isCurrentDepartmentServiceVerifySweepCode'
       ]),
       userName () {
        return this.userInfo.userName
@@ -110,6 +115,18 @@
         setStore('currentTitle','工单详情')
       },
 
+      // 获取当前需要签名的科室id
+      echoCurrentDepartmentId () {
+        try {
+          if (this.isCurrentDepartmentServiceVerifySweepCode.length == 0) { return };
+          let echoIndex = this.isCurrentDepartmentServiceVerifySweepCode.indexOf(this.isCurrentDepartmentServiceVerifySweepCode.filter((item) => {return item.taskId == this.taskId})[0]);
+          if (echoIndex == -1) { return };
+          this.currentDepartmentId = this.isCurrentDepartmentServiceVerifySweepCode[echoIndex]['number'];
+        } catch (err) {
+          this.$toast(`${err}`)
+        }
+      },
+
       // 确认
       sure () {
         this.$refs.mychild.commitSure();
@@ -120,28 +137,56 @@
         this.loadinText = '上传中,请稍等···';
         this.showLoadingHint = true;
         this.overlayShow = true;
-        submitDepartMentServiceSignInfo({
-          taskId: this.taskId,
-          imgType: 0,
-          imgOrsign: this.currentElectronicSignature
-        }).then((res) => {
-          this.showLoadingHint = false;
-          this.overlayShow = false;
-          if(res && res.data.code == 200) {
-            this.updateTaskComplete(this.proId,this.taskId)
-          } else {
-            this.$toast(`${res.data.msg}`)
-          }
-        })
-        .catch((err) => {
-          this.$dialog.alert({
-            message: `${err.message}`,
-            closeOnPopstate: true
-          }).then(() => {
-          });
-          this.showLoadingHint = false;
-          this.overlayShow = false
-        })
+        if (!this.isSingleDepartmentSignature) {
+          submitDepartMentServiceSignInfo({
+            taskId: this.taskId,
+            imgType: 0,
+            imgOrsign: this.currentElectronicSignature
+          }).then((res) => {
+              this.showLoadingHint = false;
+              this.overlayShow = false;
+              if (res && res.data.code == 200) {
+                this.updateTaskComplete(this.proId, this.taskId)
+              } else {
+                this.$toast(`${res.data.msg}`)
+              }
+            })
+            .catch((err) => {
+              this.$dialog.alert({
+                message: `${err.message}`,
+                closeOnPopstate: true
+              }).then(() => {
+              });
+              this.showLoadingHint = false;
+              this.overlayShow = false
+            })
+        } else {
+          submitSingleDepartMentServiceSignInfo({
+            proId: this.proId, //项目ID
+            taskId: this.taskId, //任务id
+            depId: this.currentDepartmentId, //部门ID
+            depNo: this.departmentServiceOfficeId, //部门编号
+            imgSign: this.currentElectronicSignature // 签名信息
+          }).then((res) => {
+              this.showLoadingHint = false;
+              this.overlayShow = false;
+              if (res && res.data.code == 200) {
+                this.$toast(`${res.data.data}`);
+                this.backTo()
+              } else {
+                this.$toast(`${res.data.msg}`)
+              }
+            })
+            .catch((err) => {
+              this.$dialog.alert({
+                message: `${err.message}`,
+                closeOnPopstate: true
+              }).then(() => {
+              });
+              this.showLoadingHint = false;
+              this.overlayShow = false
+            })
+        }
       },
 
       // 更新任务为已完成

@@ -8,7 +8,7 @@
     </div>
     <!-- 顶部导航栏 -->
     <HeaderTop :title="navTopTitle">
-      <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+      <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
     </HeaderTop>
     <div class="content-top">
       <ul class="tab-title">
@@ -172,7 +172,7 @@
       if (this.isFreshDepartmentServicePage) {
         this.getDepartmentList({
           proId: this.proId,
-          workerId: this.workerId,	
+          workerId: this.workerId,
           state: -1,
           startDate	: '',
           endDate : ''
@@ -195,7 +195,7 @@
       if (this.isFreshDepartmentServicePage) {
         this.getDepartmentList({
           proId: this.proId,
-          workerId: this.workerId,	
+          workerId: this.workerId,
           state: -1,
           startDate	: '',
           endDate : ''
@@ -233,12 +233,12 @@
 
       // 计算点位数量(已完成)
       calculateCount (number) {
-        return deteleObject(JSON.parse(number)).length
+        return deteleObject(number).length
       },
 
       // 计算点位数量(未完成)
       calculateCountUnfinish (item,sum,finishNum) {
-        return deteleObject(JSON.parse(sum)).length - deteleObject(JSON.parse(finishNum)).length
+        return deteleObject(sum).length - deteleObject(finishNum).length
       },
 
       // tab点击事件
@@ -247,7 +247,7 @@
         if (index == 0) {
           this.getDepartmentList({
             proId: this.proId,
-            workerId: this.workerId,	
+            workerId: this.workerId,
             state: -1,
             startDate	: '',
             endDate : ''
@@ -255,7 +255,7 @@
         } else {
           this.getDepartmentList({
             proId: this.proId,
-            workerId: this.workerId,	
+            workerId: this.workerId,
             state: -2,
             startDate	: '',
             endDate : ''
@@ -267,7 +267,7 @@
       onRefresh() {
         this.getDepartmentList({
           proId: this.proId,
-          workerId: this.workerId,	
+          workerId: this.workerId,
           state: this.currentIndex == 0 ? -1 : -2,
           startDate	: '',
           endDate : ''
@@ -456,7 +456,7 @@
           .status-box {
             position: absolute;
             top: 15px;
-            right: 15px;
+            right: 8px;
             font-size: 13px;
             color: #8e9397
           };
@@ -504,7 +504,7 @@
             font-size: 14px;
             color: #bbbaba;
             .name {
-              width: 70%;
+              max-width: 70%;
               display: inline-block;
               overflow: auto;
               vertical-align: top

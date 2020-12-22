@@ -3,7 +3,7 @@
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
-        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
       </HeaderTop>
       <!-- 内容部分 -->
       <div class="content-top">
@@ -15,7 +15,7 @@
         </div>
         <div class="circulation-area">
           <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
-            <span>{{index}}</span>
+            <span>{{index + 1}}</span>
              <span>
               {{item.mateName}}
             </span>
@@ -95,7 +95,7 @@
         inventoryMsgList: [],
       }
     },
-    
+
     mounted() {
       // 控制设备物理返回按键测试
       if (!IsPC()) {
@@ -108,10 +108,10 @@
       };
       this.getMaterialById(this.taskId)
     },
-    
+
     watch: {
     },
-    
+
     computed:{
       ...mapGetters([
         'navTopTitle',
@@ -163,11 +163,11 @@
               this.consumableMsgList = [];
               this.consumableMsgList = res.data.data
             } else {
-              this.$dialog.alert({
-                message: '没有查询到对应的物料信息',
-                closeOnPopstate: true
-              }).then(() => {
-              })
+              // this.$dialog.alert({
+              //   message: '没有查询到对应的物料信息',
+              //   closeOnPopstate: true
+              // }).then(() => {
+              // })
             }
           }
         })
@@ -209,7 +209,7 @@
       // 添加物质
       addConsumable () {
         this.toolShow = true;
-        this.getAllMaterial({ 
+        this.getAllMaterial({
 	        proId: this.proId,
           state: 0
         })
@@ -229,7 +229,7 @@
                 unit: item.unit,
                 mateId: item.id
              })
-           
+
           }
         }
       },
@@ -242,7 +242,7 @@
       // 搜索事件
       searchEvent () {
         if (this.searchValue == '') {
-          this.getAllMaterial({ 
+          this.getAllMaterial({
             proId: this.proId,
             state: 0
           });
@@ -263,15 +263,15 @@
           taskId: this.taskId,
           materials: []
         };
-        let temporaryConsumableMsgList = this.consumableMsgList.filter((item) => {return item.number > 0});
-        if (temporaryConsumableMsgList.length == 0) {
-          this.$toast('添加的耗材数量不能为0');
-          return
-        };
-        for (let item of temporaryConsumableMsgList) {
+        // let temporaryConsumableMsgList = this.consumableMsgList.filter((item) => {return item.number > 0});
+        // if (temporaryConsumableMsgList.length == 0) {
+        //   this.$toast('添加的耗材数量不能为0');
+        //   return
+        // };
+        for (let item of this.consumableMsgList) {
           mateMsg.materials.push(
             {
-              proId: this.proId, 
+              proId: this.proId,
               proName: this.proName,
               mateId: item.mateId,
               number: item.number
@@ -325,7 +325,8 @@
             };
             .icon-span {
               position: absolute;
-              top: 14px;
+              top: 50%;
+              transform: translateY(-50%);
               display: inline-block;
               right: 16px;
               .van-icon {

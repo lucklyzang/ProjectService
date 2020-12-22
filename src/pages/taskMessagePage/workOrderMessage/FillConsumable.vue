@@ -3,7 +3,7 @@
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
-        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
       </HeaderTop>
       <!-- 内容部分 -->
       <div class="content-top">
@@ -15,7 +15,7 @@
         </div>
         <div class="circulation-area">
           <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
-            <span>{{index}}</span>
+            <span>{{index+1}}</span>
              <span>
               {{item.mateName}}
             </span>
@@ -55,7 +55,7 @@
                 <span></span>
               </p>
                <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
-                <span>
+                <span @click="mateNameEvent(item,index)">
                   {{item.mateName}}
                 </span>
                 <span>
@@ -93,9 +93,10 @@
         searchValue: '',
         consumableMsgList: [],
         inventoryMsgList: [],
+        temporaryInventoryMsgList: []
       }
     },
-    
+
     mounted() {
       // 控制设备物理返回按键测试
       if (!IsPC()) {
@@ -109,10 +110,18 @@
       };
       this.getMaterialById(this.taskId)
     },
-    
+
     watch: {
+      searchValue:{
+        handler(newVal, oldVal){
+          console.log(newVal,oldVal);
+          this.inventoryMsgList = [];
+          this.inventoryMsgList = this.temporaryInventoryMsgList.filter((item) => {return item.mateName.indexOf(newVal) != -1})
+        },
+        deep: true
+      }
     },
-    
+
     computed:{
       ...mapGetters([
         'navTopTitle',
@@ -167,11 +176,11 @@
               this.consumableMsgList = [];
               this.consumableMsgList = res.data.data
             } else {
-              this.$dialog.alert({
-                message: '没有查询到对应的物料信息',
-                closeOnPopstate: true
-              }).then(() => {
-              })
+              // this.$dialog.alert({
+              //   message: '没有查询到对应的物料信息',
+              //   closeOnPopstate: true
+              // }).then(() => {
+              // })
             }
           }
         })
@@ -191,7 +200,12 @@
           if(res && res.data.code == 200) {
             if (res.data.data.length > 0) {
               this.inventoryMsgList = [];
-              this.inventoryMsgList = res.data.data
+              this.temporaryInventoryMsgList = [];
+              for (let item of res.data.data) {
+                item['checked'] = false
+              };
+              this.inventoryMsgList = res.data.data;
+              this.temporaryInventoryMsgList = res.data.data
             } else {
               this.$dialog.alert({
                 message: '没有查询到对应的物料信息',
@@ -210,10 +224,15 @@
         })
       },
 
+      // 耗材名称点击事件
+      mateNameEvent (name,index) {
+        this.inventoryMsgList[index]['checked'] = !this.inventoryMsgList[index]['checked'];
+      },
+
       // 添加物质
       addConsumable () {
         this.toolShow = true;
-        this.getAllMaterial({ 
+        this.getAllMaterial({
 	        proId: this.proId,
           state: 0
         })
@@ -233,7 +252,7 @@
                 unit: item.unit,
                 mateId: item.id
              })
-           
+
           }
         }
       },
@@ -246,13 +265,14 @@
       // 搜索事件
       searchEvent () {
         if (this.searchValue == '') {
-          this.getAllMaterial({ 
+          this.getAllMaterial({
             proId: this.proId,
             state: 0
           });
           return
         };
-        this.inventoryMsgList = this.inventoryMsgList.filter((item) => {return item.mateName.indexOf(this.searchValue) != -1})
+        this.inventoryMsgList = [];
+        this.inventoryMsgList = this.temporaryInventoryMsgList.filter((item) => {return item.mateName.indexOf(this.searchValue) != -1})
       },
 
       // 添加取消
@@ -267,15 +287,15 @@
           id: this.taskId,
           materials: []
         };
-        let temporaryConsumableMsgList = this.consumableMsgList.filter((item) => {return item.number > 0});
-        if (temporaryConsumableMsgList.length == 0) {
-          this.$toast('添加的耗材数量不能为0');
-          return
-        };
-        for (let item of temporaryConsumableMsgList) {
+        // let temporaryConsumableMsgList = this.consumableMsgList.filter((item) => {return item.number > 0});
+        // if (temporaryConsumableMsgList.length == 0) {
+        //   this.$toast('添加的耗材数量不能为0');
+        //   return
+        // };
+        for (let item of this.consumableMsgList) {
           mateMsg.materials.push(
             {
-              proId: this.proId, 
+              proId: this.proId,
               proName: item.mateName,
               mateId: item.mateId,
               number: item.number
@@ -313,7 +333,7 @@
           } else {
             temporaryDepartmentId.push(departmentNo);
             temporaryOfficeList.push(
-              { 
+              {
                 officeList: repeArray(temporaryDepartmentId),
                 taskId: this.taskId
               }
@@ -322,7 +342,7 @@
         } else {
           temporaryDepartmentId.push(departmentNo);
           temporaryOfficeList.push(
-            { 
+            {
               officeList: repeArray(temporaryDepartmentId),
               taskId: this.taskId
             }
@@ -343,7 +363,7 @@
       top: 50%;
       .van-dialog__content {
         margin-bottom: 6px;
-        height: 500px;
+        /*height: 500px;*/
         margin: 10px 0;
         .tool-name-list {
           width: 94%;
@@ -360,7 +380,8 @@
             };
             .icon-span {
               position: absolute;
-              top: 14px;
+              top: 50%;
+              transform: translateY(-50%);
               display: inline-block;
               right: 16px;
               .van-icon {
@@ -369,10 +390,10 @@
             }
           }
           .tool-name-list-content {
-            height: 82%;
-            max-height: 82%;
+            max-height: 300px;
             padding: 6px;
             overflow: auto;
+            box-sizing: border-box;
             border-top: 1px solid #b2b2b2;
             border-bottom: 1px solid #b2b2b2;
             .circulation-area-content {

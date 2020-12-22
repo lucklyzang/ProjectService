@@ -8,7 +8,7 @@
     </div>
     <!-- 顶部导航栏 -->
     <HeaderTop :title="navTopTitle">
-      <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+      <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
     </HeaderTop>
     <div class="content-top">
       <ul class="tab-title">
@@ -202,7 +202,7 @@
       if (this.isFreshDeviceServicePage) {
         this.getAllEnergyTask({
           proId: this.proId,
-          workerId: this.workerId,	
+          workerId: this.workerId,
           state: this.currentIndex + 1,
           startDate	: '',
           endDate : ''
@@ -225,7 +225,7 @@
       if (this.isFreshDeviceServicePage) {
         this.getAllEnergyTask({
           proId: this.proId,
-          workerId: this.workerId,	
+          workerId: this.workerId,
           state: this.currentIndex + 1,
           startDate	: '',
           endDate : ''
@@ -260,7 +260,7 @@
         this.noDataShow = false;
         this.showLoadingHint = true;
         queryAllEnergyTask(data).then((res) => {
-          this.showLoadingHint = false;
+            this.showLoadingHint = false;
             this.acceptableTaskList = [];
             this.waitTaskList = [];
             this.completeTaskList = [];
@@ -274,9 +274,9 @@
                     taskId: item.id,
                     taskNumber: item.taskNumber,
                     taskName: item.taskName,
-                    state: item.state,       
+                    state: item.state,
                     startTime: item.startTime,
-                    spaces: item.spaces,           //要访问科室 
+                    spaces: item.spaces,           //要访问科室
                     deviceCount: item.deviceCount,      //设备总数量
                     hasSpaces: item.hasSpaces,   //已访问科室
                     hasInput: item.hasInput,          //已访问设备数
@@ -289,9 +289,9 @@
                     taskId: item.id,
                     taskNumber: item.taskNumber,
                     taskName: item.taskName,
-                    state: item.state,       
+                    state: item.state,
                     startTime: item.startTime,
-                    spaces: item.spaces,           //要访问科室 
+                    spaces: item.spaces,           //要访问科室
                     deviceCount: item.deviceCount,      //设备总数量
                     hasSpaces: item.hasSpaces,   //已访问科室
                     hasInput: item.hasInput,          //已访问设备数
@@ -304,9 +304,9 @@
                     taskId: item.id,
                     taskNumber: item.taskNumber,
                     taskName: item.taskName,
-                    state: item.state,       
+                    state: item.state,
                     startTime: item.startTime,
-                    spaces: item.spaces,           //要访问科室 
+                    spaces: item.spaces,           //要访问科室
                     deviceCount: item.deviceCount,      //设备总数量
                     hasSpaces: item.hasSpaces,   //已访问科室
                     hasInput: item.hasInput,          //已访问设备数
@@ -337,7 +337,7 @@
         if (index == 0) {
           this.getAllEnergyTask({
             proId: this.proId,
-            workerId: this.workerId,	
+            workerId: this.workerId,
             state: 1,
             startDate	: '',
             endDate : ''
@@ -345,7 +345,7 @@
         } else if (index == 1) {
           this.getAllEnergyTask({
             proId: this.proId,
-            workerId: this.workerId,	
+            workerId: this.workerId,
             state: 2,
             startDate	: '',
             endDate : ''
@@ -353,7 +353,7 @@
         } else {
           this.getAllEnergyTask({
             proId: this.proId,
-            workerId: this.workerId,	
+            workerId: this.workerId,
             state: 4,
             startDate	: '',
             endDate : ''
@@ -365,7 +365,7 @@
       onRefresh() {
         this.getAllEnergyTask({
           proId: this.proId,
-          workerId: this.workerId,	
+          workerId: this.workerId,
           state: this.currentIndex == 0 ? 1 : this.currentIndex == 1 ? 2 : 4,
           startDate	: '',
           endDate : ''
@@ -379,7 +379,7 @@
             if (res && res.data.code == 200) {
               this.getAllEnergyTask({
                 proId: this.proId,
-                workerId: this.workerId,	
+                workerId: this.workerId,
                 state: 1,
                 startDate	: '',
                 endDate : ''
@@ -540,7 +540,7 @@
           .status-box {
             position: absolute;
             top: 15px;
-            right: 15px;
+            right: 8px;
             font-size: 13px;
             color: #bbbaba
           };
@@ -580,7 +580,13 @@
           };
           .work-order-number {
             font-size: 14px;
-            color: #bbbaba
+            color: #bbbaba;
+            .name {
+              max-width: 70%;
+              display: inline-block;
+              overflow: auto;
+              vertical-align: top;
+            }
           };
           .work-info-other-row {
             display: inline-block;

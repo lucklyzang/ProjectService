@@ -2,6 +2,7 @@ export default {
   state:{
     isFreshDepartmentServicePage: true,
     departmentServiceMsg: '',
+    isSingleDepartmentSignature: true,
     isDepartmentServiceVerifySweepCode: [],
     isCurrentDepartmentServiceVerifySweepCode: [],
     departmentServiceOfficeId: '',
@@ -17,7 +18,8 @@ export default {
     departmentServiceOfficeId: state => state.departmentServiceOfficeId,
     completeDepartmentServiceOfficeInfo: state => state.completeDepartmentServiceOfficeInfo,
     currentDepartmentServiceCheckedItemId: state => state.currentDepartmentServiceCheckedItemId,
-    completeDepartmentServiceCheckedItemList: state => state.completeDepartmentServiceCheckedItemList
+    completeDepartmentServiceCheckedItemList: state => state.completeDepartmentServiceCheckedItemList,
+    isSingleDepartmentSignature: state => state.isSingleDepartmentSignature
   },
   mutations:{
     // 改变是否刷新巡检任务首页的状态
@@ -32,7 +34,7 @@ export default {
     changeIsDepartmentServiceVerifySweepCode (state, playLoad) {
       state.isDepartmentServiceVerifySweepCode = playLoad
     },
-    // 改变当前巡检任务扫码校验通过的科室编号
+    // 改变当前巡检任务扫码校验通过的科室id
     changeIsCurrentDepartmentServiceVerifySweepCode (state, playLoad) {
       state.isCurrentDepartmentServiceVerifySweepCode = playLoad
     },
@@ -51,7 +53,11 @@ export default {
     // 改变当前完成问题上报的检查项id
     changeCompleteDepartmentServiceCheckedItemList (state, playLoad) {
       state.completeDepartmentServiceCheckedItemList = playLoad
-    }
+    },
+    // 改变是否是单个科室的签字状态
+    changeIsSingleDepartmentSignature (state, playLoad) {
+      state.isSingleDepartmentSignature = playLoad
+    },
   },
   actions:{}
 }

@@ -46,6 +46,7 @@ export default {
       password: '',
       loadingText: '登录中,请稍候···',
       showAccountLogin: true,
+      deviceNumber: '',
       showLoadingHint: false,
       logoTopPng: require('@/components/images/logo-top.png'),
       loginBtnPng: require('@/components/images/login-btn.png')
@@ -65,7 +66,7 @@ export default {
     if (!IsPC()) {
       let that = this;
       pushHistory()
-      that.gotoURL(() => { 
+      that.gotoURL(() => {
         pushHistory();
         this.$router.push({path: '/'});  //输入要返回的上一级路由地址
       });
@@ -77,11 +78,15 @@ export default {
       let resizeHeight = document.documentElement.clientHeight || document.body.clientHeight;
       if (resizeHeight < originalHeight) {
         return (()=>{
-          this.$refs['bgIconWrapper'].style.cssText='flex:none;height:220px' 
+          this.$refs['bgIconWrapper'].style.cssText='flex:none;height:220px'
         })()
       } else {
-        this.$refs['bgIconWrapper'].style.cssText='flex:1;height:0' 
+        this.$refs['bgIconWrapper'].style.cssText='flex:1;height:0'
       }
+    };
+    let me = this;
+    window['setDeviceInfo'] = (val) => {
+      me.setDeviceInfo(val);
     };
   },
 
@@ -98,7 +103,16 @@ export default {
       this.password = getStore('userPassword') ? getStore('userPassword') : '';
     },
 
-    
+    //获取设备编号
+    getDeviceNumber () {
+      window.android.getDeviceInfo()
+    },
+
+    //获取设备编号回调
+    setDeviceInfo (val) {
+      this.deviceNumber = val.IMEI
+    },
+
     // 注册channel
     getChannel (data) {
       return new Promise((resolve,reject) => {
@@ -118,43 +132,52 @@ export default {
     // 登录验证方法
     login () {
       return new Promise((resolve,reject) => {
-        this.showLoadingHint = true;
-        let loginMessage = {
-          username: this.username,
-          password: this.password,
-          rememberMe: 1
-        };
-        logIn(loginMessage).then((res)=>{
-          if (res) {
-            if (res.data.code == 200) {
-              // 重置过期方式
-              this.changeOverDueWay(false);
-              setStore('storeOverDueWay',false);
-              // 存储用户名和密码
-              if (this.showAccountLogin) {
-                setStore('userName', this.username);
-                setStore('userPassword', this.password);
-              };
-              // 存储用户相关的登录后的信息和是否登录
-              setStore('userInfo', res.data.data);
-              setStore('isLogin', true);
-              // 用户相关的登录后的信息存入store
-              this.storeUserInfo(JSON.parse(getStore('userInfo')));
-              resolve(res.data.data)
-            } else {
-              this.$toast(`${res.data.msg}`)
-            }
+        setTimeout(() => {
+          if (!this.deviceNumber) {
+            this.$dialog.alert({
+              message: '未获取到设备编号',
+              closeOnPopstate: false
+            }).then(() => {})
           };
-          this.showLoadingHint = false
-        })
-        .catch((err) => {
-          this.showLoadingHint = false;
-          this.$dialog.alert({
-            message: `${err.message}`,
-            closeOnPopstate: true
-          }).then(() => {
+          this.showLoadingHint = true;
+          let loginMessage = {
+            username: this.username,
+            password: this.password,
+            rememberMe: 1,
+            phoneNumber: this.deviceNumber
+          };
+          logIn(loginMessage).then((res) => {
+            if (res) {
+              if (res.data.code == 200) {
+                // 重置过期方式
+                this.changeOverDueWay(false);
+                setStore('storeOverDueWay',false);
+                // 存储用户名和密码
+                if (this.showAccountLogin) {
+                  setStore('userName', this.username);
+                  setStore('userPassword', this.password);
+                };
+                // 存储用户相关的登录后的信息和是否登录
+                setStore('userInfo', res.data.data);
+                setStore('isLogin', true);
+                // 用户相关的登录后的信息存入store
+                this.storeUserInfo(JSON.parse(getStore('userInfo')));
+                resolve(res.data.data)
+              } else {
+                this.$toast(`${res.data.msg}`)
+              }
+            };
+            this.showLoadingHint = false
           })
-        })
+          .catch((err) => {
+            this.showLoadingHint = false;
+            this.$dialog.alert({
+              message: `${err.message}`,
+              closeOnPopstate: true
+            }).then(() => {
+            })
+          })
+        },100)
       })
     },
 
@@ -179,13 +202,20 @@ export default {
     },
 
     async loginEvent () {
+      // 获取设备编号
+      try {
+        this.getDeviceNumber()
+      } catch(e) {
+        this.$dialog.alert({
+          message: `${e}`,
+          closeOnPopstate: false
+        }).then(() => {})
+      };
       const resultOne = await this.login();
       const resultTwo = await this.queryDepartmentMsg(resultOne.proId);
       if (!IsPC()) {
         // 注册channel
-        if (window.android.getChannelId() == '' || (!window.android.getChannelId() && typeof(window.android.getChannelId()) != 'undefined' && window.android.getChannelId() != 0) || typeof(window.android.getChannelId()) == 'undefined') {
-          this.$toast('未获取到channelId')
-        } else {
+        if (window.android.getChannelId()) {
           try {
             await this.getChannel({proId:resultOne.proId,workerId:resultOne.id,type:2,channelId:window.android.getChannelId()});
           } catch (err) {
@@ -194,6 +224,8 @@ export default {
               closeOnPopstate: true
             }).then(() => {})
           }
+        } else {
+          this.$toast('未获取到channelId')
         }
       };
       this.$router.push({path:'/home'});
@@ -201,7 +233,7 @@ export default {
       setStore('departmentMessage', resultTwo);
       window.location.reload()
     }
-  } 
+  }
 }
 </script>
 <style lang="less" scoped>
@@ -235,7 +267,7 @@ export default {
           }
           &:after {
             display: none
-          } 
+          }
         }
       }
     };
@@ -276,11 +308,11 @@ export default {
       .bg-icon {
         width: 70%;
         height: 50%;
-        margin: auto;  
+        margin: auto;
         position: absolute;
-        top: 0; 
-        left: 0; 
-        bottom: 0; 
+        top: 0;
+        left: 0;
+        bottom: 0;
         right: 0;
         img {
           width: 100%;
@@ -316,7 +348,7 @@ export default {
         .van-loading__text {
           color: #4ec6ff
         }
-      } 
+      }
     }
   }
 </style>

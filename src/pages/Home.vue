@@ -84,9 +84,10 @@
         temporaryNumList: [],
         deviceServiceCount: '',
         departmentServieCount: '',
+        isTimeoutContinue: true,
         taskList: [
-          {tit:'报修工单', imgUrl: repairsWorkOrderOnePng}, 
-          {tit:'设备巡检', imgUrl: deviceServiceOnePng}, 
+          {tit:'报修工单', imgUrl: repairsWorkOrderOnePng},
+          {tit:'设备巡检', imgUrl: deviceServiceOnePng},
           {tit:'科室巡检', imgUrl: departmentServiceOnePng}
         ],
         btnList: [
@@ -97,33 +98,34 @@
         btnTaskWrapperPng: require('@/common/images/home/btn-background.png'),
       }
     },
-    
+
     mounted() {
       this.changeTitleTxt({tit:'工程管理系统'});
       setStore('currentTitle','工程管理系统');
       // 控制设备物理返回按键
       if (!IsPC()) {
         pushHistory();
-        this.gotoURL(() => { 
+        this.gotoURL(() => {
         })
       };
       // this.temporaryNumList = this.newTaskName;
       // 获取任务数量
-      if (!windowTimer) {
-        // windowTimer = window.setInterval(() => {
-        //   setTimeout(this.getTaskCount(this.proId,this.workerId), 0)
-        // }, 3000);
+      if (!this.globalTimer) {
         windowTimer = window.setInterval(() => {
-          setTimeout(this.queryNewWork(this.proId, this.workerId), 0)
-        }, 3000);
-        this.changeGlobalTimer(windowTimer)
+          if (this.isTimeoutContinue) {
+            setTimeout(this.queryNewWork(this.proId, this.workerId), 0);
+            this.changeGlobalTimer(windowTimer)
+          } else {
+            this.changeGlobalTimer(null)
+          }
+        }, 3000)
       };
       this.getTaskCount(this.proId,this.workerId)
     },
-    
+
     watch: {
     },
-    
+
     computed:{
       ...mapGetters([
         'navTopTitle',
@@ -178,6 +180,7 @@
 
       // 查询是否有新任务
       queryNewWork (proId,workerId) {
+        this.isTimeoutContinue = false;
         let audio = new Audio();
         audio.preloadc = "auto";
         process.env.NODE_ENV == 'development' ? audio.src = "/static/audios/task-info-voice.wav" : audio.src = "/projectWeb/static/audios/task-info-voice.wav";
@@ -187,6 +190,7 @@
             if(windowTimer) {window.clearInterval(windowTimer)}
           };
           if (res && res.data.code == 200) {
+            this.isTimeoutContinue = true;
             Object.keys(res.data.data).forEach((item) => {
               if (item != "all" && res.data.data[item] == true) {
                 this.temporaryNumList = this.newTaskName;
@@ -256,7 +260,7 @@
             closeOnPopstate: true
           }).then(() => {
           })
-        }) 
+        })
       },
 
       // 任务类型点击事件
@@ -426,7 +430,7 @@
           height: 100%;
          > p {
             display: inline-block;
-            height: 75px;
+            height: 100%;
          }
           .content-top-userName-img {
             width: 75px;
@@ -589,11 +593,11 @@
               }
             };
             &:last-child {
-              letter-spacing: 5px;              
+              letter-spacing: 5px;
               text-indent: 5px;
               color: #271010;
               font-weight: bold;
-            }  
+            }
           };
           &:first-child {
             left: 0

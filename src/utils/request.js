@@ -8,7 +8,7 @@ import { Dialog, Toast } from 'vant';
 Vue.use(Dialog);
 import { setStore } from '@/common/js/utils'
 // http://blink.blinktech.cn/project 测试地址
-//http://blinktech.cn/project 正式地址
+// http://blinktech.cn/project 正式地址
 const service = axios.create({
   baseURL: 'http://blink.blinktech.cn/project', //接口基础地址
   retry: 2, // 网络请求异常后，重试次数
@@ -59,17 +59,29 @@ service.interceptors.response.use(
     // 判断是否配置了重试
     if(!config || !config.retry) return Promise.reject(err);
     if(!config.shouldRetry || typeof config.shouldRetry != 'function') {
-      return Promise.reject(err);
+      if (err.message == 'Network Error') {
+        return Promise.reject({message:'网络错误'});
+      } else {
+        return Promise.reject(err);
+      }
     };
     //判断是否满足重试条件
     if(!config.shouldRetry(err)) {
-      return Promise.reject(err);
+      if (err.message == 'Network Error') {
+        return Promise.reject({message:'网络错误'});
+      } else {
+        return Promise.reject(err);
+      }
     };
     // 设置重置次数，默认为0
     config.__retryCount = config.__retryCount || 0;
     // 判断是否超过了重试次数
      if(config.__retryCount > config.retry) {
-      return Promise.reject(err);
+       if (err.message == 'Network Error') {
+         return Promise.reject({message:'网络错误'});
+       } else {
+         return Promise.reject(err);
+       }
      };
     //重试次数自增
     config.__retryCount += 1;

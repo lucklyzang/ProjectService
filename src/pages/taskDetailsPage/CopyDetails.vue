@@ -3,7 +3,7 @@
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
-        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
       </HeaderTop>
       <!-- 内容部分 -->
       <div class="content-top">
@@ -69,7 +69,7 @@
         departmentNo: ''
       }
     },
-    
+
     mounted() {
       // 控制设备物理返回按键测试
       if (!IsPC()) {
@@ -92,10 +92,10 @@
       };
       this.getqueryOneEnergyTask()
     },
-    
+
     watch: {
     },
-    
+
     computed:{
       ...mapGetters([
         'navTopTitle',
@@ -212,9 +212,9 @@
               this.departmentNo = codeData[1];
               this.juddgeCurrentDepartment({
                 proId: this.proId,
-                id: this.taskId,  //任务ID 
+                id: this.taskId,  //任务ID
                 depNo: this.departmentNo, //科室编号
-                depId: this.departmentId,  //科室ID 
+                depId: this.departmentId,  //科室ID
                 workerId: this.workerId // 用户id
               })
             }
@@ -244,7 +244,7 @@
             temporaryDepartmentNumber[temporaryIndex]['number'] = departmentNumber
           } else {
             temporaryDepartmentNumber.push(
-              { 
+              {
                 number: departmentNumber,
                 taskId: this.taskId
               }
@@ -252,7 +252,7 @@
           };
         } else {
           temporaryDepartmentNumber.push(
-            { 
+            {
               number:departmentNumber,
               taskId: this.taskId
             }
@@ -302,11 +302,11 @@
 
       // 完成巡检
       completeTask () {
-        let flag = this.oneEnergyMsg.spaces.some((item) => { return item.checked == false});
-        if (flag) {
-          this.$toast('请完成所有房间的巡检');
-          return
-        };
+        // let flag = this.oneEnergyMsg.spaces.some((item) => { return item.checked == false});
+        // if (flag) {
+        //   this.$toast('请完成所有房间的巡检');
+        //   return
+        // };
         completeEnergyRecodeTask(this.proId,this.taskId).then((res) => {
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
@@ -358,7 +358,6 @@
     };
     .worker-show {
       .content-wrapper();
-      overflow: auto;
       .content-top {
         font-size: 14px;
         background: #fff;
@@ -406,7 +405,7 @@
             &:first-child {
               left: 0;
               top: 0;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px;
             };
             &:last-child {
@@ -429,7 +428,7 @@
         padding: 10px;
         position: relative;
         > p {
-          color: #bbbaba;
+          color: black;
           height: 5%;
         };
         ul {

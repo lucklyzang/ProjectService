@@ -4,7 +4,7 @@
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
-        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
       </HeaderTop>
       <div class="loading">
         <loading :isShow="showLoadingHint" :textContent="loadinText" textColor="#2895ea"></loading>
@@ -41,12 +41,12 @@
             <b v-for="(item,index) in oneRepairsMsg.present" :key="`${item}-${index}`">
               {{item.name}}
             </b>
-          </span> 
+          </span>
           <span v-if="oneRepairsMsg.present ? oneRepairsMsg.present.length == 0 : false">
             <b>
               无
             </b>
-          </span> 
+          </span>
         </p>
         <p class="content-top-other">
           <span>地点</span>
@@ -161,7 +161,7 @@
         enlargeImgUrl: ''
       }
     },
-    
+
     mounted() {
       // 控制设备物理返回按键测试
       if (!IsPC()) {
@@ -197,7 +197,7 @@
       this.echoIsMaterial();
       this.changeElementSite();
     },
-    
+
     watch: {
       issueImageList: {
         handler(newValue,oldValue) {
@@ -208,7 +208,7 @@
           }
         },
         immediate: true,
-        deep: true 
+        deep: true
       },
       completeImageList: {
         handler(newValue,oldValue) {
@@ -219,10 +219,10 @@
           }
         },
         immediate: true,
-        deep: true 
+        deep: true
       }
     },
-    
+
     computed:{
       ...mapGetters([
         'navTopTitle',
@@ -307,7 +307,7 @@
             temporaryDepartmentNumber[temporaryIndex]['isFilledMaterial'] = true
           } else {
             temporaryDepartmentNumber.push(
-              { 
+              {
                 isFilledMaterial: true,
                 taskId: this.taskId
               }
@@ -315,7 +315,7 @@
           };
         } else {
           temporaryDepartmentNumber.push(
-            { 
+            {
               isFilledMaterial:true,
               taskId: this.taskId
             }
@@ -459,7 +459,7 @@
           }).then(() => {
           });
           return
-        };  
+        };
         reader.addEventListener("load", function () {
           // 压缩图片
           let result = reader.result;
@@ -497,7 +497,7 @@
           }).then(() => {
           });
           return
-        };  
+        };
         reader.addEventListener("load", function () {
           // 压缩图片
           let result = reader.result;
@@ -536,14 +536,14 @@
           } else {
             if (type === 1) {
               temporaryPhotoList.push(
-                { 
+                {
                   issuePhototList: photoId,
                   taskId: this.taskId
                 }
               )
             } else if (type === 2) {
                temporaryPhotoList.push(
-                { 
+                {
                   completePhototList: photoId,
                   taskId: this.taskId
                 }
@@ -553,14 +553,14 @@
         } else {
           if (type === 1) {
             temporaryPhotoList.push(
-              { 
+              {
                 issuePhototList: photoId,
                 taskId: this.taskId
               }
             )
           } else if (type === 2) {
             temporaryPhotoList.push(
-              { 
+              {
                 completePhototList: photoId,
                 taskId: this.taskId
               }
@@ -783,7 +783,7 @@
             &:first-child {
               left: 0;
               top: 16px;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px;
             };
             &:last-child {
@@ -815,7 +815,7 @@
             &:first-child {
               left: 0;
               top: 0;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px;
             };
             &:not(:first-child) {
@@ -886,7 +886,7 @@
             &:first-child {
               left: 0;
               top: 0;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px;
             };
             &:last-child {
@@ -913,7 +913,7 @@
             &:first-child {
               left: 0;
               top: 0;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px;
             };
             &:last-child {

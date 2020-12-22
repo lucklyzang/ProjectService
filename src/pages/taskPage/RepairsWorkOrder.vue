@@ -8,7 +8,7 @@
     </div>
     <!-- 顶部导航栏 -->
     <HeaderTop :title="navTopTitle">
-      <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+      <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
     </HeaderTop>
     <div class="content-top">
       <ul class="tab-title">
@@ -174,7 +174,7 @@
       if (this.isFreshRepairsWorkOrderPage) {
         this.getRepairsProjectList({
           proId: this.proId,
-          workerId: this.workerId,	
+          workerId: this.workerId,
           state: -1,
           startDate	: '',
           endDate : ''
@@ -197,7 +197,7 @@
       if (this.isFreshRepairsWorkOrderPage) {
         this.getRepairsProjectList({
           proId: this.proId,
-          workerId: this.workerId,	
+          workerId: this.workerId,
           state: -1,
           startDate	: '',
           endDate : ''
@@ -246,7 +246,7 @@
       onRefresh() {
         this.getRepairsProjectList ({
           proId: this.proId,
-          workerId: this.workerId,	
+          workerId: this.workerId,
           state: this.currentIndex == 0 ? -1 : -2,
           startDate	: '',
           endDate : ''
@@ -265,7 +265,7 @@
             this.$toast(`${res.data.msg}`);
             this.getRepairsProjectList({
               proId: this.proId,
-              workerId: this.workerId,	
+              workerId: this.workerId,
               state: -1,
               startDate	: '',
               endDate : ''
@@ -304,7 +304,7 @@
         if (index == 0) {
           this.getRepairsProjectList({
             proId: this.proId,
-            workerId: this.workerId,	
+            workerId: this.workerId,
             state: -1,
             startDate	: '',
             endDate : ''
@@ -312,7 +312,7 @@
         } else {
           this.getRepairsProjectList({
             proId: this.proId,
-            workerId: this.workerId,	
+            workerId: this.workerId,
             state: -2,
             startDate	: '',
             endDate : ''
@@ -431,11 +431,17 @@
           if (res && res.data.code == 200) {
             this.getRepairsProjectList({
               proId: this.proId,
-              workerId: this.workerId,	
+              workerId: this.workerId,
               state: -1,
               startDate	: '',
               endDate : ''
             },0)
+          } else {
+            this.$dialog.alert({
+              message: `${res.data.msg}`,
+              closeOnPopstate: true
+            }).then(() => {
+            })
           }
         })
         .catch((err) => {
@@ -576,7 +582,7 @@
           .status-box {
             position: absolute;
             top: 15px;
-            right: 15px;
+            right: 8px;
             font-size: 13px;
             color: #8e9397
           };
@@ -631,7 +637,7 @@
             font-size: 14px;
             color: #bbbaba;
             .name {
-              width: 70%;
+              max-width: 70%;
               display: inline-block;
               overflow: auto;
               vertical-align: top

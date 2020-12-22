@@ -4,7 +4,7 @@
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
-        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
       </HeaderTop>
       <div class="loading">
         <loading :isShow="showLoadingHint" :textContent="loadinText" textColor="#2895ea"></loading>
@@ -80,7 +80,7 @@
         </div>
       </transition>
     </div>
-    <van-popup v-model="endTimePop" title="" position="bottom" :overlay="true"> 
+    <van-popup v-model="endTimePop" title="" position="bottom" :overlay="true">
       <van-datetime-picker  v-model="currentDateStart" type="datetime"  :min-date="minDateEnd"
       @cancel="endTimePop = false"  @confirm="endTimePop = false"  @change="timeChange"/>
     </van-popup>
@@ -126,7 +126,7 @@
         issueMessage: ''
       }
     },
-    
+
     mounted() {
       // 控制设备物理返回按键测试
       if (!IsPC()) {
@@ -146,10 +146,10 @@
       this.initDate();
       this.echoCurrentDepartmentId()
     },
-    
+
     watch: {
     },
-    
+
     computed:{
       ...mapGetters([
         'navTopTitle',
@@ -247,7 +247,7 @@
           }).then(() => {
           });
           return
-        };  
+        };
         reader.addEventListener("load", function () {
           // 压缩图片
           let result = reader.result;
@@ -277,7 +277,7 @@
           }).then(() => {
           });
           return
-        };  
+        };
         reader.addEventListener("load", function () {
           // 压缩图片
           let result = reader.result;
@@ -331,7 +331,7 @@
             this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
             temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
             temporaryOfficeList.push(
-              { 
+              {
                 officeList: repeArray(temporaryDepartmentId),
                 taskId: this.taskId,
                 depId: this.currentDepartmentId
@@ -345,7 +345,7 @@
           this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
           temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
           temporaryOfficeList.push(
-            { 
+            {
               officeList: repeArray(temporaryDepartmentId),
               taskId: this.taskId,
               depId: this.currentDepartmentId
@@ -450,7 +450,7 @@
               left: 0;
               width: 20%;
               top: 0;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px;
             };
             &:last-child {
@@ -483,7 +483,7 @@
               left: 0;
               width: 20%;
               top: 0;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px
             };
             &:last-child {
@@ -554,7 +554,7 @@
             &:first-child {
               left: 0;
               top: 0;
-              color: #bbbaba;
+              color: black;
               padding-left: 10px;
             };
             &:last-child {
@@ -579,8 +579,7 @@
             &:first-child {
               height: 26px;
               line-height: 26px;
-              color: #bbbaba;
-            
+              color: black;
             };
             &:last-child {
               margin-top: 2px;

@@ -3,7 +3,7 @@
     <div class="worker-show">
       <!-- 顶部导航栏 -->
       <HeaderTop :title="navTopTitle">
-        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon> 
+        <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
       </HeaderTop>
       <!-- 内容部分 -->
       <div class="content-top">
@@ -67,7 +67,7 @@
         consumableMsgList: []
       }
     },
-    
+
     mounted () {
       // 控制设备物理返回按键测试
       if (!IsPC()) {
@@ -116,10 +116,10 @@
 		    depId: this.currentDepartmentId
       })
     },
-    
+
     watch: {
     },
-    
+
     computed:{
       ...mapGetters([
         'navTopTitle',
@@ -161,7 +161,8 @@
         'changeCatchComponent',
         'changeCompleteDepartmentServiceOfficeInfo',
         'changeCurrentDepartmentServiceCheckedItemId',
-        'changeCompleteDepartmentServiceCheckedItemList'
+        'changeCompleteDepartmentServiceCheckedItemList',
+        'changeIsSingleDepartmentSignature'
       ]),
 
       //返回上一页
@@ -210,7 +211,7 @@
         this.changeTitleTxt({tit:'填写耗材'});
         setStore('currentTitle','填写耗材')
       },
-      
+
       // 查询检查项
       getExamineItems (data) {
         queryExamineItems(data).then((res) => {
@@ -313,7 +314,7 @@
             this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
             temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
             temporaryOfficeList.push(
-              { 
+              {
                 officeList: repeArray(temporaryDepartmentId),
                 taskId: this.taskId,
                 depId: this.currentDepartmentId
@@ -327,7 +328,7 @@
           this.changeCurrentDepartmentServiceCheckedItemId(temporaryCheckItemInfo);
           temporaryDepartmentId.push(this.currentDepartmentServiceCheckedItemId);
           temporaryOfficeList.push(
-            { 
+            {
               officeList: repeArray(temporaryDepartmentId),
               taskId: this.taskId,
               depId: this.currentDepartmentId
@@ -402,7 +403,7 @@
           } else {
             temporaryDepartmentId.push(this.departmentServiceOfficeId);
             temporaryOfficeList.push(
-              { 
+              {
                 officeList: repeArray(temporaryDepartmentId),
                 taskId: this.taskId
               }
@@ -411,7 +412,7 @@
         } else {
           temporaryDepartmentId.push(this.departmentServiceOfficeId);
           temporaryOfficeList.push(
-            { 
+            {
               officeList: repeArray(temporaryDepartmentId),
               taskId: this.taskId
             }
@@ -450,12 +451,13 @@
         };
         postCheckResult(data).then((res) => {
           if (res && res.data.code == 200) {
+            this.changeIsSingleDepartmentSignature(true);
+            this.$router.push({path: 'departmentServiceSignature'});
+            this.changeTitleTxt({tit:'巡检签名'});
+            setStore('currentTitle','巡检签名');
             this.$toast('上报成功');
             this.clearCheckedInfo();
             this.storeCompleteDepartmentNumber();
-            this.$router.push({path: 'departmentWorkOrderDeatils'});
-            this.changeTitleTxt({tit:'工单详情'});
-            setStore('currentTitle','工程详情')
           } else {
             this.$toast(`${res.data.msg}`);
           }

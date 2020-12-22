@@ -12,7 +12,7 @@ if (process.env.NODE_ENV == 'development') {
 } else {
   Vue.config.devtools = false;
 };
-Vue.prototype.$echarts = echarts
+Vue.prototype.$echarts = echarts;
 Vue.prototype.Base64 = require('js-base64').Base64;
 // 全局挂载时间格式化方法
 Vue.filter('dateformat', function(dataStr, pattern = 'YYYY-MM-DD HH:mm:ss') {
