@@ -17,7 +17,7 @@
           <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
             <span>{{index + 1}}</span>
              <span>
-              {{item.mateName}}
+              {{item.mateName}}-{{item.model}}
             </span>
             <span>
               {{item.unit}}
@@ -56,7 +56,7 @@
               </p>
                <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
                 <span>
-                  {{item.mateName}}
+                  {{item.mateName}}-{{item.model}}
                 </span>
                 <span>
                   {{item.unit}}
@@ -227,7 +227,8 @@
                 number: 0,
                 mateName: item.mateName,
                 unit: item.unit,
-                mateId: item.id
+                mateId: item.id,
+                model: item.model
              })
 
           }
@@ -274,7 +275,8 @@
               proId: this.proId,
               proName: this.proName,
               mateId: item.mateId,
-              number: item.number
+              number: item.number,
+              model: item.model
             }
           )
         };

@@ -179,27 +179,27 @@
       },
 
       // 排序测试
-      test (arrOne,arrTwo) {
-        let arrOne = [1,8,10],arrTwo = [2,4,6,9];
-        let i = 0, j = 0;
-        let temporaryArray = []; 
-        while (i < arrOne.length && j < arrTwo.length) {
-          if (arrOne[i] < arrTwo[j]) {
-            temporaryArray.push(arrOne[i]);
-            i++
-          } else {
-            temporaryArray.push(arrTwo[j]);
-            j++
-          }
-        };
-        if (i == arrOne.length) {
-          temporaryArray.concat(arrTwo.splice(j))
-        };
-        if (j == arrTwo.length) {
-          temporaryArray.concat(arrOne.splice(i))
-        };
-        return temporaryArray
-      },
+      // test (arrOne,arrTwo) {
+      //   let arrOne = [1,8,10],arrTwo = [2,4,6,9];
+      //   let i = 0, j = 0;
+      //   let temporaryArray = []; 
+      //   while (i < arrOne.length && j < arrTwo.length) {
+      //     if (arrOne[i] < arrTwo[j]) {
+      //       temporaryArray.push(arrOne[i]);
+      //       i++
+      //     } else {
+      //       temporaryArray.push(arrTwo[j]);
+      //       j++
+      //     }
+      //   };
+      //   if (i == arrOne.length) {
+      //     temporaryArray.concat(arrTwo.splice(j))
+      //   };
+      //   if (j == arrTwo.length) {
+      //     temporaryArray.concat(arrOne.splice(i))
+      //   };
+      //   return temporaryArray
+      // },
 
       // 查询是否有新任务
       queryNewWork (proId,workerId) {
