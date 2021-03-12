@@ -66,11 +66,11 @@
           <span>问题拍照</span>
           <ul class="photo-list">
             <li v-for="(item,index) in issueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
-              <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item)" />
+              <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item,0)" />
               <van-icon name="cross" @click="issueDelete(index)"/>
             </li>
             <li v-for="(item,index) in historyIssueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
-              <img width="100" height="130" :src="Base64.decode(item)" @click="enlargeIssueImgEvent(Base64.decode(item))"/>
+              <img width="100" height="130" :src="`http://blink.blinktech.cn/${item}`" @click="enlargeIssueImgEvent(item,1)"/>
             </li>
           </ul>
           <span @click="issueClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
@@ -81,11 +81,11 @@
           <span>完成拍照</span>
           <ul class="photo-list">
             <li v-for="(item,index) in completeImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
-              <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item)"/>
+              <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item,0)"/>
               <van-icon name="cross" @click="completeDelete(index)"/>
             </li>
             <li v-for="(item,index) in historyCompleteImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
-              <img width="100" height="130" :src="Base64.decode(item)" @click="enlargeCompleteImgEvent(Base64.decode(item))"/>
+              <img width="100" height="130" :src="`http://blink.blinktech.cn/${item}`" @click="enlargeCompleteImgEvent(item,1)"/>
             </li>
           </ul>
           <span @click="completeClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
@@ -334,15 +334,15 @@
       },
 
       // 放大问题图片点击事件
-      enlargeIssueImgEvent (item) {
+      enlargeIssueImgEvent (item,type) {
         this.enlargeImgShow = true;
-        this.enlargeImgUrl = item
+        type === 0 ? this.enlargeImgUrl = item : this.enlargeImgUrl = `http://blink.blinktech.cn/${item}`
       },
 
       // 放大维修后图片点击事件
-      enlargeCompleteImgEvent (item) {
+      enlargeCompleteImgEvent (item,type) {
         this.enlargeImgShow = true;
-        this.enlargeImgUrl = item
+        type === 0 ? this.enlargeImgUrl = item : this.enlargeImgUrl = `http://blink.blinktech.cn/${item}`
       },
 
       // 并行查询工单信息和图片信息
@@ -358,9 +358,9 @@
             if (this.photonList.length > 0) {
               for (let i = 0, len = this.photonList.length; i < len; i++) {
                 if (this.photonList[i].imgType == 1) {
-                  this.historyIssueImageList.push(this.photonList[i].imgSign)
+                  this.historyIssueImageList.push(this.photonList[i].path)
                 } else if (this.photonList[i].imgType == 2) {
-                  this.historyCompleteImageList.push(this.photonList[i].imgSign)
+                  this.historyCompleteImageList.push(this.photonList[i].path)
                 }
               }
             };

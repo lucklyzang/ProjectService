@@ -11,7 +11,7 @@ import { setStore } from '@/common/js/utils'
 // http://blinktech.cn/project 正式地址
 // process.env.NODE_ENV === 'development' ? 'http://blink.blinktech.cn/project' : 'http://blinktech.cn/project'
 const service = axios.create({
-  baseURL: process.env.NODE_ENV === 'development' ? 'http://blink.blinktech.cn/project' : 'http://blinktech.cn/project', //接口基础地址
+  baseURL: 'http://blink.blinktech.cn/project', //接口基础地址
   retry: 2, // 网络请求异常后，重试次数
   retryDelay: 1000, // 每次重试间隔时间
   shouldRetry: (err) => true // 重试条件
