@@ -93,7 +93,9 @@
         searchValue: '',
         consumableMsgList: [],
         inventoryMsgList: [],
-        temporaryInventoryMsgList: []
+        temporaryInventoryMsgList: [],
+        storeId: '',
+        systemId: ''
       }
     },
 
@@ -174,7 +176,10 @@
           if(res && res.data.code == 200) {
             if (res.data.data.length > 0) {
               this.consumableMsgList = [];
-              this.consumableMsgList = res.data.data
+              this.consumableMsgList = res.data.data;
+              this.storeId = this.consumableMsgList[0]['storeId'];
+              this.systemId = this.consumableMsgList[0]['systemId'];
+              console.log('id',this.consumableMsgList);
             } else {
               // this.$dialog.alert({
               //   message: '没有查询到对应的物料信息',
@@ -246,15 +251,17 @@
         } else {
           let checkConsumableList = this.inventoryMsgList.filter((item) => {return item.checked == true});
           for (let item of checkConsumableList) {
-             this.consumableMsgList.push({
-                number: 0,
-                mateName: item.mateName,
-                unit: item.unit,
-                mateId: item.id,
-                model: item.model
-             })
-
-          }
+            this.consumableMsgList.push({
+              number: 0,
+              mateName: item.mateName,
+              unit: item.unit,
+              mateId: item.id,
+              model: item.model,
+              storeId: this.storeId,
+              systemId: this.systemId
+            })
+          };
+          console.log('添加',this.consumableMsgList);
         }
       },
 
@@ -300,7 +307,9 @@
               proName: item.mateName,
               mateId: item.mateId,
               number: item.number,
-              model: item.model
+              model: item.model,
+              storeId: this.storeId,
+              systemId: this.systemId
             }
           )
         };

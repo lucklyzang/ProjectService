@@ -93,6 +93,8 @@
         searchValue: '',
         consumableMsgList: [],
         inventoryMsgList: [],
+        storeId: '',
+        systemId: ''
       }
     },
 
@@ -161,7 +163,9 @@
           if(res && res.data.code == 200) {
             if (res.data.data.length > 0) {
               this.consumableMsgList = [];
-              this.consumableMsgList = res.data.data
+              this.consumableMsgList = res.data.data;
+              this.storeId = this.consumableMsgList[0]['storeId'];
+              this.systemId = this.consumableMsgList[0]['systemId'];
             } else {
               // this.$dialog.alert({
               //   message: '没有查询到对应的物料信息',
@@ -228,7 +232,9 @@
                 mateName: item.mateName,
                 unit: item.unit,
                 mateId: item.id,
-                model: item.model
+                model: item.model,
+                storeId: this.storeId,
+                systemId: this.systemId
              })
 
           }
@@ -276,7 +282,9 @@
               proName: this.proName,
               mateId: item.mateId,
               number: item.number,
-              model: item.model
+              model: item.model,
+              storeId: this.storeId,
+              systemId: this.systemId
             }
           )
         };
