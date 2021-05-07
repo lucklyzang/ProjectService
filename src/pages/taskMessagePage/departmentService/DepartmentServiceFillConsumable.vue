@@ -6,6 +6,7 @@
         <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
       </HeaderTop>
       <!-- 内容部分 -->
+      <van-empty description="物料为空" v-show="materialShow"/>
       <div class="content-top">
         <div class="circulation-area-title">
           <span></span>
@@ -90,6 +91,8 @@
     data() {
       return {
         toolShow: false,
+        materialShow: false,
+        materialContentShow: false,
         searchValue: '',
         consumableMsgList: [],
         inventoryMsgList: [],
@@ -162,20 +165,27 @@
         .then((res) => {
           if(res && res.data.code == 200) {
             if (res.data.data.length > 0) {
+              this.materialShow = false;
+              this.materialContentShow = true;
               this.consumableMsgList = [];
-              this.consumableMsgList = res.data.data;
-              this.storeId = this.consumableMsgList[0]['storeId'];
-              this.systemId = this.consumableMsgList[0]['systemId'];
+              this.consumableMsgList = res.data.data
             } else {
-              // this.$dialog.alert({
-              //   message: '没有查询到对应的物料信息',
-              //   closeOnPopstate: true
-              // }).then(() => {
-              // })
+              this.materialShow = true;
+              this.materialContentShow = false
             }
+          } else {
+            this.materialShow = true;
+            this.materialContentShow = false;
+            this.$dialog.alert({
+              message: `${res.data.msg}`,
+              closeOnPopstate: true
+            }).then(() => {
+            })
           }
         })
         .catch((err) => {
+          this.materialShow = true;
+          this.materialContentShow = false;
           this.$dialog.alert({
             message: `${err.message}`,
             closeOnPopstate: true
@@ -191,7 +201,9 @@
           if(res && res.data.code == 200) {
             if (res.data.data.length > 0) {
               this.inventoryMsgList = [];
-              this.inventoryMsgList = res.data.data
+              this.inventoryMsgList = res.data.data;
+              this.storeId = this.inventoryMsgList[0]['storeId'];
+              this.systemId = this.inventoryMsgList[0]['systemId']
             } else {
               this.$dialog.alert({
                 message: '没有查询到对应的物料信息',
@@ -225,6 +237,8 @@
         if (!count) {
           this.$toast('至少要选择一种耗材')
         } else {
+          this.materialShow = false;
+          this.materialContentShow = true;
           let checkConsumableList = this.inventoryMsgList.filter((item) => {return item.checked == true});
           for (let item of checkConsumableList) {
              this.consumableMsgList.push({
@@ -412,6 +426,9 @@
     .worker-show {
       .content-wrapper();
       overflow: auto;
+       /deep/ .van-empty {
+        flex: 1;
+      };
       .content-top {
         height: auto;
         font-size: 14px;
