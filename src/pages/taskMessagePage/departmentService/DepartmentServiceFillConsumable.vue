@@ -111,6 +111,7 @@
           setStore('currentTitle','科室巡检单')
         })
       };
+      this.queryStoreId({proId: this.proId,state: 0});
       this.getMaterialById(this.taskId)
     },
 
@@ -194,6 +195,32 @@
         })
       },
 
+      //查询storeId与systemId
+      queryStoreId (data) {
+        queryAllMaterial(data)
+        .then((res) => {
+          if(res && res.data.code == 200) {
+            if (res.data.data.length > 0) {
+              this.storeId = res.data.data[0]['storeId'];
+              this.systemId = res.data.data[0]['systemId'];
+            } else {
+              this.$dialog.alert({
+                message: '没有查询到对应的物料信息',
+                closeOnPopstate: true
+              }).then(() => {
+              })
+            }
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
       //查询所有物料信息
        getAllMaterial (data) {
         queryAllMaterial(data)
@@ -244,6 +271,7 @@
              this.consumableMsgList.push({
                 number: 0,
                 mateName: item.mateName,
+                mateNumber: item.mateNumber,
                 unit: item.unit,
                 mateId: item.id,
                 model: item.model,
@@ -296,6 +324,8 @@
               proName: this.proName,
               mateId: item.mateId,
               number: item.number,
+              mateName: item.mateName,
+              mateNumber: item.mateNumber,
               model: item.model,
               storeId: this.storeId,
               systemId: this.systemId

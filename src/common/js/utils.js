@@ -54,22 +54,25 @@ export const pushHistory = () => {
 export const IsPC = () => {
   let flag;
 　let system = {
-　　win: false,
-　　mac: false,
-　　xll: false,
-　　ipad: false
+  　　win: false,
+  　　mac: false,
+  　　xll: false,
+  　　ipad: false
   };
 　//检测平台
-　let p = navigator.platform;
+　let p = navigator.platform,
+      u = /(Android)/i.test(navigator.userAgent);
   　　system.win = p.indexOf("Win") == 0;
   　　system.mac = p.indexOf("Mac") == 0;
-  　　system.x11 = (p == "X11") || (p.indexOf("Linux") == 0);
+  　　system.xll = (p == "X11") || (p.indexOf("Linux") == 0);
   　　system.ipad = (navigator.userAgent.match(/iPad/i) != null) ? true : false;
-　if (system.win || system.mac || system.xll || system.ipad) {
-    flag = true
-　} else {
-    flag = false
-　}
+      if (u) {
+        flag = false
+      } else if (system.win || system.mac || system.xll || system.ipad) {
+        flag = true
+      } else {
+        flag = false
+      }
   return flag
 }
 
