@@ -23,6 +23,15 @@ export function queryRepairsProjectList(data) {
     params: data
   })
 };
+// 确认消息
+export function sureStartTask(data) {
+  return request({
+    url: 'bxTask/start',
+    method: 'put',
+    data
+  })
+};
+
 
 //确认任务
 export function sureRepairsTask(data) {
