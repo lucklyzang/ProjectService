@@ -3,9 +3,9 @@
     <div class="signatureBox">
       <div class="canvasBox" ref="boardBox" :currentSinnatureData="signNatureData">
         <canvas ref="board" 
-          @touchstart='touchStart' 
-          @touchmove='touchMove' 
-          @touchend='touchEnd' 
+          @touchstart="touchStart" 
+          @touchmove="touchMove" 
+          @touchend="touchEnd" 
           @mousedown="mouseDown" 
           @mousemove="mouseMove"
           @mouseup="mouseUp"
@@ -75,7 +75,7 @@ import { base64ImgtoFile } from '@/common/js/utils'
         'changeOriginalSignature'
       ]),
 
-    // canvas配置初始化
+    // canvas初始化配置
     initCanvas () {
       let board = this.$refs.board;  // 获取canvas的DOM
       board.width = this.$refs.boardBox.offsetWidth; // 设置画布宽
