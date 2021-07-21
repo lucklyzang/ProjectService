@@ -51,11 +51,11 @@
             </div>
             <div class="tool-name-list-content">
               <p class="circulation-area-title">
-                <span>物质名称</span>
+                <span>物料名称</span>
                 <span>单位</span>
-                <span></span>
+                <span>操作</span>
               </p>
-               <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
+              <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
                 <span>
                   {{item.mateName}}-{{item.model}}
                 </span>
@@ -96,6 +96,7 @@
         searchValue: '',
         consumableMsgList: [],
         inventoryMsgList: [],
+        temporaryInventoryMsgList: [],
         storeId: '',
         systemId: ''
       }
@@ -116,6 +117,14 @@
     },
 
     watch: {
+      searchValue:{
+        handler(newVal, oldVal){
+          console.log(newVal,oldVal);
+          this.inventoryMsgList = [];
+          this.inventoryMsgList = this.temporaryInventoryMsgList.filter((item) => {return item.mateName.indexOf(newVal) != -1})
+        },
+        deep: true
+      }
     },
 
     computed:{
@@ -228,7 +237,15 @@
           if(res && res.data.code == 200) {
             if (res.data.data.length > 0) {
               this.inventoryMsgList = [];
+              this.temporaryInventoryMsgList = [];
+              for (let item of res.data.data) {
+                item['checked'] = false;
+                // 添加过的物料不允许再次添加
+                let isExist = this.consumableMsgList.filter((innerItem) => { return innerItem.mateId == item.id});
+                isExist.length > 0 ? item['disabled'] = true : item['disabled'] = false
+              };
               this.inventoryMsgList = res.data.data;
+              this.temporaryInventoryMsgList = res.data.data;
               this.storeId = this.inventoryMsgList[0]['storeId'];
               this.systemId = this.inventoryMsgList[0]['systemId']
             } else {
@@ -252,6 +269,7 @@
       // 添加物质
       addConsumable () {
         this.toolShow = true;
+        this.searchValue = '';
         this.getAllMaterial({
 	        proId: this.proId,
           state: 0
@@ -297,7 +315,8 @@
           });
           return
         };
-        this.inventoryMsgList = this.inventoryMsgList.filter((item) => {return item.mateName.indexOf(this.searchValue) != -1})
+        this.inventoryMsgList = [];
+        this.inventoryMsgList = this.temporaryInventoryMsgList.filter((item) => {return item.mateName.indexOf(this.searchValue) != -1})
       },
 
       // 添加取消
@@ -334,10 +353,23 @@
         };
         saveDepartmentMate(mateMsg).then((res) => {
           if (res && res.data.code == 200) {
-            this.$toast(`${res.data.msg}`);
-            this.$router.push({path: 'departmentServiceBill'});
-            this.changeTitleTxt({tit:'科室巡检单'});
-            setStore('currentTitle','科室巡检单')
+            if (res.data.data.length == 0) {
+              this.$toast(`${res.data.msg}`);
+            } else {
+              // 提示库存不足的物料名称及型号
+              let msgArray = [],
+                  msg = '';
+              res.data.data.forEach((el) => {
+                msgArray.push(`${el.mateName}-${el.model}`)
+              });
+              msg = msgArray.join(',');
+              this.$dialog.alert({
+                message: `${msg},库存不足`,
+                closeOnPopstate: true
+              }).then(() => {
+              })
+            };
+            this.backTo() 
           } else {
             this.$toast(`${res.data.msg}`)
           }
@@ -428,6 +460,14 @@
                 font-size: 16px;
                 &:first-child {
                   width: 55%
+                };
+                &:nth-child(2) {
+                  width: 20%;
+                }
+                &:last-child {
+                  position: absolute;
+                  text-align: right;
+                  right: 0
                 }
               }
             }

@@ -51,11 +51,11 @@
             </div>
             <div class="tool-name-list-content">
               <p class="circulation-area-title">
-                <span>物质名称</span>
+                <span>物料名称</span>
                 <span>单位</span>
-                <span></span>
+                <span>操作</span>
               </p>
-               <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
+              <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
                 <span @click="mateNameEvent(item,index)">
                   {{item.mateName}}-{{item.model}}
                 </span>
@@ -63,7 +63,7 @@
                   {{item.unit ? item.unit : '无'}}
                 </span>
                 <span>
-                  <van-checkbox v-model="item.checked" shape="square"></van-checkbox>
+                  <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
                 </span>
               </p>
             </div>
@@ -243,7 +243,10 @@
               this.inventoryMsgList = [];
               this.temporaryInventoryMsgList = [];
               for (let item of res.data.data) {
-                item['checked'] = false
+                item['checked'] = false;
+                // 添加过的物料不允许再次添加
+                let isExist = this.consumableMsgList.filter((innerItem) => { return innerItem.mateId == item.id});
+                isExist.length > 0 ? item['disabled'] = true : item['disabled'] = false
               };
               this.inventoryMsgList = res.data.data;
               this.temporaryInventoryMsgList = res.data.data;
@@ -275,6 +278,7 @@
       // 添加物质
       addConsumable () {
         this.toolShow = true;
+        this.searchValue = '';
         this.getAllMaterial({
 	        proId: this.proId,
           state: 0
@@ -357,8 +361,23 @@
         };
         saveMate(mateMsg).then((res) => {
           if (res && res.data.code == 200) {
-            this.$toast(`${res.data.msg}`);
-            this.backTo()
+            if (res.data.data.length == 0) {
+              this.$toast(`${res.data.msg}`);
+            } else {
+              // 提示库存不足的物料名称及型号
+              let msgArray = [],
+                  msg = '';
+              res.data.data.forEach((el) => {
+                msgArray.push(`${el.mateName}-${el.model}`)
+              });
+              msg = msgArray.join(',');
+              this.$dialog.alert({
+                message: `${msg},库存不足`,
+                closeOnPopstate: false
+              }).then(() => {
+              })
+            };
+            this.backTo() 
           } else {
             this.$toast(`${res.data.msg}`)
           }
@@ -482,6 +501,14 @@
                 font-size: 16px;
                 &:first-child {
                   width: 55%
+                };
+                &:nth-child(2) {
+                  width: 20%;
+                }
+                &:last-child {
+                  position: absolute;
+                  text-align: right;
+                  right: 0
                 }
               }
             }
