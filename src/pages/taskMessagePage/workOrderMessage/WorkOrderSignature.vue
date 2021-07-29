@@ -31,7 +31,7 @@
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
    import {uploadRepairsTaskPhoto, completeRepairsTaskFinal} from '@/api/worker.js'
-  import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage } from '@/common/js/utils'
+  import { formatTime, setStore, getStore, removeStore, IsPC, deepClone } from '@/common/js/utils'
   export default {
     name: 'WorkOrderSignature',
     components:{
@@ -71,7 +71,8 @@
         'currentElectronicSignature',
         'repairsWorkOrderMsg',
         'originalSignature',
-        'userInfo'
+        'userInfo',
+        'isCompleteRepairsWorkOrderPhotoList'
       ]),
       userName () {
        return this.userInfo.userName
@@ -98,7 +99,8 @@
 
     methods:{
       ...mapMutations([
-        'changeTitleTxt'
+        'changeTitleTxt',
+        'changeIsCompletePhotoList'
       ]),
 
       //返回上一页
@@ -164,6 +166,8 @@
         })
         .then((res) => {
           if (res && res.data.code == 200) {
+            this.clearPhotoList();
+            this.clearStoragePhoto();
             this.$toast(`${res.data.msg}`);
             this.$router.push({path: 'repairsWorkOrder'});
             this.changeTitleTxt({tit:'报修工单'});
@@ -187,7 +191,28 @@
         this.$router.push({path: 'workOrderDetails'});
         this.changeTitleTxt({tit:'工单详情'});
         setStore('currentTitle','工单详情')
-      }
+      },
+
+      // 清除上传成功后存储的照片
+      clearPhotoList () {
+        if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
+        let echoIndex = this.isCompleteRepairsWorkOrderPhotoList.indexOf(this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId == this.taskId})[0]);
+        if (echoIndex == -1) { return };
+        let temporaryPhotoList = deepClone(this.isCompleteRepairsWorkOrderPhotoList);
+        let temporaryPhotoId = [];
+        temporaryPhotoList[echoIndex]['completePhototList'] = temporaryPhotoId;
+        temporaryPhotoList[echoIndex]['issuePhototList'] = temporaryPhotoId;
+        this.changeIsCompletePhotoList(temporaryPhotoList);
+        setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
+      },
+
+      // 清除该任务存储的照片信息
+      clearStoragePhoto () {
+        if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
+        let temporaryPhotoList = this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId !== this.taskId});
+        this.changeIsCompletePhotoList(temporaryPhotoList);
+        setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
+      },
 
     }
   }

@@ -235,7 +235,7 @@
       },
 
       //查询所有物料信息
-       getAllMaterial (data) {
+      getAllMaterial (data) {
         queryAllMaterial(data)
         .then((res) => {
           if(res && res.data.code == 200) {

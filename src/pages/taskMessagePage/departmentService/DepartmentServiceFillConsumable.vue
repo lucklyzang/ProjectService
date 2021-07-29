@@ -7,7 +7,7 @@
       </HeaderTop>
       <!-- 内容部分 -->
       <van-empty description="物料为空" v-show="materialShow"/>
-      <div class="content-top">
+      <div class="content-top" v-show="materialContentShow">
         <div class="circulation-area-title">
           <span></span>
           <span>耗材名称</span>
@@ -24,7 +24,7 @@
               {{item.unit}}
             </span>
             <span>
-              <van-stepper theme="round" @change="stepperEvent" v-model="item.number" min="0"/>
+              <van-stepper theme="round" @change="function(val){stepValueChange(item,index,val)}" @focus="function(val){stepValueFocus(item,index,val)}" integer v-model="item.number" min="0"/>
               <!-- <span>
                 <van-icon name="delete" @click="deleteEvent(item,index)" />
               </span> -->
@@ -37,6 +37,12 @@
         <p class="quit-account" @click="sure">确认</p>
       </div>
     </div>
+    <div class="infoDialog">
+      <van-dialog v-model="isDeleteShow"  title="是否删除该耗材?" show-cancel-button
+          @confirm="isDeleteSure" @cancel="isDeleteCancel"
+        >
+      </van-dialog>
+    </div>    
     <van-dialog v-model="toolShow"  show-cancel-button width="92%"
           @confirm="toolSure" @cancel="toolCancel" confirmButtonText="添加"
         >
@@ -60,10 +66,10 @@
                   {{item.mateName}}-{{item.model}}
                 </span>
                 <span>
-                  {{item.unit}}
+                  {{item.unit ? item.unit : '无'}}
                 </span>
                 <span>
-                  <van-checkbox v-model="item.checked" shape="square"></van-checkbox>
+                  <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
                 </span>
               </p>
             </div>
@@ -92,6 +98,10 @@
       return {
         toolShow: false,
         materialShow: false,
+        isDeleteShow: false,
+        consumableIndex: null,
+        lastConsumableNumber: null,
+        isFinishShow: false,
         materialContentShow: false,
         searchValue: '',
         consumableMsgList: [],
@@ -240,9 +250,17 @@
               this.temporaryInventoryMsgList = [];
               for (let item of res.data.data) {
                 item['checked'] = false;
-                // 添加过的物料不允许再次添加
+                // 添加过的物料不允许再次添加,数量为0不容许选择操作
                 let isExist = this.consumableMsgList.filter((innerItem) => { return innerItem.mateId == item.id});
-                isExist.length > 0 ? item['disabled'] = true : item['disabled'] = false
+                if (isExist.length > 0) {
+                  item['disabled'] = true
+                } else {
+                  if (item.quantity > 0) {
+                    item['disabled'] = false
+                  } else {
+                    item['disabled'] = true
+                  }
+                }
               };
               this.inventoryMsgList = res.data.data;
               this.temporaryInventoryMsgList = res.data.data;
@@ -290,6 +308,7 @@
                 number: 0,
                 mateName: item.mateName,
                 mateNumber: item.mateNumber,
+                quantity: item.quantity,
                 unit: item.unit,
                 mateId: item.id,
                 model: item.model,
@@ -324,6 +343,40 @@
 
       },
 
+      // 步进器值变化事件
+      stepValueChange (item,index,val) {
+        if (val === "") {return};
+        this.consumableIndex = index;
+        if (val == 0) {
+          this.isDeleteShow = true;
+          return
+        };
+        if (val > item.quantity) {
+          this.$toast("数量已经超过耗材库存数量");
+          this.consumableMsgList[index]['number'] = 1;
+          return
+        };
+        this.lastConsumableNumber = val
+      },
+
+      // 步进器聚焦事件
+      stepValueFocus (item,index,val) {
+        if (val != 0) {
+          this.lastConsumableNumber = item.number
+        }
+      },
+
+       // 是否删除耗材确定事件
+      isDeleteSure () {
+        this.consumableMsgList.splice(this.consumableIndex,1)
+      },
+
+      // 是否删除耗材取消事件
+      isDeleteCancel () {
+        // 耗材数量恢复为0之前的值
+        this.consumableMsgList[this.consumableIndex]['number'] = this.lastConsumableNumber
+      },
+
       // 确认
       sure () {
         let mateMsg = {
@@ -353,22 +406,7 @@
         };
         saveDepartmentMate(mateMsg).then((res) => {
           if (res && res.data.code == 200) {
-            if (res.data.data.length == 0) {
-              this.$toast(`${res.data.msg}`);
-            } else {
-              // 提示库存不足的物料名称及型号
-              let msgArray = [],
-                  msg = '';
-              res.data.data.forEach((el) => {
-                msgArray.push(`${el.mateName}-${el.model}`)
-              });
-              msg = msgArray.join(',');
-              this.$dialog.alert({
-                message: `${msg},库存不足`,
-                closeOnPopstate: true
-              }).then(() => {
-              })
-            };
+            this.$toast(`${res.data.msg}`);
             this.backTo() 
           } else {
             this.$toast(`${res.data.msg}`)
@@ -393,86 +431,84 @@
     /deep/ .van-dialog {
       top: 50%;
       .van-dialog__content {
-        margin-bottom: 6px;
         height: 500px;
-        margin: 10px 0;
         .tool-name-list {
-          width: 94%;
-          height: 100%;
-          overflow: auto;
-          margin: 0 auto;
-          padding: 0;
-          .tool-name-list-title-innner {
-            padding: 10px;
-            position: relative;
-            /deep/ .van-cell {
-              padding: 4px;
-              border: 1px solid #333;
-            };
-            .icon-span {
-              position: absolute;
-              top: 50%;
-              transform: translateY(-50%);
-              display: inline-block;
-              right: 16px;
-              .van-icon {
-                font-size: 23px
+            width: 94%;
+            height: 100%;
+            display: flex;
+            flex-flow: column;
+            margin: 0 auto;
+            padding: 0;
+            .tool-name-list-title-innner {
+              padding: 10px;
+              position: relative;
+              /deep/ .van-cell {
+                padding: 4px;
+                border: 1px solid #333;
+              };
+              .icon-span {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                display: inline-block;
+                right: 16px;
+                .van-icon {
+                  font-size: 23px
+                }
+              }
+            }
+            .tool-name-list-content {
+              flex: 1;
+              padding: 6px;
+              overflow: auto;
+              box-sizing: border-box;
+              border-top: 1px solid #b2b2b2;
+              .circulation-area-content {
+                position: relative;
+                height: 40px;
+                background: #fff;
+                > span {
+                  height: 40px;
+                  line-height: 40px;
+                  font-size: 16px;
+                  display: inline-block;
+                  &:first-child {
+                    width: 55%
+                  };
+                  &:nth-child(2) {
+                    width: 20%;
+                  }
+                  &:last-child {
+                    position: absolute;
+                    top: 12px;
+                    right: 0
+                  }
+                }
+              }
+              .circulation-area-title {
+                position: relative;
+                font-size: 0;
+                span {
+                  height: 40px;
+                  line-height: 40px;
+                  display: inline-block;
+                  width: 20%;
+                  font-size: 16px;
+                  &:first-child {
+                    width: 55%
+                  };
+                  &:nth-child(2) {
+                    width: 20%;
+                  }
+                  &:last-child {
+                    position: absolute;
+                    text-align: right;
+                    right: 0
+                  }
+                }
               }
             }
           }
-          .tool-name-list-content {
-            height: 82%;
-            max-height: 82%;
-            padding: 6px;
-            overflow: auto;
-            border-top: 1px solid #b2b2b2;
-            border-bottom: 1px solid #b2b2b2;
-            .circulation-area-content {
-              position: relative;
-              height: 40px;
-              background: #fff;
-              > span {
-                height: 40px;
-                line-height: 40px;
-                font-size: 16px;
-                display: inline-block;
-                &:first-child {
-                  width: 55%
-                };
-                &:nth-child(2) {
-                  width: 20%;
-                }
-                &:last-child {
-                  position: absolute;
-                  top: 12px;
-                  right: 0
-                }
-              }
-            }
-            .circulation-area-title {
-              position: relative;
-              font-size: 0;
-              span {
-                height: 40px;
-                line-height: 40px;
-                display: inline-block;
-                width: 20%;
-                font-size: 16px;
-                &:first-child {
-                  width: 55%
-                };
-                &:nth-child(2) {
-                  width: 20%;
-                }
-                &:last-child {
-                  position: absolute;
-                  text-align: right;
-                  right: 0
-                }
-              }
-            }
-          }
-        }
       }
     };
     .content-wrapper();

@@ -10,92 +10,113 @@
         <loading :isShow="showLoadingHint" :textContent="loadinText" textColor="#2895ea"></loading>
       </div>
       <!-- 内容部分 -->
-      <div class="content-top">
-        <p class="content-top-other">
-          <span>工单编号</span>
-          <span>
-            {{oneRepairsMsg.taskNumber}}
-          </span>
-        </p>
-        <p class="content-top-other">
-          <span>工单标题</span>
-          <span>
-            {{oneRepairsMsg.taskDesc}}
-          </span>
-        </p>
-        <p class="content-top-other">
-          <span>工单类型</span>
-          <span>
-            {{oneRepairsMsg.typeName}}
-          </span>
-        </p>
-        <p class="content-top-other">
-          <span>时间</span>
-          <span>
-            {{oneRepairsMsg.planStartTime}}
-          </span>
-        </p>
-        <p class="content-top-other">
-          <span>参与人员</span>
-          <span v-if="oneRepairsMsg.present ? oneRepairsMsg.present.length > 0 : false">
-            <b v-for="(item,index) in oneRepairsMsg.present" :key="`${item}-${index}`">
-              {{item.name}}
-            </b>
-          </span>
-          <span v-if="oneRepairsMsg.present ? oneRepairsMsg.present.length == 0 : false">
-            <b>
-              无
-            </b>
-          </span>
-        </p>
-        <p class="content-top-other">
-          <span>地点</span>
-          <span>
-            {{oneRepairsMsg.depName}}
-          </span>
-        </p>
-        <p class="content-top-name">
-          <span>工单内容</span>
-          <span>
-            {{oneRepairsMsg.taskRemark ? oneRepairsMsg.taskRemark : '无'}}
-          </span>
-        </p>
-      </div>
-      <div class="content-middle" v-if="repairsWorkOrderMsg.state != 4">
-        <p class="issue-photo">
-          <span>问题拍照</span>
-          <ul class="photo-list">
-            <li v-for="(item,index) in issueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
-              <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item,0)" />
-              <van-icon name="cross" @click="issueDelete(index)"/>
-            </li>
-            <li v-for="(item,index) in historyIssueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
-              <img width="100" height="130" :src="`http://blink.blinktech.cn/${item}`" @click="enlargeIssueImgEvent(item,1)"/>
-            </li>
-          </ul>
-          <span @click="issueClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
-            <van-icon name="plus"/>
-          </span>
-        </p>
-        <p class="complete-photo">
-          <span>完成拍照</span>
-          <ul class="photo-list">
-            <li v-for="(item,index) in completeImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
-              <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item,0)"/>
-              <van-icon name="cross" @click="completeDelete(index)"/>
-            </li>
-            <li v-for="(item,index) in historyCompleteImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
-              <img width="100" height="130" :src="`http://blink.blinktech.cn/${item}`" @click="enlargeCompleteImgEvent(item,1)"/>
-            </li>
-          </ul>
-          <span @click="completeClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
-            <van-icon name="plus"/>
-          </span>
-        </p>
-      </div>
+      <div class="content-real">
+        <div class="content-top">
+          <p class="content-top-other">
+            <span>工单编号</span>
+            <span>
+              {{oneRepairsMsg.taskNumber}}
+            </span>
+          </p>
+          <p class="content-top-other">
+            <span>工单标题</span>
+            <span>
+              {{oneRepairsMsg.taskDesc}}
+            </span>
+          </p>
+          <p class="content-top-other">
+            <span>工单类型</span>
+            <span>
+              {{oneRepairsMsg.typeName}}
+            </span>
+          </p>
+          <p class="content-top-other">
+            <span>时间</span>
+            <span>
+              {{oneRepairsMsg.planStartTime}}
+            </span>
+          </p>
+          <p class="content-top-other">
+            <span>参与人员</span>
+            <span v-if="oneRepairsMsg.present ? oneRepairsMsg.present.length > 0 : false">
+              <b v-for="(item,index) in oneRepairsMsg.present" :key="`${item}-${index}`">
+                {{item.name}}
+              </b>
+            </span>
+            <span v-if="oneRepairsMsg.present ? oneRepairsMsg.present.length == 0 : false">
+              <b>
+                无
+              </b>
+            </span>
+          </p>
+          <p class="content-top-other">
+            <span>地点</span>
+            <span>
+              {{oneRepairsMsg.depName}}
+            </span>
+          </p>
+          <p class="content-top-name">
+            <span>工单内容</span>
+            <span>
+              {{oneRepairsMsg.taskRemark ? oneRepairsMsg.taskRemark : '无'}}
+            </span>
+          </p>
+        </div>
+        <div class="content-middle">
+          <div class="issue-photo">
+            <span>问题拍照</span>
+            <ul class="photo-list">
+              <li v-for="(item,index) in issueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
+                <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item,0)" />
+                <van-icon name="cross" @click="issueDelete(index)"/>
+              </li>
+              <li v-for="(item,index) in historyIssueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
+                <img width="100" height="130" :src="`http://blink.blinktech.cn/${item}`" @click="enlargeIssueImgEvent(item,1)"/>
+              </li>
+            </ul>
+            <span @click="issueClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
+              <van-icon name="plus"/>
+            </span>
+          </div>
+          <div class="complete-photo">
+            <span>完成拍照</span>
+            <ul class="photo-list">
+              <li v-for="(item,index) in completeImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
+                <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item,0)"/>
+                <van-icon name="cross" @click="completeDelete(index)"/>
+              </li>
+              <li v-for="(item,index) in historyCompleteImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
+                <img width="100" height="130" :src="`http://blink.blinktech.cn/${item}`" @click="enlargeCompleteImgEvent(item,1)"/>
+              </li>
+            </ul>
+            <span @click="completeClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
+              <van-icon name="plus"/>
+            </span>
+          </div>
+          <div class="manage-wrapper">
+            <div class="mange-title">
+              <span>{{repairsWorkOrderMsg.state == 5 ? "消耗耗材" : "耗材管理"}}</span>
+              <span @click="addConsumable" v-show="repairsWorkOrderMsg.state !== 5">添加</span>
+            </div>
+            <div class="circulation-area">
+              <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
+                <span>{{index+1}}</span>
+                <span>
+                  {{item.mateName}}-{{item.model}}
+                </span>
+                <span>
+                  <van-stepper @change="function(val){stepValueChange(item,index,val)}" theme="round" integer 
+                  @focus="function(val){stepValueFocus(item,index,val)}"
+                  v-model="item.number" min="0"/>
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>  
       <div class="content-bottom" ref="contentBottom" v-show="repairsWorkOrderMsg.state !== 5">
-        <p class="back-home" @click="fillConsumable" v-show="repairsWorkOrderMsg.state !== 4 && isChangeConsumableShow">修改耗材</p>
-        <p class="back-home"  @click="fillConsumable" v-show="repairsWorkOrderMsg.state !== 4 && !isChangeConsumableShow">填写耗材</p>
+        <!-- <p class="back-home" @click="fillConsumable" v-show="repairsWorkOrderMsg.state !== 4 && isChangeConsumableShow">修改耗材</p>
+        <p class="back-home"  @click="fillConsumable" v-show="repairsWorkOrderMsg.state !== 4 && !isChangeConsumableShow">填写耗材</p> -->
         <p class="quit-account" @click="completeTask">{{repairsWorkOrderMsg.state == 4 ? "签字" : "完成工单"}}</p>
       </div>
       <transition name="van-slide-up">
@@ -112,13 +133,57 @@
         </div>
       </transition>
     </div>
-    <van-dialog v-model="enlargeImgShow" width="90%">
-      <img :src="enlargeImgUrl">
-    </van-dialog>
-    <van-dialog v-model="isFinishShow"  title="确定完成?" show-cancel-button
-        @confirm="isFinishSure" @cancel="isFinishCancel"
-      >
-    </van-dialog>
+    <div class="infoDialog">
+      <van-dialog class="infoDialog" v-model="enlargeImgShow" width="90%">
+        <img :src="enlargeImgUrl">
+      </van-dialog>
+    </div>  
+    <div class="infoDialog">
+      <van-dialog v-model="isFinishShow"  title="确定完成?" show-cancel-button
+          @confirm="isFinishSure" @cancel="isFinishCancel"
+        >
+      </van-dialog>
+    </div>
+    <div class="infoDialog">
+      <van-dialog v-model="isDeleteShow"  title="是否删除该耗材?" show-cancel-button
+          @confirm="isDeleteSure" @cancel="isDeleteCancel"
+        >
+      </van-dialog>
+    </div>    
+    <div class="contentDialog">
+      <van-dialog v-model="toolShow"  show-cancel-button width="92%"
+            @confirm="toolSure" @cancel="toolCancel" confirmButtonText="添加"
+          >
+            <div class="tool-name-list">
+              <div class="tool-name-list-title-innner">
+                <van-field
+                  v-model="searchValue"
+                />
+                <span class="icon-span">
+                  <van-icon name="search" @click="searchEvent"/>
+                </span>
+              </div>
+              <div class="tool-name-list-content">
+                <p class="circulation-area-title">
+                  <span>物料名称</span>
+                  <span>单位</span>
+                  <span>操作</span>
+                </p>
+                <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
+                  <span @click="mateNameEvent(item,index)">
+                    {{item.mateName}}-{{item.model}}
+                  </span>
+                  <span>
+                    {{item.unit ? item.unit : '无'}}
+                  </span>
+                  <span>
+                    <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
+                  </span>
+                </p>
+              </div>
+            </div>
+      </van-dialog>
+    </div>  
   </div>
 </template>
 <script>
@@ -129,7 +194,7 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import {queryOneRepairsProject,uploadRepairsTaskPhoto,queryRepairsTaskPhoto,completeRepairsTask,sureStartTask} from '@/api/worker.js'
+  import {queryOneRepairsProject,uploadRepairsTaskPhoto,queryAllMaterial,queryRepairsTaskPhoto,saveMate,completeRepairsTask,sureStartTask,queryMaterialById} from '@/api/worker.js'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, deepClone, compress } from '@/common/js/utils'
   export default {
     name: 'WorkOrderDetails',
@@ -142,6 +207,10 @@
     data() {
       return {
         photoBox: false,
+        toolShow: false,
+        isDeleteShow: false,
+        consumableIndex: null,
+        lastConsumableNumber: null,
         isFinishShow: false,
         isChangeConsumableShow: false,
         showLoadingHint: false,
@@ -153,12 +222,18 @@
         clickComplete: false,
         issueImageList: [],
         completeImageList: [],
+        inventoryMsgList: [],
+        temporaryInventoryMsgList: [],
         historyIssueImageList: [],
         historyCompleteImageList: [],
         photonList: [],
+        searchValue: '',
+        consumableMsgList: [],
         enlargeImgShow: false,
         oneRepairsMsg: '',
-        enlargeImgUrl: ''
+        enlargeImgUrl: '',
+        storeId: '',
+        systemId: ''
       }
     },
 
@@ -195,7 +270,8 @@
         this.getOneRepairsProjectNoComplete(this.taskId)
       };
       this.echoIsMaterial();
-      this.changeElementSite();
+      this.queryStoreId({proId: this.proId,state: 0});
+      this.getMaterialById(this.taskId)
     },
 
     watch: {
@@ -219,6 +295,14 @@
           }
         },
         immediate: true,
+        deep: true
+      },
+      searchValue:{
+        handler(newVal, oldVal){
+          console.log(newVal,oldVal);
+          this.inventoryMsgList = [];
+          this.inventoryMsgList = this.temporaryInventoryMsgList.filter((item) => {return item.mateName.indexOf(newVal) != -1})
+        },
         deep: true
       }
     },
@@ -285,6 +369,105 @@
         };
       },
 
+       // 添加确认
+      toolSure () {
+        let count = this.inventoryMsgList.some((item)=> {return item.checked == true});
+        if (!count) {
+          this.$toast('至少要选择一种耗材')
+        } else {
+          this.materialContentShow = true;
+          let checkConsumableList = this.inventoryMsgList.filter((item) => {return item.checked == true});
+          for (let item of checkConsumableList) {
+            this.consumableMsgList.push({
+              number: 0,
+              mateName: item.mateName,
+              mateNumber: item.mateNumber,
+              unit: item.unit,
+              mateId: item.id,
+              model: item.model,
+              quantity: item.quantity,
+              storeId: this.storeId,
+              systemId: this.systemId
+            })
+          };
+        }
+      },
+
+      // 添加取消
+      toolCancel () {
+
+      },
+
+      //查询所有物料信息
+      getAllMaterial (data) {
+        queryAllMaterial(data)
+        .then((res) => {
+          if(res && res.data.code == 200) {
+            if (res.data.data.length > 0) {
+              this.inventoryMsgList = [];
+              this.temporaryInventoryMsgList = [];
+              for (let item of res.data.data) {
+                item.checked = false;
+                // 添加过的物料不允许再次添加,数量为0不容许选择操作
+                let isExist = this.consumableMsgList.filter((innerItem) => { return innerItem.mateId == item.id});
+                if (isExist.length > 0) {
+                  item['disabled'] = true
+                } else {
+                  if (item.quantity > 0) {
+                    item['disabled'] = false
+                  } else {
+                    item['disabled'] = true
+                  }
+                }
+              };
+              this.inventoryMsgList = res.data.data;
+              this.temporaryInventoryMsgList = res.data.data;
+              this.storeId = this.inventoryMsgList[0]['storeId'];
+              this.systemId = this.inventoryMsgList[0]['systemId'];
+            } else {
+              this.$dialog.alert({
+                message: '没有查询到对应的物料信息',
+                closeOnPopstate: true
+              }).then(() => {
+              })
+            }
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      // 耗材名称点击事件
+      mateNameEvent (name,index) {
+        this.inventoryMsgList[index]['checked'] = !this.inventoryMsgList[index]['checked'];
+      },
+
+      // 添加物质
+      addConsumable () {
+        this.toolShow = true;
+        this.searchValue = '';
+        this.getAllMaterial({
+	        proId: this.proId,
+          state: 0
+        })
+      },
+
+      // 是否删除耗材确定事件
+      isDeleteSure () {
+        this.consumableMsgList.splice(this.consumableIndex,1)
+      },
+
+      // 是否删除耗材取消事件
+      isDeleteCancel () {
+        // 耗材数量恢复为0之前的值
+        this.consumableMsgList[this.consumableIndex]['number'] = this.lastConsumableNumber
+      },
+
       // 回显当前是否填写过耗材
       echoIsMaterial () {
         try {
@@ -294,6 +477,36 @@
           this.isChangeConsumableShow = this.isFillMaterialList[echoIndex]['isFilledMaterial']
         } catch (err) {
           this.$toast(`${err}`)
+        }
+      },
+
+      // 步进器值变化事件
+      stepValueChange (item,index,val) {
+        if (val === "") {return};
+        this.consumableIndex = index;
+        if (val == 0) {
+          this.isDeleteShow = true;
+          return
+        };
+        if (val > item.quantity) {
+          this.$toast("数量已经超过耗材库存数量");
+          this.consumableMsgList[index]['number'] = 1;
+          return
+        };
+        this.lastConsumableNumber = val
+      },
+
+      // 步进器聚焦事件
+      stepValueFocus (item,index,val) {
+        if (val != 0) {
+          this.lastConsumableNumber = item.number
+        }
+      },
+
+      // 步进器失去焦点事件
+      stepValueBlur (item,index,val) {
+        if (Number(item.number) > item.quantity && this.consumableMsgList[index]['number'] != 1) {
+          this.consumableMsgList[index]['number'] = 1
         }
       },
 
@@ -393,6 +606,72 @@
         })
       },
 
+      //查询任务关联的物料信息
+      getMaterialById (taskId) {
+        queryMaterialById(taskId)
+        .then((res) => {
+          if(res && res.data.code == 200) {
+            if (res.data.data.length > 0) {
+              this.consumableMsgList = [];
+              this.consumableMsgList = res.data.data;
+            } else {
+            }
+          } else {
+            this.$dialog.alert({
+              message: `${res.data.msg}`,
+              closeOnPopstate: true
+            }).then(() => {
+            })
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      //查询storeId与systemId
+      queryStoreId (data) {
+        queryAllMaterial(data)
+        .then((res) => {
+          if(res && res.data.code == 200) {
+            if (res.data.data.length > 0) {
+              this.storeId = res.data.data[0]['storeId'];
+              this.systemId = res.data.data[0]['systemId'];
+            } else {
+              this.$dialog.alert({
+                message: '没有查询到对应的物料信息',
+                closeOnPopstate: true
+              }).then(() => {
+              })
+            }
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      // 搜索事件
+      searchEvent () {
+        if (this.searchValue == '') {
+          this.getAllMaterial({
+            proId: this.proId,
+            state: 0
+          });
+          return
+        };
+        this.inventoryMsgList = [];
+        this.inventoryMsgList = this.temporaryInventoryMsgList.filter((item) => {return item.mateName.indexOf(this.searchValue) != -1})
+      },
+
       // 确认任务开始
       sureTask (data) {
         sureStartTask(data).then((res) => {
@@ -409,7 +688,7 @@
       },
 
       // 查询任务下的图片
-       getOneRepairsProjectPhoto () {
+      getOneRepairsProjectPhoto () {
         return new Promise((resolve,reject) => {
           queryRepairsTaskPhoto({taskId:this.taskId,imgType:-1}).then((res) => {
             if(res && res.data.code == 200) {
@@ -598,14 +877,6 @@
         setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList})
       },
 
-      // 清除该任务存储的照片信息
-      clearStoragePhoto () {
-        if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
-        let temporaryPhotoList = this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId !== this.taskId});
-        this.changeIsCompletePhotoList(temporaryPhotoList);
-        setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
-      },
-
       // 回显照片
       echoPhoto () {
         this.historyIssueImageList = [];
@@ -620,14 +891,11 @@
         };
         if (this.isCompleteRepairsWorkOrderPhotoList[echoIndex]['completePhototList']) {
           this.completeImageList = deepClone(this.isCompleteRepairsWorkOrderPhotoList[echoIndex]['completePhototList'])
-        }
+        };
       },
 
       // 上传图片
       uploadPhoto () {
-        this.loadinText = '上传中,请稍等···';
-        this.overlayShow = true;
-        this.showLoadingHint = true;
         let imageType;
         let photoMsg = {
           taskId: this.taskId,  //任务ID
@@ -652,36 +920,23 @@
             })
           }
         };
-        uploadRepairsTaskPhoto(photoMsg)
-        .then((res) => {
-          this.showLoadingHint = false;
-          this.overlayShow = false;
-          if (res && res.data.code == 200) {
-            this.$toast(`${res.data.msg}`);
-            if (this.issueImageList.length > 0) {
-              this.issueImageList = []
+        return new Promise((resolve,reject) => {
+          uploadRepairsTaskPhoto(photoMsg)
+          .then((res) => {
+            if (res && res.data.code == 200) {
+              this.$toast('图片上传成功');
+              resolve()
+            } else {
+              reject(`${res.data.msg}`);
             }
-            if (this.completeImageList.length > 0) {
-              this.completeImageList = []
-            };
-            this.clearStorageMaterial();
-            this.clearPhotoList();
-            this.isFinishShow = true
-          } else {
-            this.$toast(`${res.data.msg}`);
-          }
-        })
-        .catch((err) => {
-          this.$dialog.alert({
-            message: `${err.message}`,
-            closeOnPopstate: true
-          }).then(() => {
-          });
-          this.showLoadingHint = false;
-          this.overlayShow = false
-        })
+          })
+          .catch((err) => {
+            reject(err.message)
+          })
+        })  
       },
 
+      
       // 清除上传成功后存储的照片
       clearPhotoList () {
         if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
@@ -691,6 +946,14 @@
         let temporaryPhotoId = [];
         temporaryPhotoList[echoIndex]['completePhototList'] = temporaryPhotoId;
         temporaryPhotoList[echoIndex]['issuePhototList'] = temporaryPhotoId;
+        this.changeIsCompletePhotoList(temporaryPhotoList);
+        setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
+      },
+
+      // 清除该任务存储的照片信息
+      clearStoragePhoto () {
+        if (this.isCompleteRepairsWorkOrderPhotoList.length == 0) { return };
+        let temporaryPhotoList = this.isCompleteRepairsWorkOrderPhotoList.filter((item) => {return item.taskId !== this.taskId});
         this.changeIsCompletePhotoList(temporaryPhotoList);
         setStore('completPhotoInfo', {"photoInfo": temporaryPhotoList});
       },
@@ -712,8 +975,6 @@
         .then((res) => {
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
-            // 清除任务存储的照片
-            this.clearStoragePhoto();
             this.$router.push({path: 'repairsWorkOrder'});
             this.changeTitleTxt({tit:'报修工单'});
             setStore('currentTitle','报修工单')
@@ -730,6 +991,43 @@
         })
       },
 
+        // 提交用到的耗材信息
+        submitMaterials () {
+          let mateMsg = {
+            proId: this.proId,
+            id: this.taskId,
+            materials: []
+          };
+          for (let item of this.consumableMsgList) {
+            mateMsg.materials.push(
+              {
+                proId: this.proId,
+                proName: item.mateName,
+                mateId: item.mateId,
+                number: item.number,
+                mateNumber: item.mateNumber,
+                mateName: item.mateName,
+                model: item.model,
+                storeId: this.storeId,
+                systemId: this.systemId
+              }
+            )
+          };
+          return new Promise((resolve,reject) => {
+            saveMate(mateMsg).then((res) => {
+              if (res && res.data.code == 200) {
+                this.$toast('物料上传成功');
+                resolve()
+              } else {
+                reject(`${res.data.msg}`)
+              }
+            })
+          .catch((err) => {
+            reject(err.message)
+          })
+        })
+      },
+
       // 是否确定完成取消
       isFinishCancel () {
         this.$router.push({path: 'repairsWorkOrder'});
@@ -739,21 +1037,39 @@
 
       // 完成工单
       completeTask () {
-        if (this.repairsWorkOrderMsg.state == 4) {
-          this.$router.push({path: 'workOrderSignature'});
-          this.changeTitleTxt({tit:'工单完成签名'});
-          setStore('currentTitle','工单完成签名')
-        } else {
-          if (this.issueImageList.length == 0 || this.completeImageList.length == 0) {
-            this.$toast('请上传问题照片或完成照片');
-            return
-          };
-          if (!this.isChangeConsumableShow) {
-            this.$toast('请填写耗材');
-            return
-          };
-          this.uploadPhoto()
-        }
+        if (this.issueImageList.length == 0 || this.completeImageList.length == 0) {
+          this.$toast('请上传问题照片或完成照片');
+          return
+        };
+        if (this.consumableMsgList.length == 0) {
+          this.$toast('请填写耗材');
+          return
+        };
+        this.loadinText = '数据上传中,请稍等···';
+        this.showLoadingHint = true;
+        this.overlayShow = true;
+        // 并行提交图片和耗材数据
+        Promise.all([this.submitMaterials(),this.uploadPhoto()]).then(() => {
+          this.showLoadingHint = false;
+          this.overlayShow = false;
+          this.clearStorageMaterial();
+          if (this.repairsWorkOrderMsg.state == 4) {
+            this.$router.push({path: 'workOrderSignature'});
+            this.changeTitleTxt({tit:'工单完成签名'});
+            setStore('currentTitle','工单完成签名')
+          } else {
+            this.isFinishShow = true
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err}`,
+            closeOnPopstate: true
+          }).then(() => {
+          });
+          this.showLoadingHint = false;
+          this.overlayShow = false
+        })
       }
     }
   }
@@ -781,178 +1097,367 @@
       height: 100px;
       text-align: center;
     };
-    /deep/ .van-dialog {
-      width: 95% !important;
-      top: 50% !important;
-      .van-dialog__content {
-        height: 90vh;
-        img {
-          width: 100%;
-          height: 100%
+    .infoDialog {
+      /deep/ .van-dialog {
+        width: 95% !important;
+        top: 50% !important;
+        .van-dialog__content {
+          height: 90vh;
+          img {
+            width: 100%;
+            height: 100%
+          }
+        }
+      }
+    };
+    .contentDialog {
+      /deep/ .van-dialog {
+        top: 50%;
+        .van-dialog__content {
+          margin-bottom: 6px;
+          /*height: 500px;*/
+          margin: 10px 0;
+          .tool-name-list {
+            width: 94%;
+            display: flex;
+            flex-flow: column;
+            overflow: auto;
+            margin: 0 auto;
+            padding: 0;
+            .tool-name-list-title-innner {
+              padding: 10px;
+              position: relative;
+              /deep/ .van-cell {
+                padding: 4px;
+                border: 1px solid #333;
+              };
+              .icon-span {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                display: inline-block;
+                right: 16px;
+                .van-icon {
+                  font-size: 23px
+                }
+              }
+            }
+            .tool-name-list-content {
+              flex: 1;
+              padding: 6px;
+              overflow: auto;
+              box-sizing: border-box;
+              border-top: 1px solid #b2b2b2;
+              .circulation-area-content {
+                position: relative;
+                height: 40px;
+                background: #fff;
+                > span {
+                  height: 40px;
+                  line-height: 40px;
+                  font-size: 16px;
+                  display: inline-block;
+                  &:first-child {
+                    width: 55%
+                  };
+                  &:nth-child(2) {
+                    width: 20%;
+                  }
+                  &:last-child {
+                    position: absolute;
+                    top: 12px;
+                    right: 0
+                  }
+                }
+              }
+              .circulation-area-title {
+                position: relative;
+                font-size: 0;
+                span {
+                  height: 40px;
+                  line-height: 40px;
+                  display: inline-block;
+                  width: 20%;
+                  font-size: 16px;
+                  &:first-child {
+                    width: 55%
+                  };
+                  &:nth-child(2) {
+                    width: 20%;
+                  }
+                  &:last-child {
+                    position: absolute;
+                    text-align: right;
+                    right: 0
+                  }
+                }
+              }
+            }
+          }
         }
       }
     };
     .worker-show {
       .content-wrapper();
       overflow: auto;
-      .content-top {
-        font-size: 14px;
-        background: #fff;
-        .content-top-name {
-          height: 90px;
-          padding: 10px;
-          box-sizing: border-box;
-          position: relative;
-          .bottom-border-1px(#dadada);
-          > span {
-            position: absolute;
-            display: inline-block;
-            &:first-child {
-              left: 0;
-              top: 16px;
-              color: black;
-              padding-left: 10px;
-            };
-            &:last-child {
-              color: @color-theme;
-              font-weight: bold;
-              right: 10px;
-              top: 16px;
-              width: 300px;
-              padding-left: 50px;
-              box-sizing: border-box;
-              line-height: 18px;
-              height: 65px;
-              overflow: auto
-            }
-          }
-        };
-        .content-top-other {
-          height: 45px;
-          line-height: 45px;
-          box-sizing: border-box;
-          position: relative;
-          .bottom-border-1px(#dadada);
-          &:last-child {
-            .bottom-border-1px(#fff)
-          }
-          > span {
-            position: absolute;
-            display: inline-block;
-            &:first-child {
-              left: 0;
-              top: 0;
-              color: black;
-              padding-left: 10px;
-            };
-            &:not(:first-child) {
-              width: 70%;
-              text-align: right;
-              overflow: auto;
-              color: @color-theme;
-              font-weight: bold;
-              right: 10px;
-              top: 0;
-              b {
-                font-weight: bold;
-              }
-            }
-          }
-        }
-      };
-      .content-middle {
+      .content-real {
         flex: 1;
         margin: 0 auto;
         width: 100%;
         overflow: auto;
         font-size: 13px;
-        background: #f7f7f7;
-        position: relative;
-        .photo-list {
-          position: absolute;
-          left: 70px;
-          width: 250px;
-          top: 10px;
-          height: 90px;
-          overflow: auto;
-          li {
-            width: 80px;
-            height: 80px;
-            float: left;
-            margin-right: 4px;
-            margin-bottom: 4px;
-            position: relative;
-            /deep/ .van-icon-cross {
-              position: absolute;
-              top: 0;
-              right:0;
-              color: @color-theme;
-              font-size: 20px;
-            };
-            img {
-              width: 100%;
-              height: 100%
-            };
-            &:nth-of-type(3n+0)
-            {
-              margin-right: 0
-            }
-          }
-        }
-        .issue-photo {
-          position: relative;
-          top: 20px;
-          left: 0;
-          height: 100px;
+        .content-top {
+          font-size: 14px;
           background: #fff;
-          line-height: 100px;
-          box-sizing: border-box;
-          > span {
-            position: absolute;
-            display: inline-block;
-            &:first-child {
-              left: 0;
-              top: 0;
-              color: black;
-              padding-left: 10px;
-            };
+          .content-top-name {
+            height: 90px;
+            padding: 10px;
+            box-sizing: border-box;
+            position: relative;
+            .bottom-border-1px(#dadada);
+            > span {
+              position: absolute;
+              display: inline-block;
+              &:first-child {
+                left: 0;
+                top: 16px;
+                color: black;
+                padding-left: 10px;
+              };
+              &:last-child {
+                color: @color-theme;
+                font-weight: bold;
+                right: 10px;
+                top: 16px;
+                width: 300px;
+                padding-left: 50px;
+                box-sizing: border-box;
+                line-height: 18px;
+                height: 65px;
+                overflow: auto
+              }
+            }
+          };
+          .content-top-other {
+            height: 45px;
+            line-height: 45px;
+            box-sizing: border-box;
+            position: relative;
+            .bottom-border-1px(#dadada);
             &:last-child {
-              color: @color-theme;
-              font-size: 34px;
-              font-weight: bold;
-              right: 10px;
-              top: 4px
+              .bottom-border-1px(#fff)
+            }
+            > span {
+              position: absolute;
+              display: inline-block;
+              &:first-child {
+                left: 0;
+                top: 0;
+                color: black;
+                padding-left: 10px;
+              };
+              &:not(:first-child) {
+                width: 70%;
+                text-align: right;
+                overflow: auto;
+                color: @color-theme;
+                font-weight: bold;
+                right: 10px;
+                top: 0;
+                b {
+                  font-weight: bold;
+                }
+              }
             }
           }
         };
-        .complete-photo {
+        .content-middle {
           position: relative;
-          margin-top: 20px;
-          top: 20px;
-          left: 0;
-          height: 100px;
-          background: #fff;
-          line-height: 100px;
+          background: #f7f7f7;
+          padding: 20px 0;
           box-sizing: border-box;
-          > span {
+          .photo-list {
             position: absolute;
-            display: inline-block;
-            &:first-child {
-              left: 0;
-              top: 0;
-              color: black;
-              padding-left: 10px;
+            left: 70px;
+            width: 250px;
+            top: 10px;
+            height: 90px;
+            overflow: auto;
+            li {
+              width: 80px;
+              height: 80px;
+              float: left;
+              margin-right: 4px;
+              margin-bottom: 4px;
+              position: relative;
+              /deep/ .van-icon-cross {
+                position: absolute;
+                top: 0;
+                right:0;
+                color: @color-theme;
+                font-size: 20px;
+              };
+              img {
+                width: 100%;
+                height: 100%
+              };
+              &:nth-of-type(3n+0)
+              {
+                margin-right: 0
+              }
+            }
+          }
+          .issue-photo {
+            position: relative;
+            height: 100px;
+            background: #fff;
+            line-height: 100px;
+            box-sizing: border-box;
+            > span {
+              position: absolute;
+              display: inline-block;
+              &:first-child {
+                left: 0;
+                top: 0;
+                color: black;
+                padding-left: 10px;
+              };
+              &:last-child {
+                color: @color-theme;
+                font-size: 34px;
+                font-weight: bold;
+                right: 10px;
+                top: 4px
+              }
+            }
+          };
+          .complete-photo {
+            position: relative;
+            margin: 20px 0;
+            height: 100px;
+            background: #fff;
+            line-height: 100px;
+            box-sizing: border-box;
+            > span {
+              position: absolute;
+              display: inline-block;
+              &:first-child {
+                left: 0;
+                top: 0;
+                color: black;
+                padding-left: 10px;
+              };
+              &:last-child {
+                color: @color-theme;
+                font-size: 34px;
+                font-weight: bold;
+                right: 10px;
+                top: 4px
+              }
+            }
+          };
+          .manage-wrapper {
+            background: #fff;
+            .mange-title {
+              height: 50px;
+              .bottom-border-1px(#dadada);
+              span {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                &:first-child {
+                  left: 10px;
+                };
+                &:last-child {
+                  right: 10px;
+                  width: 55px;
+                  height: 30px;
+                  text-align: center;
+                  line-height: 30px;
+                  border-radius: 6px;
+                  background: #2db8f9;
+                  color: #fff
+                }
+              }
             };
-            &:last-child {
-              color: @color-theme;
-              font-size: 34px;
-              font-weight: bold;
-              right: 10px;
-              top: 4px
+            .circulation-area {
+                max-height: 90%;
+                margin: 0 auto;
+                overflow: auto;
+                font-size: 0;
+              > p {
+                position: relative;
+                height: 50px;
+                background: #fff;
+                margin-bottom: 6px;
+                &:last-child {
+                  margin-bottom:0
+                }
+                > span {
+                  height: 50px;
+                  line-height: 50px;
+                  width: 40%;
+                  font-size: 16px;
+                  display: inline-block;
+                  text-align: center;
+                  &:first-child {
+                    width: 10%
+                  };
+                  &:nth-child(2) {
+                    text-align: left;
+                    /deep/ .van-cell {
+                      .van-cell__value--alone {
+                        .van-field__control {
+                          text-align: center
+                        }
+                      }
+                    }
+                  };
+                  &:last-child {
+                    position: absolute;
+                    top:0;
+                    right: 4px;
+                    width: 50%;
+                    text-align: right;
+                    /deep/ .van-stepper--round {
+                      .van-stepper__minus {
+                        color: #fff;
+                        background-color: @color-theme;
+                        border: 1px solid @color-theme;
+                        &:before {
+                          height: 3px
+                        }
+                      };
+                      .van-stepper__plus {
+                        color: #fff;
+                        background-color: @color-theme;
+                        border: 1px solid @color-theme;
+                        &:before {
+                          height: 3px
+                        };
+                        &:after {
+                          width: 3px
+                        }
+                      }
+                    };
+                    span {
+                      display: inline-block;
+                      position: absolute;
+                      top: 0;
+                      right: 2px;
+                      font-size: 22px;
+                      color: @color-theme;
+                      /deep/ .van-icon {
+                        top: 2px
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
-      };
+      }  
       .content-bottom {
         height: 100px;
         margin: 0 auto;

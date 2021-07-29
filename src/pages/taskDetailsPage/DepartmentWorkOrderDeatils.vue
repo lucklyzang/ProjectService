@@ -338,6 +338,7 @@
         // };
         updateDepartmentServiceTaskBeSigned(this.proId, this.taskId).then((res) => {
           if (res && res.data.code == 200) {
+            this.$toast(`${res.data.msg}`);
             // 删除当前任务存储的扫码校验校验通过的科室编号信息
             let temporaryCurrentDepartmentNUmInfo = this.isDepartmentServiceVerifySweepCode.filter((item) => { return item.taskId !== this.taskId});
             this.changeIsDepartmentServiceVerifySweepCode(temporaryCurrentDepartmentNUmInfo);
