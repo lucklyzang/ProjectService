@@ -29,7 +29,7 @@ module.exports = {
     'vue-router': 'VueRouter',
     'vuex': 'Vuex',
     'axios': 'axios',
-    'vant': 'vant',
+    // 'vant': 'vant',
     'echarts': 'echarts'
   },
   output: {
