@@ -71,7 +71,7 @@
                 <van-icon name="cross" @click="issueDelete(index)"/>
               </li>
               <li v-for="(item,index) in historyIssueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
-                <img width="100" height="130" :src="`http://blink.blinktech.cn/${item}`" @click="enlargeIssueImgEvent(item,1)"/>
+                <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item,1)"/>
               </li>
             </ul>
             <span @click="issueClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
@@ -86,7 +86,7 @@
                 <van-icon name="cross" @click="completeDelete(index)"/>
               </li>
               <li v-for="(item,index) in historyCompleteImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
-                <img width="100" height="130" :src="`http://blink.blinktech.cn/${item}`" @click="enlargeCompleteImgEvent(item,1)"/>
+                <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item,1)"/>
               </li>
             </ul>
             <span @click="completeClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
