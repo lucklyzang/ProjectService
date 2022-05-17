@@ -549,13 +549,13 @@
       // 放大问题图片点击事件
       enlargeIssueImgEvent (item,type) {
         this.enlargeImgShow = true;
-        type === 0 ? this.enlargeImgUrl = item : this.enlargeImgUrl = `http://blink.blinktech.cn/${item}`
+        type === 0 ? this.enlargeImgUrl = item : this.enlargeImgUrl = item
       },
 
       // 放大维修后图片点击事件
       enlargeCompleteImgEvent (item,type) {
         this.enlargeImgShow = true;
-        type === 0 ? this.enlargeImgUrl = item : this.enlargeImgUrl = `http://blink.blinktech.cn/${item}`
+        type === 0 ? this.enlargeImgUrl = item : this.enlargeImgUrl = item
       },
 
       // 并行查询工单信息和图片信息
