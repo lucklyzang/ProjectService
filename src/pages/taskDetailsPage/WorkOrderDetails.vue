@@ -1041,10 +1041,10 @@
           this.$toast('请上传问题照片或完成照片');
           return
         };
-        if (this.consumableMsgList.length == 0) {
-          this.$toast('请填写耗材');
-          return
-        };
+        // if (this.consumableMsgList.length == 0) {
+        //   this.$toast('请填写耗材');
+        //   return
+        // };
         this.loadinText = '数据上传中,请稍等···';
         this.showLoadingHint = true;
         this.overlayShow = true;
@@ -1124,6 +1124,7 @@
             overflow: auto;
             margin: 0 auto;
             padding: 0;
+            max-height: 80vh;
             .tool-name-list-title-innner {
               padding: 10px;
               position: relative;
