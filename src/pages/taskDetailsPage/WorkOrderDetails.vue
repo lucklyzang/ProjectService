@@ -55,6 +55,12 @@
               {{oneRepairsMsg.depName}}
             </span>
           </p>
+          <div class="content-top-space">
+            <span>空间</span>
+            <p v-if="oneRepairsMsg && oneRepairsMsg.spaces && oneRepairsMsg.spaces.length > 0">
+              {{ oneRepairsMsg.spaces.join(',') }}
+            </p>
+          </div>
           <p class="content-top-name">
             <span>工单内容</span>
             <span>
@@ -66,7 +72,7 @@
           <div class="issue-photo">
             <span>问题拍照</span>
             <ul class="photo-list">
-              <li v-for="(item,index) in issueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
+              <li v-for="(item,index) in issueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
                 <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item,0)" />
                 <van-icon name="cross" @click="issueDelete(index)"/>
               </li>
@@ -74,14 +80,14 @@
                 <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item,1)"/>
               </li>
             </ul>
-            <span @click="issueClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
+            <span @click="issueClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
               <van-icon name="plus"/>
             </span>
           </div>
           <div class="complete-photo">
             <span>完成拍照</span>
             <ul class="photo-list">
-              <li v-for="(item,index) in completeImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state != 5">
+              <li v-for="(item,index) in completeImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
                 <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item,0)"/>
                 <van-icon name="cross" @click="completeDelete(index)"/>
               </li>
@@ -89,14 +95,14 @@
                 <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item,1)"/>
               </li>
             </ul>
-            <span @click="completeClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5">
+            <span @click="completeClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
               <van-icon name="plus"/>
             </span>
           </div>
           <div class="manage-wrapper">
             <div class="mange-title">
-              <span>{{repairsWorkOrderMsg.state == 5 ? "消耗耗材" : "耗材管理"}}</span>
-              <span @click="addConsumable" v-show="repairsWorkOrderMsg.state !== 5">添加</span>
+              <span>{{repairsWorkOrderMsg.state == 5 || repairsWorkOrderMsg.state == 6? "消耗耗材" : "耗材管理"}}</span>
+              <span @click="addConsumable" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">添加</span>
             </div>
             <div class="circulation-area">
               <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
@@ -107,6 +113,7 @@
                 <span>
                   <van-stepper @change="function(val){stepValueChange(item,index,val)}" theme="round" integer 
                   @focus="function(val){stepValueFocus(item,index,val)}"
+                  :disabled="repairsWorkOrderMsg.state == 5 || repairsWorkOrderMsg.state == 6? true : false"
                   v-model="item.number" min="0"/>
                 </span>
               </p>
@@ -114,7 +121,7 @@
           </div>
         </div>
       </div>  
-      <div class="content-bottom" ref="contentBottom" v-show="repairsWorkOrderMsg.state !== 5">
+      <div class="content-bottom" ref="contentBottom" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
         <!-- <p class="back-home" @click="fillConsumable" v-show="repairsWorkOrderMsg.state !== 4 && isChangeConsumableShow">修改耗材</p>
         <p class="back-home"  @click="fillConsumable" v-show="repairsWorkOrderMsg.state !== 4 && !isChangeConsumableShow">填写耗材</p> -->
         <p class="quit-account" @click="completeTask">{{repairsWorkOrderMsg.state == 4 ? "签字" : "完成工单"}}</p>
@@ -595,6 +602,11 @@
         queryOneRepairsProject(this.taskId).then((res) => {
           if(res && res.data.code == 200) {
             this.oneRepairsMsg = res.data.data;
+            let temporaryArr = [];
+            for (let item of this.oneRepairsMsg.spaces) {
+              temporaryArr.push(item.value)
+            };
+            this.oneRepairsMsg['spaces'] = temporaryArr
           }
         })
         .catch((err) => {
@@ -1268,6 +1280,35 @@
                 b {
                   font-weight: bold;
                 }
+              }
+            }
+          };
+           .content-top-space {
+            height: 45px;
+            line-height: 45px;
+            box-sizing: border-box;
+            position: relative;
+            .bottom-border-1px(#dadada);
+            >span {
+              position: absolute;
+              display: inline-block;
+                left: 0;
+                top: 0;
+                color: black;
+                padding-left: 10px
+            };
+            p {
+              height: 45px;
+              position: absolute;
+              width: 70%;
+              text-align: right;
+              overflow: auto;
+              color: @color-theme;
+              font-weight: bold;
+              right: 10px;
+              top: 0;
+              >span {
+                font-size: 14px
               }
             }
           }
