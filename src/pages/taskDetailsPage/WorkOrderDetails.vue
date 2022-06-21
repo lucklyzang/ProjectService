@@ -56,7 +56,7 @@
             </span>
           </p>
           <div class="content-top-space">
-            <span>空间</span>
+            <span>目的空间</span>
             <p v-if="oneRepairsMsg && oneRepairsMsg.spaces && oneRepairsMsg.spaces.length > 0">
               {{ oneRepairsMsg.spaces.join(',') }}
             </p>
@@ -604,7 +604,7 @@
             this.oneRepairsMsg = res.data.data;
             let temporaryArr = [];
             for (let item of this.oneRepairsMsg.spaces) {
-              temporaryArr.push(item.value)
+              temporaryArr.push(item.name)
             };
             this.oneRepairsMsg['spaces'] = temporaryArr
           }
