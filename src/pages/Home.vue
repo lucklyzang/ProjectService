@@ -445,12 +445,14 @@
       .content-wrapper();
       overflow: auto;
       .content-top {
-        padding: 15px 0 15px 10px;
+        padding: 15px 10px;
         height: 75px;
         font-size: 14px;
         background: #fff;
         .content-top-userName {
           height: 100%;
+          display: flex;
+          flex-flow: row nowrap;
          > p {
             display: inline-block;
             height: 100%;
@@ -466,22 +468,25 @@
             }
           }
           .content-top-userName-msg {
-            width: 200px;
+            flex: 1;
             font-size: 13px;
             vertical-align: top;
             position: relative;
-            span {
+            >span {
               display: block;
+              word-break: break-all;
               position: absolute;
               left: 0
             };
             .real-name-one {
               top: 10px;
               color: #271010;
+              line-height: 14px;
               font-weight: bold
             };
             .real-name-two {
               bottom: 10px;
+              line-height: 14px;
               color: #bbbaba
             }
           }
