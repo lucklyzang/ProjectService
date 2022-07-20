@@ -1252,31 +1252,28 @@
             }
           };
           .content-top-other {
-            height: 45px;
-            line-height: 45px;
+            min-height: 45px;
             box-sizing: border-box;
-            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 10px;
             .bottom-border-1px(#dadada);
             &:last-child {
               .bottom-border-1px(#fff)
             }
             > span {
-              position: absolute;
               display: inline-block;
               &:first-child {
-                left: 0;
-                top: 0;
                 color: black;
-                padding-left: 10px;
               };
               &:not(:first-child) {
                 width: 70%;
                 text-align: right;
-                overflow: auto;
+                word-break: break-all;
                 color: @color-theme;
                 font-weight: bold;
-                right: 10px;
-                top: 0;
+                line-height: 18px;
                 b {
                   font-weight: bold;
                 }
@@ -1284,29 +1281,23 @@
             }
           };
            .content-top-space {
-            height: 45px;
-            line-height: 45px;
+            min-height: 45px;
             box-sizing: border-box;
-            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 10px;
             .bottom-border-1px(#dadada);
             >span {
-              position: absolute;
               display: inline-block;
-                left: 0;
-                top: 0;
-                color: black;
-                padding-left: 10px
             };
             p {
-              height: 45px;
-              position: absolute;
               width: 70%;
               text-align: right;
-              overflow: auto;
               color: @color-theme;
               font-weight: bold;
-              right: 10px;
-              top: 0;
+              word-break: break-all;
+              line-height: 18px;
               >span {
                 font-size: 14px
               }
@@ -1501,7 +1492,7 @@
         }
       }  
       .content-bottom {
-        height: 100px;
+        height: 40px;
         margin: 0 auto;
         width: 100%;
         font-size: 13px;
