@@ -8,6 +8,7 @@ import { Dialog, Toast } from 'vant';
 Vue.use(Dialog);
 import { setStore } from '@/common/js/utils'
 // http://blink.blinktech.cn/project 测试地址
+// http://show.blinktech.cn/project 演示地址
 // http://new.blinktech.cn/project 正式地址
 // process.env.NODE_ENV === 'development' ? 'http://blink.blinktech.cn/project' : 'http://blinktech.cn/project'
 const service = axios.create({
