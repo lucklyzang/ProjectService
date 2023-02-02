@@ -59,6 +59,7 @@
   import Loading from '@/components/Loading'
   import store from '@/store'
   import departmentServiceOnePng from '@/common/images/home/department-service-one.png'
+  import dispatchingManagementPng from '@/common/images/home/dispatching-management.png'
   import deviceServiceOnePng from '@/common/images/home/device-service-one.png'
   import repairsWorkOrderOnePng from '@/common/images/home/repairs-work-order-one.png'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
@@ -88,7 +89,8 @@
         taskList: [
           {tit:'报修工单', imgUrl: repairsWorkOrderOnePng},
           {tit:'设备巡检', imgUrl: deviceServiceOnePng},
-          {tit:'科室巡检', imgUrl: departmentServiceOnePng}
+          {tit:'科室巡检', imgUrl: departmentServiceOnePng},
+          {tit:'调度管理', imgUrl: dispatchingManagementPng}
         ],
         btnList: [
           {name: '主页', icon: 'wap-home-o'},
@@ -310,7 +312,7 @@
           this.$router.push({path: 'deviceService'});
           this.changeTitleTxt({tit:'设备巡检'});
           setStore('currentTitle','设备巡检')
-        } else {
+        } else if (item.tit == '科室巡检') {
           if (currentIndex != -1) {
             this.temporaryNumList.splice(index,1);
             this.changeNewTaskList(this.temporaryNumList);
@@ -320,6 +322,16 @@
           this.$router.push({path: 'departmentService'});
           this.changeTitleTxt({tit:'科室巡检'});
           setStore('currentTitle','科室巡检')
+        } else if (item.tit == '调度管理') {
+          if (currentIndex != -1) {
+            this.temporaryNumList.splice(index,1);
+            this.changeNewTaskList(this.temporaryNumList);
+            setStore('newTaskList',{taskName:this.temporaryNumList})
+          };
+          this.changeIsFreshDepartmentServicePage(true);
+          this.$router.push({path: 'engineeringTaskManagement'});
+          this.changeTitleTxt({tit:'工程维保任务管理'});
+          setStore('currentTitle','工程维保任务管理')
         }
       },
 
