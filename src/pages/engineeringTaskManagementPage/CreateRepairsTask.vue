@@ -937,7 +937,7 @@ export default {
         this.temporaryInventoryMsgList = this.echoInventoryMsgList;
         this.inventoryMsgList = this.echoInventoryMsgList;
         this.currentPage = 1;
-        this.totalPage =  Math.ceil(this.temporaryInventoryMsgList/this.pageSize);
+        this.totalPage =  Math.ceil(this.temporaryInventoryMsgList.length/this.pageSize);
         // 根据页码分割展示对应的数据
         this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
         return
@@ -945,7 +945,7 @@ export default {
       this.inventoryMsgList = this.echoInventoryMsgList.filter((item) => {return item.mateName.indexOf(this.searchValue) != -1});
       this.temporaryInventoryMsgList = this.inventoryMsgList;
       this.currentPage = 1;
-      this.totalPage =  Math.ceil(this.temporaryInventoryMsgList/this.pageSize);
+      this.totalPage =  Math.ceil(this.temporaryInventoryMsgList.length/this.pageSize);
       this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
     },
 
@@ -988,7 +988,7 @@ export default {
 
     // 物料分页点击事件
     pageClickEvent (text) {
-      this.currentPage;
+      if (this.totalPage == 0) { return };
       if (text == 'previous') {
         if ( this.currentPage == 1) { return };
         this.currentPage--;
