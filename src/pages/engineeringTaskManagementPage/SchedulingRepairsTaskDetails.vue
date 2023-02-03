@@ -286,7 +286,7 @@ export default {
   computed: {
     ...mapGetters(["userInfo","schedulingTaskDetails","schedulingTaskAboutMessage","operateBtnClickRecord"]),
     proId () {
-        return this.userInfo.extendData.proId
+      return this.userInfo.extendData.proId
     }
   },
 
@@ -409,42 +409,41 @@ export default {
       this.loadingShow = true;
       this.overlayShow = true;
       this.loadingText = '分配中...';
-        if (this.activeName == 'repairsTask') {
-        assignRepairsTask({
-            assignerId: this.workerId, //分配者id(当前登录用户id)
-            assignerName: this.userName, //分配者姓名(当前登录用户姓名)
-            id: this.taskId, //任务id
-            tempFlag: this.templateType === 'template_one' ? 1 : 2, //模板(1:旧模板,2:新模板)
-            workerId: this.selectAllocation['value'], //运送员id
-            workerName: this.selectAllocation['text'] //运送员姓名
-          })
-          .then((res) => {
-            this.loadingShow = false;
-            this.overlayShow = false;
-            this.$refs['allocationOption'].clearSelectValue();
-            if (res && res.data.code == 200) {
-              this.$toast('分配成功');
-              // 返回任务调度页
-              this.onClickLeft()
-            } else {
-              this.loadingText = '';
-              this.$toast({
-                type: 'fail',
-                message: res.data.msg
-              })
-            }
-          })
-          .catch((err) => {
-            this.$refs['allocationOption'].clearSelectValue();
+      assignRepairsTask({
+          id: this.schedulingTaskDetails['id'], //任务id
+          proId: this.proId, //项目id
+          isMe: this.schedulingTaskDetails['isMe'], // 是否我方
+          taskNumber: this.schedulingTaskDetails['taskNumber'], // 任务编号
+          present: this.schedulingTaskDetails['present'], //参与者
+          workerId: this.selectAllocation['value'], //运送员id
+          workerName: this.selectAllocation['text'] //运送员姓名
+        })
+        .then((res) => {
+          this.loadingShow = false;
+          this.overlayShow = false;
+          this.$refs['allocationOption'].clearSelectValue();
+          if (res && res.data.code == 200) {
+            this.$toast('分配成功');
+            // 返回任务调度页
+            this.onClickLeft()
+          } else {
             this.loadingText = '';
-            this.loadingShow = false;
-            this.overlayShow = false;
             this.$toast({
               type: 'fail',
-              message: err
+              message: res.data.msg
             })
+          }
         })
-      }
+        .catch((err) => {
+          this.$refs['allocationOption'].clearSelectValue();
+          this.loadingText = '';
+          this.loadingShow = false;
+          this.overlayShow = false;
+          this.$toast({
+            type: 'fail',
+            message: err
+          })
+      })
     },
 
     // 分配弹框取消事件
@@ -478,42 +477,38 @@ export default {
       this.overlayShow = true;
       this.loadingText = '延迟中...';
       // 维修任务延迟
-      if (this.activeName == 'repairsTask') {
-        delayAppointTask({
-            taskId: this.taskId, //任务id
-            proId: this.proId, // 医院id
-            reason: this.selectDelayReason['text'], //延迟原因
-            workerId: this.workerId, //操作人id
-            endUser: this.userName, //操作人姓名
-            endType: 1, //终止类型(0-web,1-安卓APP，2-微信小程序)
-          })
-          .then((res) => {
-            this.loadingShow = false;
-            this.overlayShow = false;
-            this.$refs['delayOption'].clearSelectValue();
-            if (res && res.data.code == 200) {
-              this.$toast('延迟成功');
-              // 返回任务调度页
-              this.onClickLeft()
-            } else {
-              this.loadingText = '';
-              this.$toast({
-                type: 'fail',
-                message: res.data.msg
-              })
-            }
-          })
-          .catch((err) => {
-            this.$refs['delayOption'].clearSelectValue();
+        delayRepairsTask({
+          taskId: this.schedulingTaskDetails['id'], //任务id
+          proId: this.proId, // 医院id
+          reason: this.selectDelayReason['text'], //延迟原因
+          state: 7
+        })
+        .then((res) => {
+          this.loadingShow = false;
+          this.overlayShow = false;
+          this.$refs['delayOption'].clearSelectValue();
+          if (res && res.data.code == 200) {
+            this.$toast('延迟成功');
+            // 返回任务调度页
+            this.onClickLeft()
+          } else {
             this.loadingText = '';
-            this.loadingShow = false;
-            this.overlayShow = false;
             this.$toast({
               type: 'fail',
-              message: err
+              message: res.data.msg
             })
+          }
         })
-      }
+        .catch((err) => {
+          this.$refs['delayOption'].clearSelectValue();
+          this.loadingText = '';
+          this.loadingShow = false;
+          this.overlayShow = false;
+          this.$toast({
+            type: 'fail',
+            message: err
+          })
+      })
     },
 
     // 延迟原因弹框取消事件
@@ -556,43 +551,38 @@ export default {
       this.overlayShow = true;
       this.loadingText = '取消中...';
       // 维修任务取消
-      if (this.activeName == 'repairsTask') {
-        cancelAppointTask({
-            taskId: this.taskId, //任务id
-            state: 6,
-            proId: this.proId, // 医院id
-            reason: this.selectCancelReason['text'], //延迟原因
-            workerId: this.workerId, //操作人id
-            endUser: this.userName, //操作人姓名
-            endType: 1 //终止类型(0-web,1-安卓APP，2-微信小程序)
-          })
-          .then((res) => {
-            this.loadingShow = false;
-            this.overlayShow = false;
-            this.$refs['cancelOption'].clearSelectValue();
-            if (res && res.data.code == 200) {
-              this.$toast('取消成功');
-              // 返回任务调度页
-              this.onClickLeft()
-            } else {
-              this.loadingText = '';
-              this.$toast({
-                type: 'fail',
-                message: res.data.msg
-              })
-            }
-          })
-          .catch((err) => {
-            this.$refs['cancelOption'].clearSelectValue();
+        cancelRepairsTask({
+          taskId: this.schedulingTaskDetails['id'], //任务id
+          state: 6,
+          proId: this.proId, // 医院id
+          reason: this.selectCancelReason['text'] //取消原因
+        })
+        .then((res) => {
+          this.loadingShow = false;
+          this.overlayShow = false;
+          this.$refs['cancelOption'].clearSelectValue();
+          if (res && res.data.code == 200) {
+            this.$toast('取消成功');
+            // 返回任务调度页
+            this.onClickLeft()
+          } else {
             this.loadingText = '';
-            this.loadingShow = false;
-            this.overlayShow = false;
             this.$toast({
               type: 'fail',
-              message: err
+              message: res.data.msg
             })
+          }
         })
-      }
+        .catch((err) => {
+          this.$refs['cancelOption'].clearSelectValue();
+          this.loadingText = '';
+          this.loadingShow = false;
+          this.overlayShow = false;
+          this.$toast({
+            type: 'fail',
+            message: err
+          })
+      })
     },
 
     // 取消原因弹框取消事件

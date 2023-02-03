@@ -24,6 +24,7 @@ const CopyRecordBill = () => import('@/pages/taskMessagePage/deviceService/CopyR
 const DepartmentServiceFillConsumable = () => import('@/pages/taskMessagePage/departmentService/DepartmentServiceFillConsumable')
 const EngineeringTaskManagement = () => import('@/pages/engineeringTaskManagementPage/EngineeringTaskManagement')
 const SchedulingRepairsTaskDetails = () => import('@/pages/engineeringTaskManagementPage/SchedulingRepairsTaskDetails')
+const CreateRepairsTask = () => import('@/pages/engineeringTaskManagementPage/createRepairsTask')
 Vue.use(Router) 
 
 let baseRoute  = [
@@ -136,6 +137,11 @@ let baseRoute  = [
     path: '/schedulingRepairsTaskDetails',
     name: 'schedulingRepairsTaskDetails',
     component: SchedulingRepairsTaskDetails
+  },
+  {
+    path: '/createRepairsTask',
+    name: 'createRepairsTask',
+    component: CreateRepairsTask
   }
 ];
 let router = new Router({

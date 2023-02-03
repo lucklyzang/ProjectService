@@ -247,6 +247,7 @@ export default {
       loadingText: '加载中...',
       screenDialogShow: false,
       allocationShow: false,
+      curentTaskInfo: '',
       delayReasonShow: false,
       cancelReasonShow: false,
       moveInfo: {
@@ -734,6 +735,7 @@ export default {
 
     // 分配点击事件
     allocationEvent (item,index,text) {
+      this.curentTaskInfo = item;
       this.allocationShow = true;
       this.taskId = item.id
     },
@@ -765,10 +767,11 @@ export default {
       this.loadingText = '分配中...';
         if (this.activeName == 'repairsTask') {
         assignRepairsTask({
-            assignerId: this.workerId, //分配者id(当前登录用户id)
-            assignerName: this.userName, //分配者姓名(当前登录用户姓名)
             id: this.taskId, //任务id
-            tempFlag: this.templateType === 'template_one' ? 1 : 2, //模板(1:旧模板,2:新模板)
+            proId: this.proId, //项目id
+            isMe: this.curentTaskInfo['isMe'], // 是否我方
+            taskNumber: this.curentTaskInfo['taskNumber'], // 任务编号
+            present: this.curentTaskInfo['present'], //参与者
             workerId: this.selectAllocation['value'], //运送员id
             workerName: this.selectAllocation['text'] //运送员姓名
           })
@@ -823,6 +826,7 @@ export default {
     // 延迟点击事件
     delayReasonEvent(item,index,text) {
       this.delayReasonShow = true;
+      this.curentTaskInfo = item;
       this.taskId = item.id;
       if (this.activeName == 'repairsTask') {
         this.delayReasonOption = this.repairsDelayReasonOption
@@ -856,13 +860,11 @@ export default {
       this.loadingText = '延迟中...';
       // 维修任务延迟
       if (this.activeName == 'repairsTask') {
-        delayAppointTask({
+        delayRepairsTask({
             taskId: this.taskId, //任务id
             proId: this.proId, // 医院id
             reason: this.selectDelayReason['text'], //延迟原因
-            workerId: this.workerId, //操作人id
-            endUser: this.userName, //操作人姓名
-            endType: 1, //终止类型(0-web,1-安卓APP，2-微信小程序)
+            state: 7
           })
           .then((res) => {
             this.loadingShow = false;
@@ -901,6 +903,7 @@ export default {
     // 取消点击事件
     cancelReasonEvent(item,index,text) {
       this.cancelReasonShow = true;
+      this.curentTaskInfo = item;
       this.taskId = item.id;
       if (this.activeName == 'repairsTask') {
         this.cancelReasonOption = this.repairsCancelReasonOption
@@ -934,14 +937,11 @@ export default {
       this.loadingText = '取消中...';
       // 维修任务取消
       if (this.activeName == 'repairsTask') {
-        cancelAppointTask({
+        cancelRepairsTask({
             taskId: this.taskId, //任务id
             state: 6,
             proId: this.proId, // 医院id
-            reason: this.selectCancelReason['text'], //延迟原因
-            workerId: this.workerId, //操作人id
-            endUser: this.userName, //操作人姓名
-            endType: 1 //终止类型(0-web,1-安卓APP，2-微信小程序)
+            reason: this.selectCancelReason['text'] //取消原因
           })
           .then((res) => {
             this.loadingShow = false;
@@ -1014,7 +1014,7 @@ export default {
     // 创建任务
     createTask (text) {
       let temporaryTaskType = this.schedulingTaskType;
-        if (text == '维修任务') {
+        if (text == '报修任务') {
         temporaryTaskType['taskTypeName'] = 'repairsTask';
         this.$router.push({path: '/createRepairsTask'})
       };
