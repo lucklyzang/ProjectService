@@ -22,10 +22,10 @@
         </div>
         <ul ref="ul">
           <li
+            @click="liItemClick(item,index)"
             v-for="(item, index) in list"
             :key="index"
-            :class="{'active':active == item.id}"
-            :ref="'li'+item.id"
+            :class="{'active':item.selected}"
           >{{item.text}}</li>
         </ul>
         <div class="button-box" ref="buttonBox">
@@ -41,14 +41,14 @@
 
 <script>
 export default {
-  name: 'ScrollSelection',
+  name: 'BottomSelect',
   props:{
     // 顶部标题
     title: {
       type: String,
       default: '请选择'
     },
-    // 滚动展示的数据 格式[{id: '',text:''}]
+    // 展示的数据 格式[{id: '',text:''}]
     columns: {
       type: Array,
       default: []
@@ -70,10 +70,9 @@ export default {
       searchValue: '',
       cacheList: '',
       list: [],
-      show: false,
+      show: true,
       active: null,
-      city: "",
-      listOffsetTop: [],
+      city: [],
       timer: null
     };
   },
@@ -84,8 +83,7 @@ export default {
           // 点击搜索时不进行监听
           if (!this.isClickSearch) {
             this.list = this.columns;
-            this.cacheList = this.list;  
-            this.showPicker()
+            this.cacheList = this.list
           }
         },
         deep: true
@@ -94,8 +92,7 @@ export default {
 
   mounted () {
     this.list = this.columns;
-    this.cacheList = this.list;  
-    this.showPicker()
+    this.cacheList = this.list
   },
 
   methods: {
@@ -103,41 +100,27 @@ export default {
     // 搜索事件
     onSearch(val) {
       this.isClickSearch = true;
-      this.list = this.cacheList.filter((item) => { return item.text.indexOf(this.searchValue) != -1});
-      this.list.map((item,index) => { item.id = index });
-      this.showPicker()
+      this.list = this.cacheList.filter((item) => { return item.text.indexOf(this.searchValue) != -1})
     },
 
     // 重置事件
     resetEvent () {
         this.searchValue = '';
-        this.list = this.cacheList;
-        this.list.map((item,index) => { item.id = index });
-        this.showPicker()
+        this.list = this.cacheList
     },
 
-    // 初始化事件
-    showPicker() {
-      this.show = true;
-      this.active = null;
-      this.timer = setTimeout(() => {
-        clearTimeout(this.timer);
-        this.getOffsetTop();
-        this.computeActive();
-        this.list = this.cacheList.filter((item) => { return item.text.indexOf(this.searchValue) != -1});
-        this.list.map((item,index) => { item.id = index })
-      }, 50)
+    // 列表项点击事件
+    liItemClick (item,index) {
+        this.list[index]['selected'] = !this.list[index]['selected']
     },
 
     // 确认事件
     sure() {
-      this.list.map((item, index) => {
-        item.id == this.active ? (this.city = item.text) : null
-      });
+      this.city = this.list.filter((item) => { return item.selected == true });
       this.$emit('sure',this.city);
       // 没有搜索结果时点确认
       if (this.list.length == 0) {
-        this.$emit('sure',null)
+        this.$emit('sure',[])
       };
       this.show = false
     },
@@ -152,32 +135,6 @@ export default {
     cancel() {
       this.$emit('cancel',this.city);
       this.show = false
-    },
-
-    getOffsetTop() {
-      this.listOffsetTop = [];
-      this.list.map((item, index) => {
-        let liTop = this.$refs["li" + item.id];
-        this.listOffsetTop.push(liTop[0].offsetTop - liTop[0]['offsetHeight'])
-      })
-    },
-
-    computeActive() {
-      let scroll = this.$refs.ul;
-      let buttonBoxHeight = this.$refs.buttonBox.offsetHeight;
-      let searchBoxHeight = this.$refs.searchBox.offsetHeight;
-      let chooseBoxHeight = this.$refs.chooseBox.offsetHeight;
-      scroll.addEventListener("scroll", () => {
-        this.listOffsetTop.map((item, index) => {
-         let currentTop = '';
-         if (this.isShowSearch) {
-            currentTop = scroll.scrollTop + buttonBoxHeight + searchBoxHeight + chooseBoxHeight + 20
-         } else {
-            currentTop = scroll.scrollTop + buttonBoxHeight + chooseBoxHeight + 20
-         };
-        item <= currentTop ? (this.active = index) : null
-        })
-      })
     }
   }
 };
@@ -251,7 +208,7 @@ export default {
         font-size: 18px;
         line-height: 40px;
         text-align: center;
-        // height: 40px;
+        height: 40px;
         background-color: #fff;
       }
     };

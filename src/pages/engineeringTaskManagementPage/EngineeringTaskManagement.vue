@@ -208,7 +208,7 @@
                             </div>
                             <div class="list-bottom-right">
                               <span  v-if="item.state == 0" class="operate-one" @click.stop="allocationEvent(item,index,'维修任务')">分配</span>
-                              <span class="operate-two" @click.stop="editEvent(item,index,'预约任务')">编辑</span>
+                              <span class="operate-two" @click.stop="editEvent(item,index,'维修任务')">编辑</span>
                               <span v-if="item.hasDelay == 0" class="operate-three" @click.stop="delayReasonEvent(item,index,'维修任务')">延迟</span>
                               <span class="operate-four" @click.stop="cancelReasonEvent(item,index,'维修任务')">取消</span>
                             </div>

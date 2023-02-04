@@ -46,7 +46,7 @@
     </div>
     <div class="nav">
        <van-nav-bar
-        title="创建维保任务"
+        title="编辑维保任务"
         left-text=""
         :left-arrow="true"
         :placeholder="true"
@@ -206,7 +206,6 @@
         </div>
         <div class="btn-box">
           <span class="operate-one" @click="sureEvent">确认</span>
-          <span class="operate-two" @click="temporaryStorageEvent">暂存</span>
           <span class="operate-three" @click="cancelEvent">取消</span>
         </div>
       </div>
@@ -299,7 +298,7 @@ import _ from 'lodash'
 import ScrollSelection from "@/components/ScrollSelection";
 import BottomSelect from "@/components/BottomSelect";
 export default {
-  name: "CreateRepairsTask",
+  name: "EditRepairsTask",
   components: {
     ScrollSelection,
     BottomSelect
@@ -382,7 +381,6 @@ export default {
       let that = this;
       pushHistory();
       that.gotoURL(() => {
-        that.commonIsTemporaryStorageMethods();
         pushHistory();
         that.$router.push({path: '/engineeringTaskManagement'})
       })
@@ -415,10 +413,9 @@ export default {
   },
 
   methods: {
-    ...mapMutations(["changeTitleTxt","changeCatchComponent","changeOverDueWay","changeOperateBtnClickRecord","changetransportTypeMessage","changeTemporaryStorageCreateRepairsTaskMessage"]),
+    ...mapMutations(["changeTitleTxt","changeCatchComponent","changeOverDueWay","changeOperateBtnClickRecord","changetransportTypeMessage"]),
 
     onClickLeft() {
-      this.commonIsTemporaryStorageMethods();
       this.$router.push({ path: "/engineeringTaskManagement"})
     },
 
@@ -437,13 +434,6 @@ export default {
       this.isMeRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['isMeRadioValue'];
       this.taskDescribe = casuallyTemporaryStorageCreateRepairsTaskMessage['taskDescribe'];
       this.consumableMsgList = casuallyTemporaryStorageCreateRepairsTaskMessage['consumableMsgList']
-    },
-
-    // 公共修改是否暂存的方法
-    commonIsTemporaryStorageMethods () {
-      let casuallyTemporaryStorageCreateRepairsTaskMessage = this.temporaryStorageCreateRepairsTaskMessage;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['isTemporaryStorage'] = false;
-      this.changeTemporaryStorageCreateRepairsTaskMessage(casuallyTemporaryStorageCreateRepairsTaskMessage)
     },
 
     // 处理维修任务参与者
@@ -1104,7 +1094,6 @@ export default {
       createRepairsTask(data).then((res) => {
         if (res && res.data.code == 200) {
           this.$toast(`${res.data.msg}`);
-          this.commonIsTemporaryStorageMethods();
           this.$router.push({path:'/engineeringTaskManagement'});
           this.changeTitleTxt({tit:'工程维保任务管理'});
           setStore('currentTitle','工程维保任务管理');
@@ -1229,30 +1218,8 @@ export default {
       this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
     },
 
-    // 暂存事件
-    temporaryStorageEvent () {
-      let casuallyTemporaryStorageCreateRepairsTaskMessage = this.temporaryStorageCreateRepairsTaskMessage;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['priorityRadioValue'] = this.priorityRadioValue;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['currentTaskType'] = this.currentTaskType;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['currentStructure'] = this.currentStructure;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['currentGoalDepartment'] = this.currentGoalDepartment;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['currentGoalSpaces'] = this.currentGoalSpaces;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['problemOverview'] = this.problemOverview;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['currentTransporter'] = this.currentTransporter;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['currentParticipant'] = this.currentParticipant;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['currentUseTool'] = this.currentUseTool;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['isMeRadioValue'] = this.isMeRadioValue;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['taskDescribe'] = this.taskDescribe;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['consumableMsgList'] = this.consumableMsgList;
-      casuallyTemporaryStorageCreateRepairsTaskMessage['isTemporaryStorage'] = true;
-      this.changeTemporaryStorageCreateRepairsTaskMessage(casuallyTemporaryStorageCreateRepairsTaskMessage);
-      this.$toast('暂存成功');
-      this.$router.push({path: '/engineeringTaskManagement'})
-    },
-
     // 取消事件
     cancelEvent () {
-      this.commonIsTemporaryStorageMethods();
       this.$router.push({ path: "/engineeringTaskManagement"})
     }
   }
