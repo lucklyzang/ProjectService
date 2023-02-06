@@ -149,7 +149,7 @@
                           <div class="list-top appoint-list-top">
                             <div class="list-top-left">
                               <img :src="anxiousSignPng" alt="急" v-show="item.priority == 2 || item.priority == 3 || item.priority == 4">
-                              <span>{{ item.depName }}</span>
+                              <span>{{ item.depName == '/' ? '' : item.depName }}</span>
                             </div>
                             <div class="list-top-right" :class="{'noLookupStyle':item.state == 1,'underwayStyle':item.state == 2}">
                               {{ taskStatusTransition(item.state) }}
@@ -159,7 +159,7 @@
                             <div class="center-one-line">
                               <div class="center-one-line-left">
                                 <span>创建时间:</span>
-                                <span>{{ elapsedTime(item.createTime) }}</span>
+                                <span>{{ item.createTime }}</span>
                               </div>
                                <div class="center-one-line-right">
                                 <span>已经历时间:</span>
@@ -610,7 +610,6 @@ export default {
         //判断是否在滑动区域内滑动
         let e = e || window.event;
         if (e.targetTouches.length == 1) {
-            this.isSlideArea = true;
             this.moveInfo.startX = parseInt(e.targetTouches[0].clientX)
         }    
     },
@@ -623,11 +622,12 @@ export default {
         let moveX = parseInt((e.targetTouches[0].clientX - this.moveInfo.startX));
         //左滑(根据左右滑动来控制右侧菜单的显示与隐藏)
         if (moveX < -50) {
-            this.rightMenuShow = true
-        } else {
-            this.rightMenuShow = false
-        };
-        e.preventDefault();
+          if(this.rightMenuShow) {return};
+          this.rightMenuShow = true
+        } else if (moveX > 50) {
+          if(!this.rightMenuShow) {return};
+          this.rightMenuShow = false
+        }
         }        
     },
 
@@ -1426,7 +1426,7 @@ export default {
                 padding: 0 4px 0px 4px;
                 box-sizing: border-box;
                 background: #f7f7f7;
-                overflow: auto;
+                overflow: scroll;
                 height: 0;
                 display: flex;
                 .van-tab__pane {

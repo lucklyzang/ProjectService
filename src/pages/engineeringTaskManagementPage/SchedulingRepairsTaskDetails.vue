@@ -145,7 +145,7 @@
                         <span>位置</span>
                     </div>
                     <div class="message-two-right">
-                        {{ schedulingTaskDetails.depName }}
+                        {{ schedulingTaskDetails.depName == '/' ? '' : schedulingTaskDetails.depName }}
                     </div>
                 </div>
                 <div class="message-one message-two">
@@ -251,9 +251,8 @@ export default {
       anxiousSignPng: require("@/common/images/home/anxious-sign.png"),
       taskList: [
         {tit:'调度管理'},
-        {tit:'调度任务'},
-        {tit:'预约任务'},
-        {tit:'循环任务'}
+        {tit:'报修任务'},
+        {tit:'科室巡检'}
       ],
       transporterValue: null,
       transporterOption: [],
@@ -328,7 +327,6 @@ export default {
         //判断是否在滑动区域内滑动
         let e = e || window.event;
         if (e.targetTouches.length == 1) {
-            this.isSlideArea = true;
             this.moveInfo.startX = parseInt(e.targetTouches[0].clientX)
         }    
     },
@@ -340,12 +338,13 @@ export default {
         // 滑动距离
         let moveX = parseInt((e.targetTouches[0].clientX - this.moveInfo.startX));
         //左滑(根据左右滑动来控制右侧菜单的显示与隐藏)
-        if (moveX < -50) {
-            this.rightMenuShow = true
-        } else {
-            this.rightMenuShow = false
-        };
-        e.preventDefault();
+       if (moveX < -50) {
+          if(this.rightMenuShow) {return};
+          this.rightMenuShow = true
+        } else if (moveX > 50) {
+          if(!this.rightMenuShow) {return};
+          this.rightMenuShow = false
+        }
         }        
     },
 
@@ -604,22 +603,17 @@ export default {
     // 右侧菜单任务列表点击事件
     taskRouterSkip (name, index) {
         this.functionListIndex = index;
-        if (name === '调度任务') {
-          this.$router.push({path:'/dispatchTask'});
-          this.changeTitleTxt({tit:'调度任务'});
-          setStore('currentTitle','调度任务')
-        } else if (name === '循环任务') {
-          this.$router.push({path:'/circulationTask'})
-          this.changeTitleTxt({tit:'循环任务'});
-          setStore('currentTitle','循环任务')
-        } else if (name === '预约任务') {
-          this.$router.push({path:'/appointTask'});
-          this.changeTitleTxt({tit:'预约任务'});
-          setStore('currentTitle','预约任务')
+        if (name === '报修任务') {
+          this.resetBtnClickStatus();
+          this.$router.push({path: 'repairsWorkOrder'});
+          this.changeTitleTxt({tit:'报修工单'});
+          setStore('currentTitle','报修工单')
+        } else if (name === '科室巡检') {
+          this.resetBtnClickStatus();
+          this.$router.push({path: 'departmentService'});
+          this.changeTitleTxt({tit:'科室巡检'});
+          setStore('currentTitle','科室巡检')
         } else if (name === '调度管理') {
-          this.$router.push({path:'/taskScheduling'});
-          this.changeTitleTxt({tit:'中央运送任务管理'});
-          setStore('currentTitle','中央运送任务管理')
         }
       },
 
@@ -693,7 +687,7 @@ export default {
 
     // 编辑点击事件
     editEvent () {
-        this.$router.push({path: '/editAppintTask'})
+      this.$router.push({path: '/editRepairsTask'})
     },
 
     // 延迟点击事件
@@ -906,7 +900,7 @@ export default {
         .message-box {
             flex: 1;
             width: 100%;
-            overflow: auto;
+            overflow: scroll;
             .message-one {
                 width: 100%;
                 padding: 4px 6px;

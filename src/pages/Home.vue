@@ -323,11 +323,6 @@
           this.changeTitleTxt({tit:'科室巡检'});
           setStore('currentTitle','科室巡检')
         } else if (item.tit == '调度管理') {
-          if (currentIndex != -1) {
-            this.temporaryNumList.splice(index,1);
-            this.changeNewTaskList(this.temporaryNumList);
-            setStore('newTaskList',{taskName:this.temporaryNumList})
-          };
           this.changeIsFreshDepartmentServicePage(true);
           this.$router.push({path: 'engineeringTaskManagement'});
           this.changeTitleTxt({tit:'工程维保任务管理'});
@@ -506,11 +501,11 @@
       };
       .content-middle-task-message {
         flex:1;
-        overflow: auto;
+        overflow: scroll;
         padding: 0 10px 0 10px;
         background: #f7f7f7;
         display: flex;
-        height: 100%;
+        height: 0;
         flex-direction: column;
         font-size: 13px;
         .content-middle-title {
@@ -522,8 +517,7 @@
         };
         .content-middle-task-name {
           flex:1;
-          overflow: auto;
-          height: 85%;
+          overflow: scroll;
           box-sizing: border-box;
           li {
             background: #fff;

@@ -9,6 +9,14 @@ export function repairsList (state,proId,flag) {
     })
   };
 
+// 维修任务详情查询
+export function repairsDetails (id) {
+  return request({
+    url: `bxTask/query/${id}`,
+    method: 'get'
+  })
+};
+
 // 维修任务任务类型查询
 export function getRepairsTaskType (proId) {
   return request({

@@ -257,13 +257,14 @@
                     <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
                   </span>
                 </p>
+                <van-empty description="暂无数据" v-show="inventoryMsgList.length == 0" />
               </div>
               <div class="shadow-box"></div> 
             </div>
             <div class="page-area">
               <div class="page-left" @click="pageClickEvent('previous')" :class="{'pageSpanStyle' : currentPage == 1}">上一页</div>
               <div class="page-center">
-                <span>{{ currentPage }}</span>
+                <span>{{ totalPage == 0 ? 0 : currentPage }}</span>
                 <span>/</span>
                 <span>{{ totalPage }}</span>
               </div>
@@ -292,7 +293,7 @@
 import { mapGetters, mapMutations } from "vuex";
 import {mixinsDeviceReturn} from '@/mixins/deviceReturnFunction'
 import {userSignOut} from '@/api/login.js'
-import { createRepairsTask, getTransporter, querySpace, queryDepartment, queryRepairsTaskTool, queryStructure, queryRepairsTaskMaterial, getRepairsTaskType} from '@/api/taskScheduling.js'
+import { editRepairsTask, getTransporter, repairsDetails, querySpace, queryDepartment, queryRepairsTaskTool, queryStructure, queryRepairsTaskMaterial, getRepairsTaskType} from '@/api/taskScheduling.js'
 import { setStore,removeAllLocalStorage } from '@/common/js/utils'
 import _ from 'lodash'
 import ScrollSelection from "@/components/ScrollSelection";
@@ -386,18 +387,14 @@ export default {
       })
     };
     this.registerSlideEvent();
-    this.parallelFunction();
-    //判断是否回显暂存的数据
-    if (JSON.stringify(this.temporaryStorageCreateRepairsTaskMessage) != '{}' && this.temporaryStorageCreateRepairsTaskMessage['isTemporaryStorage']) {
-      this.echoTemporaryStorageMessage()
-    }
+    this.parallelFunction()
   },
 
   watch: {
   },
 
   computed: {
-    ...mapGetters(["userInfo","schedulingTaskDetails","operateBtnClickRecord","transportantTaskMessage","templateType","temporaryStorageCreateRepairsTaskMessage"]),
+    ...mapGetters(["userInfo","schedulingTaskDetails","operateBtnClickRecord","transportantTaskMessage","templateType"]),
     proId () {
       return this.userInfo.extendData.proId
     },
@@ -413,35 +410,36 @@ export default {
   },
 
   methods: {
-    ...mapMutations(["changeTitleTxt","changeCatchComponent","changeOverDueWay","changeOperateBtnClickRecord","changetransportTypeMessage"]),
+    ...mapMutations(["changeTitleTxt","changeCatchComponent","changeOverDueWay","changeOperateBtnClickRecord","changetransportTypeMessage","changeSchedulingTaskDetails"]),
 
     onClickLeft() {
       this.$router.push({ path: "/engineeringTaskManagement"})
     },
 
-    // 回显暂存的信息
-    async echoTemporaryStorageMessage () {
-      let casuallyTemporaryStorageCreateRepairsTaskMessage = this.temporaryStorageCreateRepairsTaskMessage;
-      this.priorityRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['priorityRadioValue'];
-      this.currentTaskType = casuallyTemporaryStorageCreateRepairsTaskMessage['currentTaskType'];
-      this.currentStructure = casuallyTemporaryStorageCreateRepairsTaskMessage['currentStructure'];
-      this.currentGoalDepartment = casuallyTemporaryStorageCreateRepairsTaskMessage['currentGoalDepartment'];
-      this.currentGoalSpaces = casuallyTemporaryStorageCreateRepairsTaskMessage['currentGoalSpaces'];
-      this.problemOverview = casuallyTemporaryStorageCreateRepairsTaskMessage['problemOverview'];
-      this.currentTransporter = casuallyTemporaryStorageCreateRepairsTaskMessage['currentTransporter'];
-      this.currentParticipant = casuallyTemporaryStorageCreateRepairsTaskMessage['currentParticipant'];
-      this.currentUseTool = casuallyTemporaryStorageCreateRepairsTaskMessage['currentUseTool'];
-      this.isMeRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['isMeRadioValue'];
-      this.taskDescribe = casuallyTemporaryStorageCreateRepairsTaskMessage['taskDescribe'];
-      this.consumableMsgList = casuallyTemporaryStorageCreateRepairsTaskMessage['consumableMsgList']
+    // 回显编辑信息
+    echoEditMessage () {
+      let casuallyTemporaryStorageCreateRepairsTaskMessage = this.schedulingTaskDetails;
+      this.priorityRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['priority'].toString();
+      this.currentTaskType = casuallyTemporaryStorageCreateRepairsTaskMessage['typeName'];
+      this.problemOverview = casuallyTemporaryStorageCreateRepairsTaskMessage['taskDesc'];
+      this.currentTransporter = casuallyTemporaryStorageCreateRepairsTaskMessage['workerName'];
+      this.currentParticipant = casuallyTemporaryStorageCreateRepairsTaskMessage['present'];
+      this.isMeRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['isMe'].toString();
+      this.taskDescribe = casuallyTemporaryStorageCreateRepairsTaskMessage['taskRemark'];
+      this.consumableMsgList = casuallyTemporaryStorageCreateRepairsTaskMessage['materials'];
+      // 处理目的建筑、目的科室显示信息
+      let trmporaryMessage = casuallyTemporaryStorageCreateRepairsTaskMessage['depName'].split("/");
+      this.currentStructure = trmporaryMessage[0] ? trmporaryMessage[0] : '请选择';
+      this.currentGoalDepartment = trmporaryMessage[1] ? trmporaryMessage[1] : '请选择'
     },
 
     // 处理维修任务参与者
     disposeTaskPresent (item) {
+      if (item == null) { return };
       if (item.length == 0) { return '请选择'};
       let temporaryArray = [];
       for (let innerItem of item) {
-        temporaryArray.push(innerItem.text)
+        innerItem.hasOwnProperty('text') ? temporaryArray.push(innerItem.text) : temporaryArray.push(innerItem.name)
       };
       return temporaryArray.join('、')
     },
@@ -559,12 +557,12 @@ export default {
       })
     },
 
-    // 并行查询任务类型、目的建筑、维修员、物料信息、维修工具
+    // 并行查询任务类型、目的建筑、维修员、物料信息、维修工具、任务详情
     parallelFunction (type) {
         this.loadingText = '加载中...';
         this.loadingShow = true;
         this.overlayShow = true;
-        Promise.all([this.getTaskType(), this.getStructure(), this.queryTransporter(), this.getRepairsTaskMaterial(), this.getRepairsTaskTool()])
+        Promise.all([this.getTaskType(), this.getStructure(), this.queryTransporter(), this.getRepairsTaskMaterial(), this.getRepairsTaskTool(),this.getRepairsDetails()])
         .then((res) => {
           this.loadingText = '';
           this.loadingShow = false;
@@ -575,7 +573,7 @@ export default {
             this.taskTypeOption = [];
             this.transporterOption = [];
             this.useToolOption = [];
-            let [item1,item2,item3,item4,item5] = res;
+            let [item1,item2,item3,item4,item5,item6] = res;
             if (item1) {
               // 任务类型
               for (let i = 0, len = item1.length; i < len; i++) {
@@ -594,9 +592,6 @@ export default {
                   value: item2[i].id,
                   id: i
                 })
-              };
-              if (this.currentStructure != '请选择') {
-                this.getDepartmentByStructureId(this.structureOption.filter((item) => { return item['text'] == this.currentStructure})[0]['value'],false,true)
               }
             };
             if (item3) {
@@ -631,7 +626,6 @@ export default {
               this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
               this.storeId = this.inventoryMsgList[0]['storeId'];
               this.systemId = this.inventoryMsgList[0]['systemId'];
-              console.log('物料信息',this.inventoryMsgList);
             };
             // 维修工具
             if (item5) {
@@ -644,12 +638,18 @@ export default {
                 })
               }
             };
-            // if (item4) {
-            //   //任务类型
-            //   // 有暂存的话,则回显该暂存信息
-            //   if (this.temporaryStorageCreateRepairsTaskMessage['isTemporaryStorage']) {
-            //   }
-            // }
+            if (item6) {
+              //任务详情信息
+              this.changeSchedulingTaskDetails(item6);
+              //回显要编辑的信息
+              this.echoEditMessage();
+              this.currentUseTool = this.schedulingTaskDetails['tools'].length == 0 ? [] : this.schedulingTaskDetails['tools'];
+              this.currentGoalSpaces = this.schedulingTaskDetails['spaces'].length == 0 ? [] : this.schedulingTaskDetails['spaces'];
+              if (this.currentStructure != '请选择') {
+                this.getDepartmentByStructureId(this.structureOption.filter((item) => { return item['text'] == this.currentStructure})[0]['value'],false,true)
+              }
+              console.log('任务信息',this.schedulingTaskDetails)
+            }
           }
         })
         .catch((err) => {
@@ -660,6 +660,20 @@ export default {
             message: `${err}`,
             closeOnPopstate: true
           }).then(() => {})
+        })
+      },
+
+      // 查询任务详情
+      getRepairsDetails () {
+        return new Promise((resolve,reject) => {
+          repairsDetails(this.schedulingTaskDetails.id).then((res) => {
+            if (res && res.data.code == 200) {
+              resolve(res.data.data)
+            }
+          })
+          .catch((err) => {
+            reject(err.message)
+          })
         })
       },
 
@@ -747,25 +761,25 @@ export default {
         //判断是否在滑动区域内滑动
         let e = e || window.event;
         if (e.targetTouches.length == 1) {
-            this.isSlideArea = true;
             this.moveInfo.startX = parseInt(e.targetTouches[0].clientX)
         }    
     },
 
     // 滑动中
     touchmoveHandle() {
-        let e = e || window.event;
-        if (e.targetTouches.length == 1) {
+      let e = e || window.event;
+      if (e.targetTouches.length == 1) {
         // 滑动距离
         let moveX = parseInt((e.targetTouches[0].clientX - this.moveInfo.startX));
         //左滑(根据左右滑动来控制右侧菜单的显示与隐藏,滑动距离大于10才判定为滑动)
         if (moveX < -50) {
-            this.rightMenuShow = true
-        } else {
-            this.rightMenuShow = false
-        };
-        e.preventDefault();
-        }        
+          if(this.rightMenuShow) {return};
+          this.rightMenuShow = true
+        } else if (moveX > 50) {
+          if(!this.rightMenuShow) {return};
+          this.rightMenuShow = false
+        }
+      }        
     },
 
     // 使用工具下拉选择框确认事件
@@ -834,6 +848,8 @@ export default {
       if (val) {
         this.currentStructure =  val;
         this.currentGoalDepartment = '请选择';
+        this.currentGoalSpaces = [];
+        this.goalSpacesOption = [];
         this.getDepartmentByStructureId(this.structureOption.filter((item) => { return item['text'] == this.currentStructure})[0]['value'],false,false)
       } else {
         this.currentStructure = '请选择'
@@ -1008,21 +1024,24 @@ export default {
         })
       },
 
-    // 确认事件(创建维保任务)
+    // 确认事件(编辑维保任务)
     sureEvent () {
       // 任务类型不能为空
       if (this.currentTaskType == '请选择') {
         this.$toast('任务类型不能为空');
         return
       };
-      // 创建维修任务
+      // 编辑维修任务
       let temporaryMessage = {
+        id: this.schedulingTaskDetails.id, //任务id
+        taskNumber: this.schedulingTaskDetails['taskNumber'], // 任务编号
         typeId: this.taskTypeOption.filter((item) => { return item['text'] == this.currentTaskType})[0]['value'], // 任务类型
         taskDesc: this.problemOverview, // 问题描述
         destinationId: '', // 目的地id
         depId: '', // 出发地id
         select: '',
         isMe: this.isMe, // 是否我方解决 0-否，1-是
+        isApp: 1,
         priority: this.priorityRadioValue,
         taskRemark: this.taskDescribe, //任务描述
         proId: this.proId,
@@ -1032,6 +1051,8 @@ export default {
         createType: 0, // 创建类型 0-调度员 2-医务人员 3-巡检人员
         workerId: this.currentTransporter == '请选择' ? '' : this.getCurrentTransporterIdByName(this.currentTransporter),
         workerName: this.currentTransporter == '请选择' ? '' : this.currentTransporter,
+        modifyName: this.userName, //修改者姓名
+        modifyId: this.workerId, //修改者id
         spaces: [], //空间信息
         present: [], //参与者
         tools: [],  //使用工具
@@ -1039,20 +1060,23 @@ export default {
         typeName: this.currentTaskType, // 类型名称
         materials: []        // 需要的物料
       };
+      //处理拼接的地点信息
+      temporaryMessage['depName'] =  temporaryMessage['depName'].replace('//','/');
       // 拼接参与者数据
       if (this.currentParticipant.length > 0) {
         for (let item of this.currentParticipant) {
-          temporaryMessage['present'].push({
-            id: item.value,
-            name: item.text
-          })
+            temporaryMessage['present'].push({
+              id: item.hasOwnProperty('id') ? item.id : item.value,
+              name: item.hasOwnProperty('text') ? item.text : item.name
+            })
         }
       };
       // 拼接使用工具数据
       if (this.currentUseTool.length > 0) {
         for (let item of this.currentUseTool) {
           temporaryMessage['tools'].push({
-            id: item.value
+            id: item.hasOwnProperty('id') ? item.id : item.value,
+            name: item.hasOwnProperty('text') ? item.text : item.name
           })
         }
       };
@@ -1060,8 +1084,8 @@ export default {
       if (this.currentUseTool.length > 0) {
         for (let item of this.currentGoalSpaces) {
           temporaryMessage['spaces'].push({
-            id: item.value,
-            name: item.text
+            id: item.hasOwnProperty('id') ? item.id : item.value,
+            name: item.hasOwnProperty('text') ? item.text : item.name
           })
         }
       };
@@ -1084,14 +1108,15 @@ export default {
           }  
         }
       };
-      this.postGenerateRepairsTask(temporaryMessage)
+      this.postEditRepairsTask(temporaryMessage)
     },
 
-    // 生成维修任务
-    postGenerateRepairsTask (data) {
-      this.showLoadingHint = true;
+    // 编辑维修任务
+    postEditRepairsTask (data) {
+      this.loadingText = '编辑中...';
+      this.loadingShow = true;
       this.overlayShow = true;
-      createRepairsTask(data).then((res) => {
+      editRepairsTask(data).then((res) => {
         if (res && res.data.code == 200) {
           this.$toast(`${res.data.msg}`);
           this.$router.push({path:'/engineeringTaskManagement'});
@@ -1104,7 +1129,8 @@ export default {
           }).then(() => {
           });
         };
-        this.showLoadingHint = false;
+        this.loadingText = '';
+        this.loadingShow = false;
         this.overlayShow = false
       })
       .catch((err) => {
@@ -1113,7 +1139,8 @@ export default {
           closeOnPopstate: true
         }).then(() => {
         });
-        this.showLoadingHint = false;
+        this.loadingText = '';
+        this.loadingShow = false;
         this.overlayShow = false
       })
     },
@@ -1189,12 +1216,16 @@ export default {
         // 添加过的物料不允许再次添加
         let isExist = this.consumableMsgList.filter((innerItem) => { return innerItem.mateId == item.id});
         if (isExist.length > 0) {
-          item['disabled'] = true
+          item['disabled'] = true;
+          item['checked'] = true
         } else {
           item['disabled'] = false
           item['checked'] = false
         }
       };
+      // 打开物料弹框就显示全部物料信息
+      this.temporaryInventoryMsgList = this.echoInventoryMsgList;
+      this.totalPage = Math.ceil(this.temporaryInventoryMsgList.length/this.pageSize);
       this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
     },
 
@@ -1321,7 +1352,8 @@ export default {
                 };
                 .circulation-area-content-box {
                   flex: 1;
-                  overflow: auto;
+                  position: relative;
+                  overflow: scroll;
                   .circulation-area-content {
                     position: relative;
                     padding: 10px 0;
@@ -1351,7 +1383,14 @@ export default {
                         position: absolute;
                         top: 12px;
                         right: 0;
-                        z-index: 1000
+                        z-index: 1000;
+                        /deep/ .van-checkbox {
+                          .van-checkbox__icon {
+                            .van-icon {
+                              border-radius: 4px
+                            }
+                          }
+                        }
                       }
                     }
                   }
@@ -1603,7 +1642,7 @@ export default {
         .message-box {
           flex: 1;
           width: 100%;
-          overflow: auto;
+          overflow: scroll;
           .message-one {
             width: 100%;
             padding: 10px 6px 10px 16px;

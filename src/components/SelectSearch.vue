@@ -164,7 +164,7 @@
 		}
 		.list-module {
 		 max-height: 150px;
-		 overflow-y: auto;
+		 overflow: scroll;
 			li {
                 word-break: break-all;
                 line-height: 20px;

@@ -200,7 +200,7 @@ export default {
       padding: 100px 0;
       box-sizing: border-box;
       margin: 0;
-      overflow: auto;
+      overflow: scroll;
       background-color: #fff;
       li {
         list-style: none;

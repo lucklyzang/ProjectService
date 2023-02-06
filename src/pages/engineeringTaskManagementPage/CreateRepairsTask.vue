@@ -1,7 +1,7 @@
 <template>
   <div class="page-box" ref="wrapper">
     <van-loading size="35px" vertical color="#e6e6e6" v-show="loadingShow">{{loadingText}}</van-loading>
-    <van-overlay :show="overlayShow" z-index="100000" /> 
+    <van-overlay :show="overlayShow" z-index="100000" />
     <!-- 右侧菜单 -->
     <van-popup v-model="rightMenuShow" position="right" ref="vanPopup" :style="{ width: '60%', height: '100%' }">
         <div class="top-icon">
@@ -258,13 +258,14 @@
                     <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
                   </span>
                 </p>
+                <van-empty description="暂无数据" v-show="inventoryMsgList.length == 0" />
               </div>
               <div class="shadow-box"></div> 
             </div>
             <div class="page-area">
               <div class="page-left" @click="pageClickEvent('previous')" :class="{'pageSpanStyle' : currentPage == 1}">上一页</div>
               <div class="page-center">
-                <span>{{ currentPage }}</span>
+                <span>{{ totalPage == 0 ? 0 : currentPage }}</span>
                 <span>/</span>
                 <span>{{ totalPage }}</span>
               </div>
@@ -757,7 +758,6 @@ export default {
         //判断是否在滑动区域内滑动
         let e = e || window.event;
         if (e.targetTouches.length == 1) {
-            this.isSlideArea = true;
             this.moveInfo.startX = parseInt(e.targetTouches[0].clientX)
         }    
     },
@@ -770,12 +770,13 @@ export default {
         let moveX = parseInt((e.targetTouches[0].clientX - this.moveInfo.startX));
         //左滑(根据左右滑动来控制右侧菜单的显示与隐藏,滑动距离大于10才判定为滑动)
         if (moveX < -50) {
-            this.rightMenuShow = true
-        } else {
-            this.rightMenuShow = false
-        };
-        e.preventDefault();
-        }        
+          if(this.rightMenuShow) {return};
+          this.rightMenuShow = true
+        } else if (moveX > 50) {
+          if(!this.rightMenuShow) {return};
+          this.rightMenuShow = false
+        }
+      }        
     },
 
     // 使用工具下拉选择框确认事件
@@ -844,6 +845,8 @@ export default {
       if (val) {
         this.currentStructure =  val;
         this.currentGoalDepartment = '请选择';
+        this.currentGoalSpaces = [];
+        this.goalSpacesOption = [];
         this.getDepartmentByStructureId(this.structureOption.filter((item) => { return item['text'] == this.currentStructure})[0]['value'],false,false)
       } else {
         this.currentStructure = '请选择'
@@ -1049,6 +1052,8 @@ export default {
         typeName: this.currentTaskType, // 类型名称
         materials: []        // 需要的物料
       };
+      //处理拼接的地点信息
+      temporaryMessage['depName'] = temporaryMessage['depName'].replace('//','/');
       // 拼接参与者数据
       if (this.currentParticipant.length > 0) {
         for (let item of this.currentParticipant) {
@@ -1062,7 +1067,8 @@ export default {
       if (this.currentUseTool.length > 0) {
         for (let item of this.currentUseTool) {
           temporaryMessage['tools'].push({
-            id: item.value
+            id: item.value,
+            name: item.text
           })
         }
       };
@@ -1099,7 +1105,8 @@ export default {
 
     // 生成维修任务
     postGenerateRepairsTask (data) {
-      this.showLoadingHint = true;
+      this.loadingText = '创建中...';
+      this.loadingShow = true;
       this.overlayShow = true;
       createRepairsTask(data).then((res) => {
         if (res && res.data.code == 200) {
@@ -1115,7 +1122,8 @@ export default {
           }).then(() => {
           });
         };
-        this.showLoadingHint = false;
+        this.loadingText = '';
+        this.loadingShow = false;
         this.overlayShow = false
       })
       .catch((err) => {
@@ -1124,7 +1132,8 @@ export default {
           closeOnPopstate: true
         }).then(() => {
         });
-        this.showLoadingHint = false;
+        this.loadingText = '';
+        this.loadingShow = false;
         this.overlayShow = false
       })
     },
@@ -1200,13 +1209,17 @@ export default {
         // 添加过的物料不允许再次添加
         let isExist = this.consumableMsgList.filter((innerItem) => { return innerItem.mateId == item.id});
         if (isExist.length > 0) {
-          item['disabled'] = true
+          item['disabled'] = true;
+          item['checked'] = true
         } else {
           item['disabled'] = false
           item['checked'] = false
         }
       };
-      this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
+      // 打开物料弹框就显示全部物料信息
+      this.temporaryInventoryMsgList = this.echoInventoryMsgList;
+      this.totalPage = Math.ceil(this.temporaryInventoryMsgList.length/this.pageSize);
+      this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize)
     },
 
     // 关闭耗材弹框
@@ -1354,7 +1367,8 @@ export default {
                 };
                 .circulation-area-content-box {
                   flex: 1;
-                  overflow: auto;
+                  overflow: scroll;
+                  position: relative;
                   .circulation-area-content {
                     position: relative;
                     padding: 10px 0;
@@ -1384,7 +1398,14 @@ export default {
                         position: absolute;
                         top: 12px;
                         right: 0;
-                        z-index: 1000
+                        z-index: 1000;
+                        /deep/ .van-checkbox {
+                          .van-checkbox__icon {
+                            .van-icon {
+                              border-radius: 4px
+                            }
+                          }
+                        }
                       }
                     }
                   }
@@ -1636,7 +1657,7 @@ export default {
         .message-box {
           flex: 1;
           width: 100%;
-          overflow: auto;
+          overflow: scroll;
           .message-one {
             width: 100%;
             padding: 10px 6px 10px 16px;
