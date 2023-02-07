@@ -395,6 +395,9 @@ export default {
           // 只显示未分配、未开始时、进行中三种任务的状态(0-未分配，1-未开始，2-进行中，3-待签字，5-已完成，6-已取消)
           this.repairsTaskList = this.repairsTaskList.filter(( item ) => { return item.state == 0 || item.state == 1 || item.state == 2 });
           this.echoRepairsTaskList = this.repairsTaskList;
+          this.repairsTaskList.forEach((item) => {
+            console.log('哈哈',item['depName']);
+          });
           if (this.repairsTaskList.length == 0) {
             this.repairsTaskEmptyShow = true
           }
@@ -461,12 +464,12 @@ export default {
             }];
             let [item1,item2,item3,item4] = res;
             if (item1) {
-              Object.keys(item1).forEach((item,index) => {
+              item1.forEach((item,index) => {
                 // 起点科室
                 this.startPointDepartmentOption.push({
-                  text: item1[item],
-                  value: item
-                });
+                  text: item['departmentName'],
+                  value: item['id']
+                })
               })
             };
             if (item2) {
@@ -652,7 +655,7 @@ export default {
       this.$refs['transporterOption'].clearSelectValue()
     },
 
-    // 筛选弹框起点科室下拉框选值变化事件
+    // 筛选弹框目的科室下拉框选值变化事件
     startPointDepartmentOptionChange (item) {
       this.startPointDepartmentValue = item.value
     },
@@ -676,51 +679,97 @@ export default {
       }
     },
 
+    // 根据科室名称获取科室id
+    getCurrentDepartmentIdByName(text) {
+      if (!text) { return null};
+      return this.startPointDepartmentOption.filter((item) => {return item['text'] == text })[0]['value']
+    },
+
     // 筛选弹框确定事件
     screenDialogSure () {
-      console.log( '过滤数据' ,this.startPointDepartmentValue,this.transporterValue,this.priorityResult);
+      try {
         if (this.activeName == 'repairsTask') {
-            if (!this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length == 0) {
-            this.repairsTaskList = this.echoRepairsTaskList;
-            if (this.repairsTaskList.length == 0) {
-                this.repairsTaskEmptyShow = true
-            } else {
-                this.repairsTaskEmptyShow = false
-            }
-            } else {
-            this.repairsTaskList = this.echoRepairsTaskList.filter((item) => {
-                if (this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length > 0) {
-                    return item['setOutPlaceId'] == this.startPointDepartmentValue &&
-                    item['workerId'] == this.transporterValue &&
-                    this.priorityResult.indexOf(item.priority.toString()) != -1
-                } else {
-                    if (this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length == 0) {
-                    return item['setOutPlaceId'] == this.startPointDepartmentValue
-                    };
-                    if (!this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length == 0) {
-                    return item['workerId'] == this.transporterValue
-                    };
-                    if (!this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length > 0) {
-                    return this.priorityResult.indexOf(item.priority.toString()) != -1
-                    };
-                    if (this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length == 0) {
-                    return item['setOutPlaceId'] == this.startPointDepartmentValue && item['workerId'] == this.transporterValue
-                    };
-                    if (this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length > 0) {
-                    return item['setOutPlaceId'] == this.startPointDepartmentValue && this.priorityResult.indexOf(item.priority.toString()) != -1
-                    };
-                    if (!this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length > 0) {
-                    return item['workerId'] == this.transporterValue && this.priorityResult.indexOf(item.priority.toString()) != -1
-                    };
-                }
-            });
-            if (this.repairsTaskList.length == 0) {
-                this.repairsTaskEmptyShow = true
-            } else {
-                this.repairsTaskEmptyShow = false
-            }
-            }
-      }
+              if (!this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length == 0) {
+              this.repairsTaskList = this.echoRepairsTaskList;
+              if (this.repairsTaskList.length == 0) {
+                  this.repairsTaskEmptyShow = true
+              } else {
+                  this.repairsTaskEmptyShow = false
+              }
+              } else {
+              this.repairsTaskList = this.echoRepairsTaskList.filter((item) => {
+                  if (this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length > 0) {
+                    if (item['depName'] == '/' || !item['depName'] || item['depName'].indexOf('//') != -1) {
+                      return item['depName'] == this.startPointDepartmentValue &&
+                      item['workerId'] == this.transporterValue &&
+                      this.priorityResult.indexOf(item.priority.toString()) != -1
+                    } else {
+                      if (item['depName'].split('/').length >= 2 && item['depName'].split('/')[1]) {
+                        console.log(item['depName'].split('/'));
+                        return this.getCurrentDepartmentIdByName(item['depName'].split('/')[1]) == this.startPointDepartmentValue &&
+                        item['workerId'] == this.transporterValue &&
+                        this.priorityResult.indexOf(item.priority.toString()) != -1
+                      } else {
+                        return item['depName'] == this.startPointDepartmentValue &&
+                        item['workerId'] == this.transporterValue &&
+                        this.priorityResult.indexOf(item.priority.toString()) != -1
+                      }
+                    }
+                  } else {
+                      if (this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length == 0) {
+                        if (item['depName'] == '/' || !item['depName'] || item['depName'].indexOf('//') != -1) {
+                          return item['depName'] == this.startPointDepartmentValue
+                        } else {
+                          if (item['depName'].split('/').length >= 2 && item['depName'].split('/')[1]) {
+                            return this.getCurrentDepartmentIdByName(item['depName'].split('/')[1]) == this.startPointDepartmentValue
+                          } else {
+                            return item['depName'] == this.startPointDepartmentValue
+                          }
+                        }
+                      };
+                      if (!this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length == 0) {
+                        return item['workerId'] == this.transporterValue
+                      };
+                      if (!this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length > 0) {
+                        return this.priorityResult.indexOf(item.priority.toString()) != -1
+                      };
+                      if (this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length == 0) {
+                        if (item['depName'] == '/' || !item['depName'] || item['depName'].indexOf('//') != -1) {
+                          return item['depName'] == this.startPointDepartmentValue && item['workerId'] == this.transporterValue
+                        } else {
+                          if (item['depName'].split('/').length >= 2 && item['depName'].split('/')[1]) {
+                            return this.getCurrentDepartmentIdByName(item['depName'].split('/')[1]) == this.startPointDepartmentValue && item['workerId'] == this.transporterValue
+                          } else {
+                            return item['depName'] == this.startPointDepartmentValue && item['workerId'] == this.transporterValue
+                          }
+                        }
+                      };
+                      if (this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length > 0) {
+                        if (item['depName'] == '/' || !item['depName'] || item['depName'].indexOf('//') != -1) {
+                          return item['depName'] == this.startPointDepartmentValue && this.priorityResult.indexOf(item.priority.toString()) != -1
+                        } else {
+                          if (item['depName'].split('/').length >= 2 && item['depName'].split('/')[1]) {
+                            return this.getCurrentDepartmentIdByName(item['depName'].split('/')[1]) == this.startPointDepartmentValue && this.priorityResult.indexOf(item.priority.toString()) != -1
+                          } else {
+                            return item['depName'] == this.startPointDepartmentValue && this.priorityResult.indexOf(item.priority.toString()) != -1
+                          }
+                        }
+                      };
+                      if (!this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length > 0) {
+                        return item['workerId'] == this.transporterValue && this.priorityResult.indexOf(item.priority.toString()) != -1
+                      };
+                  }
+              });
+              if (this.repairsTaskList.length == 0) {
+                  this.repairsTaskEmptyShow = true
+              } else {
+                  this.repairsTaskEmptyShow = false
+              }
+              }
+        }
+      } catch (err) {
+        this.$toast(`${err}`)
+      }  
     },
 
     // 筛选弹框取消事件
