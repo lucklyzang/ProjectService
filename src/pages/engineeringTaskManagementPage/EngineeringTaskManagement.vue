@@ -395,9 +395,6 @@ export default {
           // 只显示未分配、未开始时、进行中三种任务的状态(0-未分配，1-未开始，2-进行中，3-待签字，5-已完成，6-已取消)
           this.repairsTaskList = this.repairsTaskList.filter(( item ) => { return item.state == 0 || item.state == 1 || item.state == 2 });
           this.echoRepairsTaskList = this.repairsTaskList;
-          this.repairsTaskList.forEach((item) => {
-            console.log('哈哈',item['depName']);
-          });
           if (this.repairsTaskList.length == 0) {
             this.repairsTaskEmptyShow = true
           }

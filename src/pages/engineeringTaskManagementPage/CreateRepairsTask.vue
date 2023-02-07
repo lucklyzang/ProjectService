@@ -641,8 +641,7 @@ export default {
               // 默认展示第一页的物料信息
               this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
               this.storeId = this.inventoryMsgList[0]['storeId'];
-              this.systemId = this.inventoryMsgList[0]['systemId'];
-              console.log('物料信息',this.inventoryMsgList);
+              this.systemId = this.inventoryMsgList[0]['systemId']
             };
             // 维修工具
             if (item5) {
