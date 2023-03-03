@@ -133,8 +133,8 @@
         pushHistory();
         this.gotoURL(() => {
           this.$router.push({path: 'departmentServiceBill'});
-          this.changeTitleTxt({tit:'科室巡检单'});
-          setStore('currentTitle','科室巡检单')
+          this.changeTitleTxt({tit:'区域巡检单'});
+          setStore('currentTitle','区域巡检单')
         })
       };
       document.addEventListener('click', (e) => {
@@ -200,8 +200,8 @@
       //返回上一页
       backTo () {
         this.$router.push({path: 'departmentServiceBill'});
-        this.changeTitleTxt({tit:'科室巡检单'});
-        setStore('currentTitle','科室巡检单')
+        this.changeTitleTxt({tit:'区域巡检单'});
+        setStore('currentTitle','区域巡检单')
       },
 
       // 放大维修后图片点击事件
@@ -302,8 +302,8 @@
       // 取消
       cancel () {
         this.$router.push({path: 'departmentServiceBill'});
-        this.changeTitleTxt({tit:'科室巡检单'});
-        setStore('currentTitle','科室巡检单')
+        this.changeTitleTxt({tit:'区域巡检单'});
+        setStore('currentTitle','区域巡检单')
       },
 
       // 存储完成问题上报的检查项信息
@@ -378,8 +378,8 @@
             this.$toast('上报成功');
             this.storageCompleteCheckItemInfo();
             this.$router.push({path: 'departmentServiceBill'});
-            this.changeTitleTxt({tit:'科室巡检单'});
-            setStore('currentTitle','科室巡检单')
+            this.changeTitleTxt({tit:'区域巡检单'});
+            setStore('currentTitle','区域巡检单')
           } else {
             this.$toast(`${res.data.msg}`);
           }

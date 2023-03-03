@@ -33,7 +33,7 @@
         </p>
       </div>
       <div class="content-middle">
-        <p>巡检科室</p>
+        <p>巡检区域</p>
         <ul v-show="oneEnergyMsg.spaces ? oneEnergyMsg.spaces.length > 0 : false">
           <li v-for="(item,index) in oneEnergyMsg.spaces" :key="`${item}-${index}`" :class="{listStyle: item.checked}">{{item.depName}}</li>
         </ul>

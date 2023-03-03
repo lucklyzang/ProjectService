@@ -252,7 +252,7 @@ export default {
       taskList: [
         {tit:'调度管理'},
         {tit:'报修任务'},
-        {tit:'科室巡检'}
+        {tit:'区域巡检'}
       ],
       transporterValue: null,
       transporterOption: [],
@@ -608,11 +608,11 @@ export default {
           this.$router.push({path: 'repairsWorkOrder'});
           this.changeTitleTxt({tit:'报修工单'});
           setStore('currentTitle','报修工单')
-        } else if (name === '科室巡检') {
+        } else if (name === '区域巡检') {
           this.resetBtnClickStatus();
           this.$router.push({path: 'departmentService'});
-          this.changeTitleTxt({tit:'科室巡检'});
-          setStore('currentTitle','科室巡检')
+          this.changeTitleTxt({tit:'区域巡检'});
+          setStore('currentTitle','区域巡检')
         } else if (name === '调度管理') {
         }
       },

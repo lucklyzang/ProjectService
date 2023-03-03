@@ -199,8 +199,8 @@
             this.changeCompleteDepartmentServiceOfficeInfo(temporaryInfo);
             setStore('isCompleteDepartmentServiceOfficeInfo', {"sweepCodeInfo": temporaryInfo});
             this.$router.push({path: 'departmentService'});
-            this.changeTitleTxt({tit:'科室巡检'});
-            setStore('currentTitle','科室巡检');
+            this.changeTitleTxt({tit:'区域巡检'});
+            setStore('currentTitle','区域巡检');
           } else {
             this.$toast(`${res.data.msg}`)
           }

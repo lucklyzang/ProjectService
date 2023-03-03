@@ -8,7 +8,7 @@
       <!-- 内容部分 -->
       <div class="content-top">
         <div class="circulation-area-title">
-          当前巡检科室: {{currentDepartmentName}}
+          当前巡检区域: {{currentDepartmentName}}
         </div>
         <div class="circulation-area">
           <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
@@ -34,7 +34,7 @@
       @cancel="reportProblem"
       >
     </van-dialog>
-     <van-dialog v-model="isBackShow"  title="返回上级将不会保存本科室检查结果,确定返回?" show-cancel-button
+     <van-dialog v-model="isBackShow"  title="返回上级将不会保存本区域检查结果,确定返回?" show-cancel-button
         @confirm="isBackSure" @cancel="isBackCancel"
       >
     </van-dialog>

@@ -8,7 +8,7 @@
       <!-- 内容部分 -->
       <div class="content-top">
         <div class="circulation-area-title">
-          当前抄表科室: {{currentDepartmentName}}
+          当前抄表区域: {{currentDepartmentName}}
         </div>
         <div class="circulation-area">
           <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">

@@ -18,7 +18,7 @@
         </div>
         <div class="dialog-center">
           <div class="dialog-center-one-line">
-            <span>目的科室选择</span>
+            <span>目的区域选择</span>
             <SelectSearch ref="departmentOption" :isNeedSearch="false" :itemData="startPointDepartmentOption" :curData="startPointDepartmentValue" @change="startPointDepartmentOptionChange" />
             <span @click="startPointDepartmentClear">清除</span>
           </div>
@@ -270,7 +270,7 @@ export default {
       taskList: [
         {tit:'调度管理'},
         {tit:'报修任务'},
-        {tit:'科室巡检'}
+        {tit:'区域巡检'}
       ],
       priorityResult: ['1'],
       startPointDepartmentValue: null,
@@ -1077,11 +1077,11 @@ export default {
           this.$router.push({path: 'repairsWorkOrder'});
           this.changeTitleTxt({tit:'报修工单'});
           setStore('currentTitle','报修工单')
-        } else if (name === '科室巡检') {
+        } else if (name === '区域巡检') {
           this.resetBtnClickStatus();
           this.$router.push({path: 'departmentService'});
-          this.changeTitleTxt({tit:'科室巡检'});
-          setStore('currentTitle','科室巡检')
+          this.changeTitleTxt({tit:'区域巡检'});
+          setStore('currentTitle','区域巡检')
         } else if (name === '调度管理') {
         }
       },

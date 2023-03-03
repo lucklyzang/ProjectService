@@ -82,8 +82,8 @@
           this.changeIsFreshDepartmentServicePage(true)
         };
         this.$router.push({path: 'departmentService'});
-        this.changeTitleTxt({tit:'科室巡检'});
-        setStore('currentTitle','科室巡检')
+        this.changeTitleTxt({tit:'区域巡检'});
+        setStore('currentTitle','区域巡检')
         })
       };
       // 二维码回调方法绑定到window下面,提供给外部调用
@@ -147,8 +147,8 @@
           this.changeIsFreshDepartmentServicePage(true)
         };
         this.$router.push({path: 'departmentService'});
-        this.changeTitleTxt({tit:'科室巡检'});
-        setStore('currentTitle','科室巡检')
+        this.changeTitleTxt({tit:'区域巡检'});
+        setStore('currentTitle','区域巡检')
       },
 
       // 查询单条科室巡检任务信息
@@ -193,7 +193,7 @@
       // 扫一扫
       fillConsumable () {
         if (this.oneRepairsMsg.spaces.every((item) => {return item.checked == true})) {
-          this.$toast('该任务下所有科室都已完成检修,不能执行该操作');
+          this.$toast('该任务下所有区域都已完成检修,不能执行该操作');
           return
         };
         if (this.departmentServiceMsg.state == 3) {
@@ -215,8 +215,8 @@
             this.changeDepartmentServiceOfficeId(data.depNo);
             setStore('departmentServiceId',data.depNo);
             this.$router.push({path: 'departmentServiceBill'});
-            this.changeTitleTxt({tit:'科室巡检单'});
-            setStore('currentTitle','科室巡检单')
+            this.changeTitleTxt({tit:'区域巡检单'});
+            setStore('currentTitle','区域巡检单')
           } else {
             this.$toast(`${res.data.msg}`)
           }
@@ -241,7 +241,7 @@
             let temporaryFlagOne = this.oneRepairsMsg.spaces.filter((item) => {return item.checked == true});
             let temporaryFlagTwo = temporaryFlagOne.some((item) => {return item.depNo == this.departmentNo});
             if (temporaryFlagTwo) {
-              this.$toast('当前扫码科室巡检已完成,禁止此操作');
+              this.$toast('当前扫码区域巡检已完成,禁止此操作');
               return
             };
             this.juddgeCurrentDepartment({
@@ -350,8 +350,8 @@
             setStore('isCurrentDepartmentServiceVerifySweepCode', {"number": temporaryInfo});
 
             this.$router.push({path: 'departmentService'});
-            this.changeTitleTxt({tit:'科室巡检'});
-            setStore('currentTitle','科室巡检')
+            this.changeTitleTxt({tit:'区域巡检'});
+            setStore('currentTitle','区域巡检')
           } else {
             this.$toast(`${res.data.msg}`)
           }

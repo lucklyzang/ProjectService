@@ -89,7 +89,7 @@
         taskList: [
           {tit:'报修工单', imgUrl: repairsWorkOrderOnePng},
           {tit:'设备巡检', imgUrl: deviceServiceOnePng},
-          {tit:'科室巡检', imgUrl: departmentServiceOnePng},
+          {tit:'区域巡检', imgUrl: departmentServiceOnePng},
           {tit:'调度管理', imgUrl: dispatchingManagementPng}
         ],
         btnList: [
@@ -249,7 +249,7 @@
           case '报修工单' :
             return 'bx'
             break;
-          case '科室巡检' :
+          case '区域巡检' :
             return 'kx'
             break;
           case '设备巡检' :
@@ -312,7 +312,7 @@
           this.$router.push({path: 'deviceService'});
           this.changeTitleTxt({tit:'设备巡检'});
           setStore('currentTitle','设备巡检')
-        } else if (item.tit == '科室巡检') {
+        } else if (item.tit == '区域巡检') {
           if (currentIndex != -1) {
             this.temporaryNumList.splice(index,1);
             this.changeNewTaskList(this.temporaryNumList);
@@ -320,8 +320,8 @@
           };
           this.changeIsFreshDepartmentServicePage(true);
           this.$router.push({path: 'departmentService'});
-          this.changeTitleTxt({tit:'科室巡检'});
-          setStore('currentTitle','科室巡检')
+          this.changeTitleTxt({tit:'区域巡检'});
+          setStore('currentTitle','区域巡检')
         } else if (item.tit == '调度管理') {
           this.changeIsFreshDepartmentServicePage(true);
           this.$router.push({path: 'engineeringTaskManagement'});
