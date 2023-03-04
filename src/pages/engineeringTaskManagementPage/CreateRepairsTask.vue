@@ -195,7 +195,10 @@
                   {{item.mateName}}-{{item.model}}
                 </span>
                 <span>
-                  <van-stepper @change="stepperEvent" v-model="item.number" min="0"/>
+                  <van-stepper 
+                  @change="(value,detail) => {stepperEvent(value,detail,item)}" 
+                  @plus="stepperPlusEvent(item,index)"
+                  v-model="item.number" min="0" :max="item.quantity+1" />
                 </span>
                 <span>
                   <van-icon name="delete" color="red" @click="deleteEvent(item,index)" />
@@ -240,6 +243,7 @@
                   <span>物资名称</span>
                   <span>单位</span>
                   <span>型号</span>
+                  <span>规格</span>
                   <span></span>
                 </p>
               </div>
@@ -255,13 +259,16 @@
                     {{ item.model ?  item.model : '无'}}
                   </span>
                   <span>
+                    {{ item.norms ?  item.norms : '无' }}
+                  </span>
+                  <span>
                     <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
                   </span>
                 </p>
                 <van-empty description="暂无数据" v-show="inventoryMsgList.length == 0" />
               </div>
-              <div class="shadow-box"></div> 
             </div>
+            <div class="shadow-box"></div> 
             <div class="page-area">
               <div class="page-left" @click="pageClickEvent('previous')" :class="{'pageSpanStyle' : currentPage == 1}">上一页</div>
               <div class="page-center">
@@ -388,7 +395,7 @@ export default {
         that.$router.push({path: '/engineeringTaskManagement'})
       })
     };
-    this.registerSlideEvent();
+    // this.registerSlideEvent();
     this.parallelFunction();
     //判断是否回显暂存的数据
     if (JSON.stringify(this.temporaryStorageCreateRepairsTaskMessage) != '{}' && this.temporaryStorageCreateRepairsTaskMessage['isTemporaryStorage']) {
@@ -464,8 +471,21 @@ export default {
       this.deleteMaterialIndex = index
     },
 
-    // 物料增减事件
-    stepperEvent () {},
+    // 物料数量变化事件
+    stepperEvent (value,detail,item) {
+      if (item.number > item.quantity+1) {
+        item.number = item.quantity;
+        this.$toast('已超出库存数量')
+      }
+    },
+
+    // 点击物料加事件
+    stepperPlusEvent(item,index) {
+      if (item.number > item.quantity+1) {
+        item.number = item.quantity+1;
+        this.$toast('已超出库存数量')
+      }
+    },
 
     // 格式化时间
     getNowFormatDate(currentDate) {
@@ -628,20 +648,104 @@ export default {
             };
             // 物料信息
             if (item4) {
+              item4 = [
+                {
+                  "id":12,
+                  "mateName":"落实",
+                  "mateNumber":'002',
+                  "model":"把",
+                  "norms":"大号",
+                  "remark":'测试',
+                  "unit":"困",
+                  "state":1,
+                  "isHospital":2,
+                  "proId":12,
+                  "proName":"测试幽暗与",
+                  "quantity":200,
+                  "storeId":12,
+                  "systemId":34
+                },
+                 {
+                  "id":13,
+                  "mateName":"钳子",
+                  "mateNumber":'006',
+                  "model":"把",
+                  "norms":"大号",
+                  "remark":'测试',
+                  "unit":"困",
+                  "state":1,
+                  "isHospital":2,
+                  "proId":12,
+                  "proName":"测试幽暗与",
+                  "quantity":200,
+                  "storeId":12,
+                  "systemId":34
+                },
+                {
+                  "id":14,
+                  "mateName":"把手",
+                  "mateNumber":'000',
+                  "model":"把",
+                  "norms":"大号",
+                  "remark":'测试',
+                  "unit":"困",
+                  "state":1,
+                  "isHospital":2,
+                  "proId":12,
+                  "proName":"测试幽暗与",
+                  "quantity":200,
+                  "storeId":12,
+                  "systemId":34
+                },
+                 {
+                  "id":15,
+                  "mateName":"钳子",
+                  "mateNumber":'006',
+                  "model":"把",
+                  "norms":"大号",
+                  "remark":'测试',
+                  "unit":"困",
+                  "state":1,
+                  "isHospital":2,
+                  "proId":12,
+                  "proName":"测试幽暗与",
+                  "quantity":200,
+                  "storeId":12,
+                  "systemId":34
+                },
+                {
+                  "id":16,
+                  "mateName":"把手",
+                  "mateNumber":'000',
+                  "model":"把",
+                  "norms":"大号",
+                  "remark":'测试',
+                  "unit":"困",
+                  "state":1,
+                  "isHospital":2,
+                  "proId":12,
+                  "proName":"测试幽暗与",
+                  "quantity":200,
+                  "storeId":12,
+                  "systemId":34
+                }
+              ];
               this.inventoryMsgList = [];
               this.temporaryInventoryMsgList = [];
               this.echoInventoryMsgList = [];
-              for (let item of item4) {
-                item['checked'] = false
-              };
-              this.inventoryMsgList = item4;
-              this.temporaryInventoryMsgList = item4;
-              this.echoInventoryMsgList = item4;
-              this.totalPage =  Math.ceil(this.temporaryInventoryMsgList.length/this.pageSize);
-              // 默认展示第一页的物料信息
-              this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
-              this.storeId = this.inventoryMsgList[0]['storeId'];
-              this.systemId = this.inventoryMsgList[0]['systemId']
+              if (item4.length > 0) {
+                for (let item of item4) {
+                  item['checked'] = false
+                };
+                this.inventoryMsgList = item4;
+                this.temporaryInventoryMsgList = item4;
+                this.echoInventoryMsgList = item4;
+                this.totalPage =  Math.ceil(this.temporaryInventoryMsgList.length/this.pageSize);
+                // 默认展示第一页的物料信息
+                this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
+                this.storeId = this.inventoryMsgList[0]['storeId'];
+                this.systemId = this.inventoryMsgList[0]['systemId']
+              }  
             };
             // 维修工具
             if (item5) {
@@ -763,6 +867,8 @@ export default {
 
     // 滑动中
     touchmoveHandle() {
+      // 添加耗材框弹出时,禁止左右滑动
+      if (this.materialShow) { return};
         let e = e || window.event;
         if (e.targetTouches.length == 1) {
         // 滑动距离
@@ -783,7 +889,7 @@ export default {
       if (val.length > 0) {
         this.currentUseTool =  val
       } else {
-        this.currentUseTool = '请选择'
+        this.currentUseTool = []
       };
       this.showUseTool = false
     },
@@ -803,7 +909,7 @@ export default {
       if (val.length > 0) {
         this.currentParticipant =  val
       } else {
-        this.currentParticipant = '请选择'
+        this.currentParticipant = []
       };
       this.showParticipant = false
     },
@@ -1072,7 +1178,7 @@ export default {
         }
       };
       // 拼接空间信息
-      if (this.currentUseTool.length > 0) {
+      if (this.currentGoalSpaces.length > 0) {
         for (let item of this.currentGoalSpaces) {
           temporaryMessage['spaces'].push({
             id: item.value,
@@ -1186,6 +1292,7 @@ export default {
             mateNumber: item.mateNumber,
             unit: item.unit,
             mateId: item.id,
+            quantity: item.quantity,
             model: item.model,
             storeId: this.storeId,
             systemId: this.systemId
@@ -1315,11 +1422,14 @@ export default {
               flex: 1;
               display: flex;
               height: 0;
+              display: flex;
+              position: relative;
               flex-direction: column;
               .tool-name-list-title-innner {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                height: 52px;
                 .search-input {
                   flex: 1;
                   padding: 10px;
@@ -1348,32 +1458,28 @@ export default {
                 }
               };
               .tool-name-list-content {
+                width: 100%;
+                overflow: hidden;
+                overflow-x: auto;
+                white-space: nowrap;
                 flex: 1;
                 padding: 20px 6px 10px 6px;
-                position: relative;
                 display: flex;
                 flex-direction: column;
                 height: 0;
                 box-sizing: border-box;
                 border-top: 1px solid #b2b2b2;
-                .shadow-box {
-                  position: absolute;
-                  top: 20px;
-                  right: 0;
-                  width: 10%;
-                  height: 90%;
-                  box-shadow: -3px 0 3px 0 #dddddd
-                };
                 .circulation-area-content-box {
                   flex: 1;
-                  overflow: scroll;
+                  overflow-y: scroll;
                   position: relative;
                   .circulation-area-content {
                     position: relative;
                     padding: 10px 0;
-                    display: flex;
-                    align-items: center;
-                    box-sizing: border-box;
+                    // display: flex;
+                    // align-items: center;
+                    // box-sizing: border-box;
+                    font-size: 0;
                     background: #fff;
                     > span {
                       line-height: 20px;
@@ -1392,12 +1498,18 @@ export default {
                         width: 20%;
                         text-align: center;
                         word-break: break-all
+                      };
+                      &:nth-child(4) {
+                        width: 20%;
+                        text-align: center;
+                        word-break: break-all
                       }
                       &:last-child {
-                        position: absolute;
-                        top: 12px;
-                        right: 0;
+                        width: 20%;
+                        // display: flex;
                         z-index: 1000;
+                        // justify-content: center;
+                        // align-items: center;
                         /deep/ .van-checkbox {
                           .van-checkbox__icon {
                             .van-icon {
@@ -1431,15 +1543,34 @@ export default {
                       &:nth-child(3) {
                         width: 20%;
                         text-align: center;
+                      };
+                      &:nth-child(4) {
+                        width: 20%;
+                        text-align: center;
                       }
                       &:last-child {
-                        position: absolute;
-                        text-align: right;
-                        right: 0
+                        width: 20%;
+                        text-align: center;
                       }
                     }
                   }
+                };
+                scrollbar-width: none; /* Firefox隐藏滚动条 */
+                -ms-overflow-style: none; /* Internet Explorer 10+隐藏滚动条 */
+                ::-webkit-scrollbar {
+                  width: 0;      /* Safari,Chrome 隐藏滚动条 */
+                  height: 0;     /* Safari,Chrome 隐藏滚动条 */
+                  display: none; /* 移动端、pad 上Safari，Chrome，隐藏滚动条 */
                 }
+              };
+              .shadow-box {
+                  position: absolute;
+                  top: 66px;
+                  background: #fff;
+                  right: 0;
+                  width: 10%;
+                  height: calc(60vh - 162px);
+                  box-shadow: -3px 0 3px 0 #dddddd
               };
               .page-area {
                 height: 40px;

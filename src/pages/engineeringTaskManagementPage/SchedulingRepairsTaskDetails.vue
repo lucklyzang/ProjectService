@@ -420,13 +420,13 @@ export default {
         .then((res) => {
           this.loadingShow = false;
           this.overlayShow = false;
+          this.loadingText = '';
           this.$refs['allocationOption'].clearSelectValue();
           if (res && res.data.code == 200) {
             this.$toast('分配成功');
             // 返回任务调度页
             this.onClickLeft()
           } else {
-            this.loadingText = '';
             this.$toast({
               type: 'fail',
               message: res.data.msg
@@ -485,13 +485,13 @@ export default {
         .then((res) => {
           this.loadingShow = false;
           this.overlayShow = false;
+          this.loadingText = '';
           this.$refs['delayOption'].clearSelectValue();
           if (res && res.data.code == 200) {
             this.$toast('延迟成功');
             // 返回任务调度页
             this.onClickLeft()
           } else {
-            this.loadingText = '';
             this.$toast({
               type: 'fail',
               message: res.data.msg
@@ -559,13 +559,13 @@ export default {
         .then((res) => {
           this.loadingShow = false;
           this.overlayShow = false;
+          this.loadingText = '';
           this.$refs['cancelOption'].clearSelectValue();
           if (res && res.data.code == 200) {
             this.$toast('取消成功');
             // 返回任务调度页
             this.onClickLeft()
           } else {
-            this.loadingText = '';
             this.$toast({
               type: 'fail',
               message: res.data.msg

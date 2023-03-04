@@ -195,7 +195,10 @@
                   {{item.mateName}}-{{item.model}}
                 </span>
                 <span>
-                  <van-stepper @change="stepperEvent" v-model="item.number" min="0"/>
+                  <van-stepper 
+                  @change="(value,detail) => {stepperEvent(value,detail,item)}"
+                  @plus="stepperPlusEvent(item,index)"
+                  v-model="item.number" min="0" :max="item.quantity+1"/>
                 </span>
                 <span>
                   <van-icon name="delete" color="red" @click="deleteEvent(item,index)" />
@@ -420,7 +423,7 @@ export default {
     echoEditMessage () {
       let casuallyTemporaryStorageCreateRepairsTaskMessage = this.schedulingTaskDetails;
       this.priorityRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['priority'].toString();
-      this.currentTaskType = casuallyTemporaryStorageCreateRepairsTaskMessage['typeName'];
+      this.currentTaskType = casuallyTemporaryStorageCreateRepairsTaskMessage['typeName'] ? casuallyTemporaryStorageCreateRepairsTaskMessage['typeName'] : '请选择';
       this.problemOverview = casuallyTemporaryStorageCreateRepairsTaskMessage['taskDesc'];
       this.currentTransporter = casuallyTemporaryStorageCreateRepairsTaskMessage['workerName'];
       this.currentParticipant = casuallyTemporaryStorageCreateRepairsTaskMessage['present'];
@@ -435,7 +438,7 @@ export default {
 
     // 处理维修任务参与者
     disposeTaskPresent (item) {
-      if (item == null) { return };
+      if (item == null) { return '请选择'};
       if (item.length == 0) { return '请选择'};
       let temporaryArray = [];
       for (let innerItem of item) {
@@ -451,8 +454,21 @@ export default {
       this.deleteMaterialIndex = index
     },
 
-    // 物料增减事件
-    stepperEvent () {},
+    // 物料数量变化事件
+    stepperEvent (value,detail,item) {
+      if (item.number > item.quantity+1) {
+        item.number = item.quantity+1;
+        this.$toast('已超出库存数量')
+      }
+    },
+
+    // 点击物料加事件
+    stepperPlusEvent(item,index) {
+      if (item.number > item.quantity+1) {
+        item.number = item.quantity+1;
+        this.$toast('已超出库存数量')
+      }
+    },
 
     // 格式化时间
     getNowFormatDate(currentDate) {
@@ -592,7 +608,8 @@ export default {
                   value: item2[i].id,
                   id: i
                 })
-              }
+              };
+              console.log('查询目的建筑',this.structureOption)
             };
             if (item3) {
               // 运送员
@@ -615,17 +632,19 @@ export default {
               this.inventoryMsgList = [];
               this.temporaryInventoryMsgList = [];
               this.echoInventoryMsgList = [];
-              for (let item of item4) {
-                item['checked'] = false
-              };
-              this.inventoryMsgList = item4;
-              this.temporaryInventoryMsgList = item4;
-              this.echoInventoryMsgList = item4;
-              this.totalPage =  Math.ceil(this.temporaryInventoryMsgList.length/this.pageSize);
-              // 默认展示第一页的物料信息
-              this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
-              this.storeId = this.inventoryMsgList[0]['storeId'];
-              this.systemId = this.inventoryMsgList[0]['systemId'];
+              if (item4.length > 0) {
+                for (let item of item4) {
+                  item['checked'] = false
+                };
+                this.inventoryMsgList = item4;
+                this.temporaryInventoryMsgList = item4;
+                this.echoInventoryMsgList = item4;
+                this.totalPage =  Math.ceil(this.temporaryInventoryMsgList.length/this.pageSize);
+                // 默认展示第一页的物料信息
+                this.inventoryMsgList = this.temporaryInventoryMsgList.slice((this.currentPage - 1) * this.pageSize,(this.currentPage - 1) * this.pageSize + this.pageSize);
+                this.storeId = this.inventoryMsgList[0]['storeId'];
+                this.systemId = this.inventoryMsgList[0]['systemId']
+              }  
             };
             // 维修工具
             if (item5) {
@@ -643,12 +662,20 @@ export default {
               this.changeSchedulingTaskDetails(item6);
               //回显要编辑的信息
               this.echoEditMessage();
-              this.currentUseTool = this.schedulingTaskDetails['tools'].length == 0 ? [] : this.schedulingTaskDetails['tools'];
+              // tools字段返回的值可能为null
+              if (!this.schedulingTaskDetails['tools']) {
+                this.currentUseTool = []
+              } else {
+                if (this.schedulingTaskDetails['tools'].length == 0) {
+                  this.currentUseTool = []
+                } else {
+                  this.currentUseTool = this.schedulingTaskDetails['tools']
+                }
+              };
               this.currentGoalSpaces = this.schedulingTaskDetails['spaces'].length == 0 ? [] : this.schedulingTaskDetails['spaces'];
               if (this.currentStructure != '请选择') {
                 this.getDepartmentByStructureId(this.structureOption.filter((item) => { return item['text'] == this.currentStructure})[0]['value'],false,true)
               }
-              console.log('任务信息',this.schedulingTaskDetails)
             }
           }
         })
@@ -787,7 +814,7 @@ export default {
       if (val.length > 0) {
         this.currentUseTool =  val
       } else {
-        this.currentUseTool = '请选择'
+        this.currentUseTool = []
       };
       this.showUseTool = false
     },
@@ -807,7 +834,7 @@ export default {
       if (val.length > 0) {
         this.currentParticipant =  val
       } else {
-        this.currentParticipant = '请选择'
+        this.currentParticipant = []
       };
       this.showParticipant = false
     },
@@ -824,7 +851,6 @@ export default {
 
     // 任务类型下拉选择框确认事件
     taskTypeSureEvent (val) {
-      console.log(val);
       if (val) {
         this.currentTaskType =  val
       } else {
@@ -1081,7 +1107,7 @@ export default {
         }
       };
       // 拼接空间信息
-      if (this.currentUseTool.length > 0) {
+      if (this.currentGoalSpaces.length > 0) {
         for (let item of this.currentGoalSpaces) {
           temporaryMessage['spaces'].push({
             id: item.hasOwnProperty('id') ? item.id : item.value,
@@ -1193,6 +1219,7 @@ export default {
             mateName: item.mateName,
             mateNumber: item.mateNumber,
             unit: item.unit,
+            quantity: item.quantity,
             mateId: item.id,
             model: item.model,
             storeId: this.storeId,

@@ -19,12 +19,12 @@
         <div class="dialog-center">
           <div class="dialog-center-one-line">
             <span>目的区域选择</span>
-            <SelectSearch ref="departmentOption" :isNeedSearch="false" :itemData="startPointDepartmentOption" :curData="startPointDepartmentValue" @change="startPointDepartmentOptionChange" />
+            <SelectSearch ref="departmentOption" :itemData="startPointDepartmentOption" :curData="startPointDepartmentValue" @change="startPointDepartmentOptionChange" />
             <span @click="startPointDepartmentClear">清除</span>
           </div>
           <div class="dialog-center-one-line">
             <span>维修员</span>
-            <SelectSearch ref="transporterOption" :isNeedSearch="false" :itemData="transporterOption" :curData="transporterValue" @change="transporterOptionChange" />
+            <SelectSearch ref="transporterOption" :itemData="transporterOption" :curData="transporterValue" @change="transporterOptionChange" />
             <span  @click="transporterValueClear">清除</span>
           </div>
           <div class="priority-box">
@@ -151,7 +151,7 @@
                               <img :src="anxiousSignPng" alt="急" v-show="item.priority == 2 || item.priority == 3 || item.priority == 4">
                               <span>{{ item.depName == '/' ? '' : item.depName }}</span>
                             </div>
-                            <div class="list-top-right" :class="{'noLookupStyle':item.state == 1,'underwayStyle':item.state == 2}">
+                            <div class="list-top-right" :class="{'noLookupStyle':item.state == 1,'underwayStyle':item.state == 2,'tobeSigned':item.state == 3}">
                               {{ taskStatusTransition(item.state) }}
                             </div>
                           </div>
@@ -182,7 +182,7 @@
                                 <span>{{ disposeCheckType(item.spaces) }}</span>
                               </div>
                                <div class="center-one-line-right">
-                                <span>运送员:</span>
+                                <span>维修员:</span>
                                 <span>{{ item.workerName }}</span>
                               </div>
                             </div>
@@ -204,7 +204,7 @@
                           <div class="list-bottom appoint-list-bottom">
                             <div class="list-bottom-left">
                               <span @click.stop="() => { return }" class="delay-btn" v-if="item.hasDelay == 1">已延迟</span>
-                              <span @click.stop="() => { return }" class="allocation-btn" v-if="item.state != 0">已分配</span>
+                              <!-- <span @click.stop="() => { return }" class="allocation-btn" v-if="item.state != 0">已分配</span> -->
                             </div>
                             <div class="list-bottom-right">
                               <span  v-if="item.state == 0" class="operate-one" @click.stop="allocationEvent(item,index,'维修任务')">分配</span>
@@ -272,7 +272,7 @@ export default {
         {tit:'报修任务'},
         {tit:'区域巡检'}
       ],
-      priorityResult: ['1'],
+      priorityResult: ['1','2','3','4'],
       startPointDepartmentValue: null,
       startPointDepartmentOption: [],
       transporterValue: null,
@@ -390,16 +390,16 @@ export default {
       .then((res) => {
         this.loadingShow = false;
         this.overlayShow = false;
+        this.loadingText = '';
         if (res && res.data.code == 200) {
           this.repairsTaskList = res.data.data;
-          // 只显示未分配、未开始时、进行中三种任务的状态(0-未分配，1-未开始，2-进行中，3-待签字，5-已完成，6-已取消)
-          this.repairsTaskList = this.repairsTaskList.filter(( item ) => { return item.state == 0 || item.state == 1 || item.state == 2 });
+          // 显示未完成(不包括已取消)的任务状态(0-未分配，1-未开始，2-进行中，3-待签字，5-已完成，6-已取消)
+          this.repairsTaskList = this.repairsTaskList.filter(( item ) => { return item.state != 5 && item.state != 6});
           this.echoRepairsTaskList = this.repairsTaskList;
           if (this.repairsTaskList.length == 0) {
             this.repairsTaskEmptyShow = true
           }
         } else {
-          this.loadingText = '';
           this.$toast({
             type: 'fail',
             message: res.data.msg
@@ -466,7 +466,8 @@ export default {
                 this.startPointDepartmentOption.push({
                   text: item['departmentName'],
                   value: item['id']
-                })
+                });
+                console.log('科室信息',this.startPointDepartmentOption);
               })
             };
             if (item2) {
@@ -654,7 +655,8 @@ export default {
 
     // 筛选弹框目的科室下拉框选值变化事件
     startPointDepartmentOptionChange (item) {
-      this.startPointDepartmentValue = item.value
+      this.startPointDepartmentValue = item.value;
+      console.log('当前选中科室',this.startPointDepartmentValue)
     },
 
     // 筛选弹框运送员下拉框选值变化事件
@@ -668,7 +670,7 @@ export default {
       if (action == 'cancel') {
         this.$refs['departmentOption'].clearSelectValue();
         this.$refs['transporterOption'].clearSelectValue();
-        this.priorityResult = [];
+        this.priorityResult = ['1','2','3','4'];
         done(false);
         return
       } else {
@@ -686,13 +688,13 @@ export default {
     screenDialogSure () {
       try {
         if (this.activeName == 'repairsTask') {
-              if (!this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length == 0) {
-              this.repairsTaskList = this.echoRepairsTaskList;
-              if (this.repairsTaskList.length == 0) {
-                  this.repairsTaskEmptyShow = true
-              } else {
-                  this.repairsTaskEmptyShow = false
-              }
+            if (!this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length == 0) {
+                this.repairsTaskList = this.echoRepairsTaskList;
+                if (this.repairsTaskList.length == 0) {
+                    this.repairsTaskEmptyShow = true
+                } else {
+                    this.repairsTaskEmptyShow = false
+                }
               } else {
               this.repairsTaskList = this.echoRepairsTaskList.filter((item) => {
                   if (this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length > 0) {
@@ -762,7 +764,7 @@ export default {
               } else {
                   this.repairsTaskEmptyShow = false
               }
-              }
+            }
         }
       } catch (err) {
         this.$toast(`${err}`)
@@ -824,13 +826,13 @@ export default {
           .then((res) => {
             this.loadingShow = false;
             this.overlayShow = false;
+            this.loadingText = '';
             this.$refs['allocationOption'].clearSelectValue();
             if (res && res.data.code == 200) {
               this.$toast('分配成功');
               // 更新任务信息
               this.getRepairsList()
             } else {
-              this.loadingText = '';
               this.$toast({
                 type: 'fail',
                 message: res.data.msg
@@ -915,13 +917,13 @@ export default {
           .then((res) => {
             this.loadingShow = false;
             this.overlayShow = false;
+            this.loadingText = '';
             this.$refs['delayOption'].clearSelectValue();
             if (res && res.data.code == 200) {
               this.$toast('延迟成功');
               // 更新任务信息
               this.getRepairsList()
             } else {
-              this.loadingText = '';
               this.$toast({
                 type: 'fail',
                 message: res.data.msg
@@ -992,13 +994,13 @@ export default {
           .then((res) => {
             this.loadingShow = false;
             this.overlayShow = false;
+            this.loadingText = '';
             this.$refs['cancelOption'].clearSelectValue();
             if (res && res.data.code == 200) {
               this.$toast('取消成功');
               // 更新任务信息
               this.getRepairsList()
             } else {
-              this.loadingText = '';
               this.$toast({
                 type: 'fail',
                 message: res.data.msg
@@ -1580,6 +1582,9 @@ export default {
                               };
                               .underwayStyle {
                                 color: #289E8E !important
+                              };
+                              .tobeSigned {
+                                color: #40f9e0 !important
                               }
                             };
                             .list-center {
@@ -1649,7 +1654,7 @@ export default {
                                 };
                                 .delay-btn {
                                   margin-right: 4px;
-                                  background: #254550
+                                  background: #174E97
                                 };
                                 .allocation-btn {
                                   background: #ffb77d
@@ -1768,7 +1773,7 @@ export default {
                             .appoint-list-bottom {
                               .list-bottom-left {
                                 .delay-btn {
-                                  background: #254550 !important
+                                  background: #174E97 !important
                                 };
                                 .allocation-btn {
                                   background: #ffb77d !important
