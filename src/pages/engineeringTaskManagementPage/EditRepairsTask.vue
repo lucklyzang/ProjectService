@@ -196,9 +196,9 @@
                 </span>
                 <span>
                   <van-stepper 
-                  @change="(value,detail) => {stepperEvent(value,detail,item)}"
+                  @change="(value,detail) => {stepperEvent(value,detail,item,index)}" 
                   @plus="stepperPlusEvent(item,index)"
-                  v-model="item.number" min="0" :max="item.quantity+1"/>
+                  v-model.number="item.number" min="0" :max="item.quantity" />
                 </span>
                 <span>
                   <van-icon name="delete" color="red" @click="deleteEvent(item,index)" />
@@ -237,31 +237,43 @@
                 <div class="search-btn" @click="searchEvent">搜索</div>
             </div>
             <div class="tool-name-list-content">
-              <div class="circulation-area-title-box">
-                <p class="circulation-area-title">
+              <van-row class="static-row">
+                <div class="circulation-area-title-box">
                   <span>物资名称</span>
                   <span>单位</span>
                   <span>型号</span>
-                  <span></span>
-                </p>
-              </div>
-              <div class="circulation-area-content-box"> 
-                <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
-                  <span @click="mateNameEvent(item,index)">
-                    {{item.mateName}}
-                  </span>
-                  <span>
-                    {{item.unit ? item.unit : '无'}}
-                  </span>
-                  <span>
-                    {{ item.model ?  item.model : '无'}}
-                  </span>
-                  <span>
-                    <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
-                  </span>
-                </p>
-                <van-empty description="暂无数据" v-show="inventoryMsgList.length == 0" />
-              </div>
+                  <span>规格</span>
+                </div>
+                <div class="circulation-area-content-box"> 
+                  <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
+                    <span @click="mateNameEvent(item,index)">
+                      {{item.mateName}}
+                    </span>
+                    <span>
+                      {{item.unit ? item.unit : '无'}}
+                    </span>
+                    <span>
+                      {{ item.model ?  item.model : '无'}}
+                    </span>
+                    <span>
+                      {{ item.norms ?  item.norms : '无' }}
+                    </span>
+                  </p>
+                  <van-empty description="暂无数据" v-show="inventoryMsgList.length == 0" />
+                </div>
+              </van-row>
+              <van-row class="absolute-row">
+                <div class="absolute-title">
+                  占位
+                </div>
+                <div class="absolute-operate">
+                  <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`">
+                    <span>
+                      <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
+                    </span>
+                  </p>
+                </div>
+              </van-row>
               <div class="shadow-box"></div> 
             </div>
             <div class="page-area">
@@ -455,19 +467,16 @@ export default {
     },
 
     // 物料数量变化事件
-    stepperEvent (value,detail,item) {
-      if (item.number > item.quantity+1) {
-        item.number = item.quantity+1;
+    stepperEvent (value,detail,item,index) {
+      console.log('变化',value);
+      if (item.number > item.quantity) {
+        this.$set(this.consumableMsgList[index],'number',item.quantity);
         this.$toast('已超出库存数量')
       }
     },
 
     // 点击物料加事件
     stepperPlusEvent(item,index) {
-      if (item.number > item.quantity+1) {
-        item.number = item.quantity+1;
-        this.$toast('已超出库存数量')
-      }
     },
 
     // 格式化时间
@@ -794,6 +803,8 @@ export default {
 
     // 滑动中
     touchmoveHandle() {
+      // 添加耗材框弹出时,禁止左右滑动
+      if (this.materialShow) { return};
       let e = e || window.event;
       if (e.targetTouches.length == 1) {
         // 滑动距离
@@ -1317,7 +1328,7 @@ export default {
                 color: #101010;
                 text-align: center
               };
-              /deep/ .van-icon {
+              .van-icon {
                 position: absolute;
                 top: 50%;
                 transform: translateY(-50%);
@@ -1337,7 +1348,7 @@ export default {
                   flex: 1;
                   padding: 10px;
                   position: relative;
-                  /deep/ .van-cell {
+                  .van-cell {
                     padding: 4px 4px 4px 30px;
                     background: #F7F7F9;
                     box-sizing: border;
@@ -1360,71 +1371,56 @@ export default {
                   margin-left: 6px;
                 }
               };
-              .tool-name-list-content {
+               .tool-name-list-content {
+                width: 100%;
+                position: relative;
                 flex: 1;
                 padding: 20px 6px 10px 6px;
-                position: relative;
                 display: flex;
                 flex-direction: column;
                 height: 0;
                 box-sizing: border-box;
                 border-top: 1px solid #b2b2b2;
-                .shadow-box {
-                  position: absolute;
-                  top: 20px;
-                  right: 0;
-                  width: 10%;
-                  height: 90%;
-                  box-shadow: -3px 0 3px 0 #dddddd
-                };
-                .circulation-area-content-box {
-                  flex: 1;
-                  position: relative;
-                  overflow: scroll;
-                  .circulation-area-content {
-                    position: relative;
-                    padding: 10px 0;
-                    display: flex;
-                    align-items: center;
-                    box-sizing: border-box;
-                    background: #fff;
-                    > span {
-                      line-height: 20px;
-                      font-size: 15px;
-                      display: inline-block;
-                      &:first-child {
-                        width: 50%;
-                        word-break: break-all
-                      };
-                      &:nth-child(2) {
-                        width: 20%;
-                        text-align: center;
-                        word-break: break-all
-                      };
-                      &:nth-child(3) {
-                        width: 20%;
-                        text-align: center;
-                        word-break: break-all
-                      }
-                      &:last-child {
-                        position: absolute;
-                        top: 12px;
-                        right: 0;
-                        z-index: 1000;
-                        /deep/ .van-checkbox {
-                          .van-checkbox__icon {
-                            .van-icon {
-                              border-radius: 4px
-                            }
-                          }
+                .static-row {
+                  overflow: hidden;
+                  &::-webkit-scrollbar {
+                    height: 0;
+                    display: none
+                  };
+                  height: 100%;
+                  overflow-x: auto;
+                  white-space: nowrap;
+                  .circulation-area-content-box {
+                    flex: 1;
+                    .circulation-area-content {
+                      padding: 10px 0;
+                      box-sizing: border-box;
+                      font-size: 0;
+                      background: #fff;
+                      > span {
+                        line-height: 20px;
+                        font-size: 15px;
+                        display: inline-block;
+                        .no-wrap();
+                        &:first-child {
+                          width: 50%;
+                        };
+                        &:nth-child(2) {
+                          width: 20%;
+                          text-align: center
+                        };
+                        &:nth-child(3) {
+                          width: 25%;
+                          text-align: center
+                        };
+                        &:nth-child(4) {
+                          width: 30%;
+                          text-align: center
                         }
                       }
                     }
-                  }
-                }  
-                .circulation-area-title-box {
-                  .circulation-area-title {
-                    position: relative;
+                  };  
+                  .circulation-area-title-box {
                     font-size: 0;
                     span {
                       height: 40px;
@@ -1442,17 +1438,63 @@ export default {
                         text-align: center;
                       };
                       &:nth-child(3) {
-                        width: 20%;
+                        width: 25%;
                         text-align: center;
-                      }
-                      &:last-child {
-                        position: absolute;
-                        text-align: right;
-                        right: 0
+                      };
+                      &:nth-child(4) {
+                        width: 30%;
+                        text-align: center;
                       }
                     }
                   }
-                }
+                };
+                .absolute-row {
+                  height: 90%;
+                  width: 10%;
+                  z-index: 100;
+                  position: absolute;
+                  top: 20px;
+                  display: flex;
+                  flex-direction: column;
+                  right: 0;
+                  background: #fff;
+                  .absolute-title {
+                    line-height: 20px;
+                    width: 100%;
+                    font-size: 0;
+                    padding: 10px 0;
+                    box-sizing: border-box;
+                  };
+                  .absolute-operate {
+                    width: 100%;
+                    flex: 1;
+                    p {
+                      padding: 10px 0;
+                      box-sizing: border-box;
+                      >span {
+                        line-height: 20px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        .van-checkbox {
+                          .van-checkbox__icon {
+                            .van-icon {
+                              border-radius: 4px
+                            }
+                          }
+                        }
+                      }
+                    }  
+                  }
+                };
+                .shadow-box {
+                  position: absolute;
+                  background: #fff;
+                  right: 0;
+                  width: 10%;
+                  height: 90%;
+                  box-shadow: -3px 0 3px 0 #dddddd;
+                }  
               };
               .page-area {
                 height: 40px;

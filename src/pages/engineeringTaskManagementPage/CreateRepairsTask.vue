@@ -196,9 +196,9 @@
                 </span>
                 <span>
                   <van-stepper 
-                  @change="(value,detail) => {stepperEvent(value,detail,item)}" 
+                  @change="(value,detail) => {stepperEvent(value,detail,item,index)}" 
                   @plus="stepperPlusEvent(item,index)"
-                  v-model="item.number" min="0" :max="item.quantity+1" />
+                  v-model.number="item.number" min="0" :max="item.quantity" />
                 </span>
                 <span>
                   <van-icon name="delete" color="red" @click="deleteEvent(item,index)" />
@@ -238,37 +238,45 @@
                 <div class="search-btn" @click="searchEvent">搜索</div>
             </div>
             <div class="tool-name-list-content">
-              <div class="circulation-area-title-box">
-                <p class="circulation-area-title">
+              <van-row class="static-row">
+                <div class="circulation-area-title-box">
                   <span>物资名称</span>
                   <span>单位</span>
                   <span>型号</span>
                   <span>规格</span>
-                  <span></span>
-                </p>
-              </div>
-              <div class="circulation-area-content-box"> 
-                <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
-                  <span @click="mateNameEvent(item,index)">
-                    {{item.mateName}}
-                  </span>
-                  <span>
-                    {{item.unit ? item.unit : '无'}}
-                  </span>
-                  <span>
-                    {{ item.model ?  item.model : '无'}}
-                  </span>
-                  <span>
-                    {{ item.norms ?  item.norms : '无' }}
-                  </span>
-                  <span>
-                    <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
-                  </span>
-                </p>
-                <van-empty description="暂无数据" v-show="inventoryMsgList.length == 0" />
-              </div>
+                </div>
+                <div class="circulation-area-content-box"> 
+                  <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
+                    <span @click="mateNameEvent(item,index)">
+                      {{item.mateName}}
+                    </span>
+                    <span>
+                      {{item.unit ? item.unit : '无'}}
+                    </span>
+                    <span>
+                      {{ item.model ?  item.model : '无'}}
+                    </span>
+                    <span>
+                      {{ item.norms ?  item.norms : '无' }}
+                    </span>
+                  </p>
+                  <van-empty description="暂无数据" v-show="inventoryMsgList.length == 0" />
+                </div>
+              </van-row>
+              <van-row class="absolute-row">
+                <div class="absolute-title">
+                  占位
+                </div>
+                <div class="absolute-operate">
+                  <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`">
+                    <span>
+                      <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
+                    </span>
+                  </p>
+                </div>
+              </van-row>
+              <div class="shadow-box"></div> 
             </div>
-            <div class="shadow-box"></div> 
             <div class="page-area">
               <div class="page-left" @click="pageClickEvent('previous')" :class="{'pageSpanStyle' : currentPage == 1}">上一页</div>
               <div class="page-center">
@@ -472,19 +480,15 @@ export default {
     },
 
     // 物料数量变化事件
-    stepperEvent (value,detail,item) {
-      if (item.number > item.quantity+1) {
-        item.number = item.quantity;
+    stepperEvent (value,detail,item,index) {
+      if (item.number > item.quantity) {
+        this.$set(this.consumableMsgList[index],'number',item.quantity);
         this.$toast('已超出库存数量')
       }
     },
 
     // 点击物料加事件
     stepperPlusEvent(item,index) {
-      if (item.number > item.quantity+1) {
-        item.number = item.quantity+1;
-        this.$toast('已超出库存数量')
-      }
     },
 
     // 格式化时间
@@ -661,7 +665,7 @@ export default {
                   "isHospital":2,
                   "proId":12,
                   "proName":"测试幽暗与",
-                  "quantity":200,
+                  "quantity":10,
                   "storeId":12,
                   "systemId":34
                 },
@@ -677,7 +681,7 @@ export default {
                   "isHospital":2,
                   "proId":12,
                   "proName":"测试幽暗与",
-                  "quantity":200,
+                  "quantity":6,
                   "storeId":12,
                   "systemId":34
                 },
@@ -1411,7 +1415,7 @@ export default {
                 color: #101010;
                 text-align: center
               };
-              /deep/ .van-icon {
+              .van-icon {
                 position: absolute;
                 top: 50%;
                 transform: translateY(-50%);
@@ -1434,7 +1438,7 @@ export default {
                   flex: 1;
                   padding: 10px;
                   position: relative;
-                  /deep/ .van-cell {
+                  .van-cell {
                     padding: 4px 4px 4px 30px;
                     background: #F7F7F9;
                     box-sizing: border;
@@ -1459,9 +1463,7 @@ export default {
               };
               .tool-name-list-content {
                 width: 100%;
-                overflow: hidden;
-                overflow-x: auto;
-                white-space: nowrap;
+                position: relative;
                 flex: 1;
                 padding: 20px 6px 10px 6px;
                 display: flex;
@@ -1469,61 +1471,46 @@ export default {
                 height: 0;
                 box-sizing: border-box;
                 border-top: 1px solid #b2b2b2;
-                .circulation-area-content-box {
-                  flex: 1;
-                  overflow-y: scroll;
-                  position: relative;
-                  .circulation-area-content {
-                    position: relative;
-                    padding: 10px 0;
-                    // display: flex;
-                    // align-items: center;
-                    // box-sizing: border-box;
-                    font-size: 0;
-                    background: #fff;
-                    > span {
-                      line-height: 20px;
-                      font-size: 15px;
-                      display: inline-block;
-                      &:first-child {
-                        width: 50%;
-                        word-break: break-all
-                      };
-                      &:nth-child(2) {
-                        width: 20%;
-                        text-align: center;
-                        word-break: break-all
-                      };
-                      &:nth-child(3) {
-                        width: 20%;
-                        text-align: center;
-                        word-break: break-all
-                      };
-                      &:nth-child(4) {
-                        width: 20%;
-                        text-align: center;
-                        word-break: break-all
-                      }
-                      &:last-child {
-                        width: 20%;
-                        // display: flex;
-                        z-index: 1000;
-                        // justify-content: center;
-                        // align-items: center;
-                        /deep/ .van-checkbox {
-                          .van-checkbox__icon {
-                            .van-icon {
-                              border-radius: 4px
-                            }
-                          }
+                .static-row {
+                  overflow: hidden;
+                  &::-webkit-scrollbar {
+                    height: 0;
+                    display: none
+                  };
+                  height: 100%;
+                  overflow-x: auto;
+                  white-space: nowrap;
+                  .circulation-area-content-box {
+                    flex: 1;
+                    .circulation-area-content {
+                      padding: 10px 0;
+                      box-sizing: border-box;
+                      font-size: 0;
+                      background: #fff;
+                      > span {
+                        line-height: 20px;
+                        font-size: 15px;
+                        display: inline-block;
+                        .no-wrap();
+                        &:first-child {
+                          width: 50%;
+                        };
+                        &:nth-child(2) {
+                          width: 20%;
+                          text-align: center
+                        };
+                        &:nth-child(3) {
+                          width: 25%;
+                          text-align: center
+                        };
+                        &:nth-child(4) {
+                          width: 30%;
+                          text-align: center
                         }
                       }
                     }
-                  }
-                }  
-                .circulation-area-title-box {
-                  .circulation-area-title {
-                    position: relative;
+                  };  
+                  .circulation-area-title-box {
                     font-size: 0;
                     span {
                       height: 40px;
@@ -1541,36 +1528,63 @@ export default {
                         text-align: center;
                       };
                       &:nth-child(3) {
-                        width: 20%;
+                        width: 25%;
                         text-align: center;
                       };
                       &:nth-child(4) {
-                        width: 20%;
-                        text-align: center;
-                      }
-                      &:last-child {
-                        width: 20%;
+                        width: 30%;
                         text-align: center;
                       }
                     }
                   }
                 };
-                scrollbar-width: none; /* Firefox隐藏滚动条 */
-                -ms-overflow-style: none; /* Internet Explorer 10+隐藏滚动条 */
-                ::-webkit-scrollbar {
-                  width: 0;      /* Safari,Chrome 隐藏滚动条 */
-                  height: 0;     /* Safari,Chrome 隐藏滚动条 */
-                  display: none; /* 移动端、pad 上Safari，Chrome，隐藏滚动条 */
-                }
-              };
-              .shadow-box {
+                .absolute-row {
+                  height: 90%;
+                  width: 10%;
+                  z-index: 100;
                   position: absolute;
-                  top: 66px;
+                  top: 20px;
+                  display: flex;
+                  flex-direction: column;
+                  right: 0;
+                  background: #fff;
+                  .absolute-title {
+                    line-height: 20px;
+                    width: 100%;
+                    font-size: 0;
+                    padding: 10px 0;
+                    box-sizing: border-box;
+                  };
+                  .absolute-operate {
+                    width: 100%;
+                    flex: 1;
+                    p {
+                      padding: 10px 0;
+                      box-sizing: border-box;
+                      >span {
+                        line-height: 20px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        .van-checkbox {
+                          .van-checkbox__icon {
+                            .van-icon {
+                              border-radius: 4px
+                            }
+                          }
+                        }
+                      }
+                    }  
+                  }
+                };
+                .shadow-box {
+                  position: absolute;
                   background: #fff;
                   right: 0;
                   width: 10%;
-                  height: calc(60vh - 162px);
-                  box-shadow: -3px 0 3px 0 #dddddd
+                  height: 90%;
+                  box-shadow: -3px 0 3px 0 #dddddd;
+                }  
               };
               .page-area {
                 height: 40px;
