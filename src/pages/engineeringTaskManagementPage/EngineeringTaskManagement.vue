@@ -144,78 +144,81 @@
                       </div>
                     </div>
                     <van-empty description="暂无数据" v-show="repairsTaskEmptyShow" />
-                    <div class="backlog-task-list-box" ref="scrollRepairsTask" v-show="!repairsTaskEmptyShow">
-                      <div class="backlog-task-list" v-for="(item,index) in repairsTaskList" :key="index" @click="enterRepairsTaskEvent(item,index,'维修任务')">
-                          <div class="list-top appoint-list-top">
-                            <div class="list-top-left">
-                              <img :src="anxiousSignPng" alt="急" v-show="item.priority == 2 || item.priority == 3 || item.priority == 4">
-                              <span>{{ item.depName == '/' ? '' : item.depName }}</span>
+                    <!-- 下拉刷新 -->
+                    <van-pull-refresh v-model="isLoadingRepairsTask" loading-text="刷新中..." @refresh="onRefreshRepairsTaskEvent">
+                      <div class="backlog-task-list-box" ref="scrollRepairsTask" v-show="!repairsTaskEmptyShow">
+                        <div class="backlog-task-list" v-for="(item,index) in repairsTaskList" :key="index" @click="enterRepairsTaskEvent(item,index,'维修任务')">
+                            <div class="list-top appoint-list-top">
+                              <div class="list-top-left">
+                                <img :src="anxiousSignPng" alt="急" v-show="item.priority == 2 || item.priority == 3 || item.priority == 4">
+                                <span>{{ item.depName == '/' ? '' : item.depName }}</span>
+                              </div>
+                              <div class="list-top-right" :class="{'noLookupStyle':item.state == 1,'underwayStyle':item.state == 2,'tobeSigned':item.state == 3}">
+                                {{ taskStatusTransition(item.state) }}
+                              </div>
                             </div>
-                            <div class="list-top-right" :class="{'noLookupStyle':item.state == 1,'underwayStyle':item.state == 2,'tobeSigned':item.state == 3}">
-                              {{ taskStatusTransition(item.state) }}
+                            <div class="list-center appoint-list-center">
+                              <div class="center-one-line">
+                                <div class="center-one-line-left">
+                                  <span>创建时间:</span>
+                                  <span>{{ item.createTime }}</span>
+                                </div>
+                                <div class="center-one-line-right">
+                                  <span>已经历时间:</span>
+                                  <span>{{ elapsedTime(item.planStartTime) }}</span>
+                                </div>
+                              </div>
+                              <div class="center-one-line">
+                                <div class="center-one-line-left">
+                                  <span>响应时间:</span>
+                                  <span>{{ item.responseTime }}</span>
+                                </div>
+                                <div class="center-one-line-right">
+                                  <span>开始时间:</span>
+                                  <span>{{ item.startTime }}</span>
+                                </div>
+                              </div>
+                              <div class="center-one-line">
+                                <div class="center-one-line-left">
+                                  <span>房间:</span>
+                                  <span>{{ disposeCheckType(item.spaces) }}</span>
+                                </div>
+                                <div class="center-one-line-right">
+                                  <span>维修员:</span>
+                                  <span>{{ item.workerName }}</span>
+                                </div>
+                              </div>
+                              <div class="issue-image">
+                                <div class="issue-image-left">
+                                  <span>问题图片:</span>
+                                </div>
+                              <div class="issue-image-list" v-if="item.images && item.images.length > 0">
+                                  <span v-for="(innerItem,innerIndex) in item.images" :key="innerIndex" >
+                                      <img alt="" :src="innerItem.path ? innerItem.path : ''" @click.stop="enlareEvent(innerItem.path)">
+                                  </span>
+                              </div>
+                              </div>
+                              <div class="issue-describe">
+                                <span>问题描述:</span>
+                                <span>{{ item.taskDesc }}</span>
+                              </div>
+                            </div>
+                            <div class="list-bottom appoint-list-bottom">
+                              <div class="list-bottom-left">
+                                <span @click.stop="() => { return }" class="delay-btn" v-if="item.hasDelay == 1">已延迟</span>
+                                <!-- <span @click.stop="() => { return }" class="allocation-btn" v-if="item.state != 0">已分配</span> -->
+                              </div>
+                              <div class="list-bottom-right">
+                                <span  v-if="item.state == 0" class="operate-one" @click.stop="allocationEvent(item,index,'维修任务')">分配</span>
+                                <span class="operate-two" @click.stop="editEvent(item,index,'维修任务')">编辑</span>
+                                <span v-if="item.hasDelay == 0" class="operate-three" @click.stop="delayReasonEvent(item,index,'维修任务')">延迟</span>
+                                <span class="operate-four" @click.stop="cancelReasonEvent(item,index,'维修任务')">取消</span>
+                              </div>
                             </div>
                           </div>
-                          <div class="list-center appoint-list-center">
-                            <div class="center-one-line">
-                              <div class="center-one-line-left">
-                                <span>创建时间:</span>
-                                <span>{{ item.createTime }}</span>
-                              </div>
-                               <div class="center-one-line-right">
-                                <span>已经历时间:</span>
-                                <span>{{ elapsedTime(item.planStartTime) }}</span>
-                              </div>
-                            </div>
-                            <div class="center-one-line">
-                              <div class="center-one-line-left">
-                                <span>响应时间:</span>
-                                <span>{{ item.responseTime }}</span>
-                              </div>
-                               <div class="center-one-line-right">
-                                <span>开始时间:</span>
-                                <span>{{ item.startTime }}</span>
-                              </div>
-                            </div>
-                            <div class="center-one-line">
-                              <div class="center-one-line-left">
-                                <span>房间:</span>
-                                <span>{{ disposeCheckType(item.spaces) }}</span>
-                              </div>
-                               <div class="center-one-line-right">
-                                <span>维修员:</span>
-                                <span>{{ item.workerName }}</span>
-                              </div>
-                            </div>
-                            <div class="issue-image">
-                              <div class="issue-image-left">
-                                <span>问题图片:</span>
-                              </div>
-                             <div class="issue-image-list" v-if="item.images && item.images.length > 0">
-                                <span v-for="(innerItem,innerIndex) in item.images" :key="innerIndex" >
-                                    <img alt="" :src="innerItem.path ? innerItem.path : ''" @click.stop="enlareEvent(innerItem.path)">
-                                </span>
-                             </div>
-                            </div>
-                            <div class="issue-describe">
-                              <span>问题描述:</span>
-                              <span>{{ item.taskDesc }}</span>
-                            </div>
-                          </div>
-                          <div class="list-bottom appoint-list-bottom">
-                            <div class="list-bottom-left">
-                              <span @click.stop="() => { return }" class="delay-btn" v-if="item.hasDelay == 1">已延迟</span>
-                              <!-- <span @click.stop="() => { return }" class="allocation-btn" v-if="item.state != 0">已分配</span> -->
-                            </div>
-                            <div class="list-bottom-right">
-                              <span  v-if="item.state == 0" class="operate-one" @click.stop="allocationEvent(item,index,'维修任务')">分配</span>
-                              <span class="operate-two" @click.stop="editEvent(item,index,'维修任务')">编辑</span>
-                              <span v-if="item.hasDelay == 0" class="operate-three" @click.stop="delayReasonEvent(item,index,'维修任务')">延迟</span>
-                              <span class="operate-four" @click.stop="cancelReasonEvent(item,index,'维修任务')">取消</span>
-                            </div>
-                          </div>
-                        </div>
-                      <div class="no-more-data" v-show="isShowAppointTaskNoMoreData">没有更多数据了</div>
-                    </div>    
+                        <div class="no-more-data" v-show="isShowAppointTaskNoMoreData">没有更多数据了</div>
+                      </div>
+                    </van-pull-refresh>      
                 </van-tab>
             </van-tabs>
         </div>
@@ -244,6 +247,7 @@ export default {
   data() {
     return {
       loadingShow: false,
+      isLoadingRepairsTask: false,
       loadingText: '加载中...',
       screenDialogShow: false,
       allocationShow: false,
@@ -277,6 +281,7 @@ export default {
       startPointDepartmentText: null,
       startPointDepartmentOption: [],
       transporterValue: null,
+      loadFreshTimer: null,
       transporterText: null,
       transporterOption: [],
       selectAllocation: {},
@@ -320,10 +325,14 @@ export default {
     this.parallelFunction()
   },
 
+  beforeDestroy () {
+    if (this.loadFreshTimer) {clearTimeout(this.loadFreshTimer)}
+  },
+
   beforeRouteEnter(to, from, next) {
     next(vm=>{
       if (from.path == '/home') {
-        vm.getRepairsList()
+        vm.getRepairsList(false)
       } else {
         // 回显调度页面点击的任务类型
         if (vm.schedulingTaskType.taskTypeName) {
@@ -332,7 +341,7 @@ export default {
         };
         if (vm.schedulingTaskType.taskTypeName) {
           if (vm.schedulingTaskType.taskTypeName == 'repairsTask') {
-            vm.getRepairsList()
+            vm.getRepairsList(false)
           }
         }
       }
@@ -372,6 +381,21 @@ export default {
       this.$router.push({ path: "/home"})
     },
 
+    // 下拉刷新事件
+    onRefreshRepairsTaskEvent () {
+      this.getRepairsList(true);
+      // 刷新时间大于3秒,则关闭刷新动画
+      this.loadFreshTimer = setTimeout(() => {
+        this.isLoadingRepairsTask = false;
+        this.loadingText = '';
+        this.loadingShow = false;
+        this.overlayShow = false;
+        this.$toast('刷新失败,请检查网络');
+        console.log(this.isLoadingRepairsTask,this.loadingText,this.loadingShow,this.overlayShow,this.loadFreshTimer);
+        if (this.loadFreshTimer) {clearTimeout(this.loadFreshTimer)}
+      }, 3100);
+    },
+
     // 处理维修任务空间信息
     disposeCheckType (item) {
       if (item.length == 0) { return };
@@ -383,10 +407,10 @@ export default {
     },
 
     // 维修任务列表
-    getRepairsList () {
+    getRepairsList (flag) {
       this.loadingShow = true;
       this.overlayShow = true;
-      this.loadingText = '加载中...';
+      this.loadingText = flag ? '刷新中' : '加载中...';
       this.repairsTaskEmptyShow = false;
       repairsList(-3,this.proId,1)
       .then((res) => {
@@ -394,6 +418,14 @@ export default {
         this.overlayShow = false;
         this.loadingText = '';
         if (res && res.data.code == 200) {
+          // 是否开启下拉刷新
+          if (flag) {
+            this.isLoadingRepairsTask = false;
+            this.$toast('刷新成功');
+            if (this.loadFreshTimer) {
+              clearTimeout(this.loadFreshTimer)
+            }
+          };
           this.repairsTaskList = res.data.data;
           // 显示未完成(不包括已取消)的任务状态(0-未分配，1-未开始，2-进行中，3-待签字，5-已完成，6-已取消)
           this.repairsTaskList = this.repairsTaskList.filter(( item ) => { return item.state != 5 && item.state != 6});
@@ -412,9 +444,17 @@ export default {
         this.loadingText = '';
         this.loadingShow = false;
         this.overlayShow = false;
+        if (flag) {
+          this.isLoadingRepairsTask = false;
+          this.$toast('刷新失败,请检查网络');
+          if (this.loadFreshTimer) {
+            clearTimeout(this.loadFreshTimer)
+          };
+          return
+        };
         this.$toast({
           type: 'fail',
-          message: err
+          message: err.message
         })
       })
     },
@@ -833,7 +873,7 @@ export default {
             if (res && res.data.code == 200) {
               this.$toast('分配成功');
               // 更新任务信息
-              this.getRepairsList()
+              this.getRepairsList(false)
             } else {
               this.$toast({
                 type: 'fail',
@@ -924,7 +964,7 @@ export default {
             if (res && res.data.code == 200) {
               this.$toast('延迟成功');
               // 更新任务信息
-              this.getRepairsList()
+              this.getRepairsList(false)
             } else {
               this.$toast({
                 type: 'fail',
@@ -1001,7 +1041,7 @@ export default {
             if (res && res.data.code == 200) {
               this.$toast('取消成功');
               // 更新任务信息
-              this.getRepairsList()
+              this.getRepairsList(false)
             } else {
               this.$toast({
                 type: 'fail',
@@ -1165,7 +1205,7 @@ export default {
     // tab切换值变化事件
     vanTabsChangeEvent (value) {
         if (value == 'repairsTask') {
-          this.getRepairsList()
+          this.getRepairsList(false)
         };
         this.$nextTick(()=> {
             this.initScrollChange()
