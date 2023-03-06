@@ -90,7 +90,7 @@
 							temporaryArray.push(it['text'])
 						}
 					};
-					this.current = newVal.length > 0 ? temporaryArray.join(',') : '请选择'
+					this.current = newVal.length > 0 ? temporaryArray.join(',') : this.itemData[0]['text']
 				}
 		   }
         },
@@ -108,7 +108,7 @@
         handler: function(newVal, oldVal) {
            if (this.multiple) {
 			   if (this.selectedItem.length == 0) {
-				   this.current = '请选择'
+				   this.current = this.itemData[0]['text']
 			   }
 		   }
         },
@@ -139,7 +139,7 @@
 							temporaryArray.push(it['text'])
 						}
 					};
-					this.current = this.curData.length > 0 ? temporaryArray.join(',') : '请选择'
+					this.current = this.curData.length > 0 ? temporaryArray.join(',') : this.itemData[0]['text']
 				}
 		};
 		//点击组件以外的地方，收起
@@ -157,26 +157,38 @@
             this.isShow = !this.isShow;
             if (this.isShow) {
                 this.searchValue = '';
-                this.datalist = this.itemData
+                this.datalist = this.itemData;
+				if (this.multiple) {
+					if (this.current != null && this.current != this.itemData[0]['text']) {
+						let temporaryArray = this.current.split(',');
+						this.datalist.forEach((item) => {
+							if (temporaryArray.indexOf(item.text) != -1) {
+								item.selected = true
+							}
+						})
+					}
+				}
             } else {
 				if (this.multiple) {
-				 this.$emit('change',this.selectedItem)
+					this.$emit('change',this.selectedItem)
 				}
+			};
+			if (!this.current || this.current == this.itemData[0]['text']) {
+				this.datalist.forEach(element => {
+					if (element['value']) {
+						element['selected'] = false
+					}
+				})
 			}
         },
 
 		search(e){
 			this.searchValue = e.target.value;
 			//单选
-			if (!this.multiple) {
-				this.current = '请选择'
-			} else {
-				this.current = '请选择'
-			};
 			this.datalist = this.itemData.filter((item)=>{
 				return item.text.indexOf(this.searchValue) != -1
 			});
-			this.datalist.forEach(element => {
+			this.itemData.forEach(element => {
 				if (element['value']) {
 					element['selected'] = false
 				}
@@ -214,9 +226,9 @@
 		clearSelectValue () {
 			// 单选
 			if (!this.multiple) {
-				this.current = this.datalist[0]['text'];
+				this.current = this.itemData[0]['text'];
 				this.currentFullValue = this.datalist[0];
-				this.$emit('change',{text:this.datalist[0]['text'],value: null})
+				this.$emit('change',{text:this.itemData[0]['text'],value: null})
 			} else {
 				this.datalist.forEach((element) => { 
 					if (element['value']) {
@@ -230,7 +242,8 @@
 					temporaryArray.push(it['text'])
 				};
 				this.current = temporaryArray.join(',')
-			}
+			};
+			this.datalist = this.itemData
 		},
 
 		//供父组件调用的全选的方法
@@ -301,16 +314,16 @@
 			li {
                 word-break: break-all;
                 line-height: 20px;
-				&._self-hide {
-					display: none;
-				}
-				padding: 5px 8px;
-				box-sizing: border-box;
-				&:hover {
-					cursor:pointer;
-					color: #fff;
-					background: #00a0e9;
-				};
+				// &._self-hide {
+				// 	display: none;
+				// }
+				// padding: 5px 8px;
+				// box-sizing: border-box;
+				// &:hover {
+				// 	cursor:pointer;
+				// 	color: #fff;
+				// 	background: #00a0e9;
+				// };
 				>span {
 					&:nth-child(1) {
 						margin-right: 10px

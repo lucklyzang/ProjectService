@@ -274,8 +274,10 @@ export default {
       ],
       priorityResult: ['1','2','3','4'],
       startPointDepartmentValue: null,
+      startPointDepartmentText: null,
       startPointDepartmentOption: [],
       transporterValue: null,
+      transporterText: null,
       transporterOption: [],
       selectAllocation: {},
       allocationValue: null,
@@ -656,12 +658,13 @@ export default {
     // 筛选弹框目的科室下拉框选值变化事件
     startPointDepartmentOptionChange (item) {
       this.startPointDepartmentValue = item.value;
-      console.log('当前选中科室',this.startPointDepartmentValue)
+      this.startPointDepartmentText = item.text
     },
 
     // 筛选弹框运送员下拉框选值变化事件
     transporterOptionChange (item) {
-      this.transporterValue = item.value
+      this.transporterValue = item.value;
+      this.transporterText = item.text
     },
 
     // 筛选弹框关闭前事件
@@ -699,63 +702,62 @@ export default {
               this.repairsTaskList = this.echoRepairsTaskList.filter((item) => {
                   if (this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length > 0) {
                     if (item['depName'] == '/' || !item['depName'] || item['depName'].indexOf('//') != -1) {
-                      return item['depName'] == this.startPointDepartmentValue &&
-                      item['workerId'] == this.transporterValue &&
+                      return item['depName'] == this.startPointDepartmentText &&
+                      item['workerName'] == this.transporterText &&
                       this.priorityResult.indexOf(item.priority.toString()) != -1
                     } else {
                       if (item['depName'].split('/').length >= 2 && item['depName'].split('/')[1]) {
-                        console.log(item['depName'].split('/'));
-                        return this.getCurrentDepartmentIdByName(item['depName'].split('/')[1]) == this.startPointDepartmentValue &&
-                        item['workerId'] == this.transporterValue &&
-                        this.priorityResult.indexOf(item.priority.toString()) != -1
+                          return item['depName'].split('/')[1] == this.startPointDepartmentText &&
+                          item['workerName'] == this.transporterText &&
+                          this.priorityResult.indexOf(item.priority.toString()) != -1
                       } else {
-                        return item['depName'] == this.startPointDepartmentValue &&
-                        item['workerId'] == this.transporterValue &&
+                        return item['depName'] == this.startPointDepartmentText &&
+                        item['workerName'] == this.transporterText &&
                         this.priorityResult.indexOf(item.priority.toString()) != -1
                       }
                     }
                   } else {
                       if (this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length == 0) {
                         if (item['depName'] == '/' || !item['depName'] || item['depName'].indexOf('//') != -1) {
-                          return item['depName'] == this.startPointDepartmentValue
+                          return item['depName'] == this.startPointDepartmentText
                         } else {
                           if (item['depName'].split('/').length >= 2 && item['depName'].split('/')[1]) {
-                            return this.getCurrentDepartmentIdByName(item['depName'].split('/')[1]) == this.startPointDepartmentValue
+                            return item['depName'].split('/')[1] == this.startPointDepartmentText
                           } else {
-                            return item['depName'] == this.startPointDepartmentValue
+                            return item['depName'] == this.startPointDepartmentText
                           }
                         }
                       };
                       if (!this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length == 0) {
-                        return item['workerId'] == this.transporterValue
+                        item['workerName'] == this.transporterText
                       };
                       if (!this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length > 0) {
                         return this.priorityResult.indexOf(item.priority.toString()) != -1
                       };
                       if (this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length == 0) {
                         if (item['depName'] == '/' || !item['depName'] || item['depName'].indexOf('//') != -1) {
-                          return item['depName'] == this.startPointDepartmentValue && item['workerId'] == this.transporterValue
+                          return item['depName'] == this.startPointDepartmentText && item['workerName'] == this.transporterText
                         } else {
                           if (item['depName'].split('/').length >= 2 && item['depName'].split('/')[1]) {
-                            return this.getCurrentDepartmentIdByName(item['depName'].split('/')[1]) == this.startPointDepartmentValue && item['workerId'] == this.transporterValue
+                            return item['depName'].split('/')[1] == this.startPointDepartmentText && item['workerName'] == this.transporterText
                           } else {
-                            return item['depName'] == this.startPointDepartmentValue && item['workerId'] == this.transporterValue
+                            return item['depName'] == this.startPointDepartmentText && item['workerName'] == this.transporterText
                           }
                         }
                       };
                       if (this.startPointDepartmentValue && !this.transporterValue && this.priorityResult.length > 0) {
                         if (item['depName'] == '/' || !item['depName'] || item['depName'].indexOf('//') != -1) {
-                          return item['depName'] == this.startPointDepartmentValue && this.priorityResult.indexOf(item.priority.toString()) != -1
+                          return item['depName'] == this.startPointDepartmentText && this.priorityResult.indexOf(item.priority.toString()) != -1
                         } else {
                           if (item['depName'].split('/').length >= 2 && item['depName'].split('/')[1]) {
-                            return this.getCurrentDepartmentIdByName(item['depName'].split('/')[1]) == this.startPointDepartmentValue && this.priorityResult.indexOf(item.priority.toString()) != -1
+                            return item['depName'].split('/')[1] == this.startPointDepartmentText && this.priorityResult.indexOf(item.priority.toString()) != -1
                           } else {
-                            return item['depName'] == this.startPointDepartmentValue && this.priorityResult.indexOf(item.priority.toString()) != -1
+                            return item['depName'] == this.startPointDepartmentText && this.priorityResult.indexOf(item.priority.toString()) != -1
                           }
                         }
                       };
                       if (!this.startPointDepartmentValue && this.transporterValue && this.priorityResult.length > 0) {
-                        return item['workerId'] == this.transporterValue && this.priorityResult.indexOf(item.priority.toString()) != -1
+                        return item['workerName'] == this.transporterText && this.priorityResult.indexOf(item.priority.toString()) != -1
                       };
                   }
               });
@@ -767,7 +769,7 @@ export default {
             }
         }
       } catch (err) {
-        this.$toast(`${err}`)
+        // this.$toast(`${err}`)
       }  
     },
 

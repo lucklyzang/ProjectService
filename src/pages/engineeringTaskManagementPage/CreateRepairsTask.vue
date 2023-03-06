@@ -198,7 +198,7 @@
                   <van-stepper 
                   @change="(value,detail) => {stepperEvent(value,detail,item,index)}" 
                   @plus="stepperPlusEvent(item,index)"
-                  v-model.number="item.number" min="0" :max="item.quantity" />
+                  v-model.number="item.number" min="0" :max="item.quantity+1" />
                 </span>
                 <span>
                   <van-icon name="delete" color="red" @click="deleteEvent(item,index)" />
@@ -482,13 +482,21 @@ export default {
     // 物料数量变化事件
     stepperEvent (value,detail,item,index) {
       if (item.number > item.quantity) {
-        this.$set(this.consumableMsgList[index],'number',item.quantity);
+        this.$nextTick(() => {
+          this.$set(this.consumableMsgList[index],'number',item.quantity)
+        });
         this.$toast('已超出库存数量')
       }
     },
 
     // 点击物料加事件
     stepperPlusEvent(item,index) {
+      if (item.number  >= item.quantity) {
+        this.$nextTick(() => {
+          this.$set(this.consumableMsgList[index],'number',item.quantity)
+        });
+        this.$toast('已超出库存数量')
+      }
     },
 
     // 格式化时间
@@ -652,88 +660,6 @@ export default {
             };
             // 物料信息
             if (item4) {
-              item4 = [
-                {
-                  "id":12,
-                  "mateName":"落实",
-                  "mateNumber":'002',
-                  "model":"把",
-                  "norms":"大号",
-                  "remark":'测试',
-                  "unit":"困",
-                  "state":1,
-                  "isHospital":2,
-                  "proId":12,
-                  "proName":"测试幽暗与",
-                  "quantity":10,
-                  "storeId":12,
-                  "systemId":34
-                },
-                 {
-                  "id":13,
-                  "mateName":"钳子",
-                  "mateNumber":'006',
-                  "model":"把",
-                  "norms":"大号",
-                  "remark":'测试',
-                  "unit":"困",
-                  "state":1,
-                  "isHospital":2,
-                  "proId":12,
-                  "proName":"测试幽暗与",
-                  "quantity":6,
-                  "storeId":12,
-                  "systemId":34
-                },
-                {
-                  "id":14,
-                  "mateName":"把手",
-                  "mateNumber":'000',
-                  "model":"把",
-                  "norms":"大号",
-                  "remark":'测试',
-                  "unit":"困",
-                  "state":1,
-                  "isHospital":2,
-                  "proId":12,
-                  "proName":"测试幽暗与",
-                  "quantity":200,
-                  "storeId":12,
-                  "systemId":34
-                },
-                 {
-                  "id":15,
-                  "mateName":"钳子",
-                  "mateNumber":'006',
-                  "model":"把",
-                  "norms":"大号",
-                  "remark":'测试',
-                  "unit":"困",
-                  "state":1,
-                  "isHospital":2,
-                  "proId":12,
-                  "proName":"测试幽暗与",
-                  "quantity":200,
-                  "storeId":12,
-                  "systemId":34
-                },
-                {
-                  "id":16,
-                  "mateName":"把手",
-                  "mateNumber":'000',
-                  "model":"把",
-                  "norms":"大号",
-                  "remark":'测试',
-                  "unit":"困",
-                  "state":1,
-                  "isHospital":2,
-                  "proId":12,
-                  "proName":"测试幽暗与",
-                  "quantity":200,
-                  "storeId":12,
-                  "systemId":34
-                }
-              ];
               this.inventoryMsgList = [];
               this.temporaryInventoryMsgList = [];
               this.echoInventoryMsgList = [];
@@ -1472,7 +1398,6 @@ export default {
                 box-sizing: border-box;
                 border-top: 1px solid #b2b2b2;
                 .static-row {
-                  overflow: hidden;
                   &::-webkit-scrollbar {
                     height: 0;
                     display: none
@@ -1558,6 +1483,7 @@ export default {
                   .absolute-operate {
                     width: 100%;
                     flex: 1;
+                    overflow-y: auto;
                     p {
                       padding: 10px 0;
                       box-sizing: border-box;
