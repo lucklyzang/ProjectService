@@ -130,6 +130,8 @@
         <div class="content-top-area">
 			<img :src="statusBackgroundPng" />
 		</div>
+      <!-- 下拉刷新 -->
+      <van-pull-refresh v-model="isLoadingRepairsTask" loading-text="刷新中..." @refresh="onRefreshRepairsTaskEvent">
         <div class="content-box">
             <van-tabs v-model="activeName" type="card" color="#fff" title-inactive-color="#9E9E9A" title-active-color="#174E97" @change="vanTabsChangeEvent">
                 <van-tab title="报修任务" name="repairsTask">
@@ -144,84 +146,82 @@
                       </div>
                     </div>
                     <van-empty description="暂无数据" v-show="repairsTaskEmptyShow" />
-                    <!-- 下拉刷新 -->
-                    <van-pull-refresh v-model="isLoadingRepairsTask" loading-text="刷新中..." @refresh="onRefreshRepairsTaskEvent">
-                      <div class="backlog-task-list-box" ref="scrollRepairsTask" v-show="!repairsTaskEmptyShow">
-                        <div class="backlog-task-list" v-for="(item,index) in repairsTaskList" :key="index" @click="enterRepairsTaskEvent(item,index,'维修任务')">
-                            <div class="list-top appoint-list-top">
-                              <div class="list-top-left">
-                                <img :src="anxiousSignPng" alt="急" v-show="item.priority == 2 || item.priority == 3 || item.priority == 4">
-                                <span>{{ item.depName == '/' ? '' : item.depName }}</span>
-                              </div>
-                              <div class="list-top-right" :class="{'noLookupStyle':item.state == 1,'underwayStyle':item.state == 2,'tobeSigned':item.state == 3}">
-                                {{ taskStatusTransition(item.state) }}
-                              </div>
+                    <div class="backlog-task-list-box" ref="scrollRepairsTask" v-show="!repairsTaskEmptyShow">
+                      <div class="backlog-task-list" v-for="(item,index) in repairsTaskList" :key="index" @click="enterRepairsTaskEvent(item,index,'维修任务')">
+                          <div class="list-top appoint-list-top">
+                            <div class="list-top-left">
+                              <img :src="anxiousSignPng" alt="急" v-show="item.priority == 2 || item.priority == 3 || item.priority == 4">
+                              <span>{{ item.depName == '/' ? '' : item.depName }}</span>
                             </div>
-                            <div class="list-center appoint-list-center">
-                              <div class="center-one-line">
-                                <div class="center-one-line-left">
-                                  <span>创建时间:</span>
-                                  <span>{{ item.createTime }}</span>
-                                </div>
-                                <div class="center-one-line-right">
-                                  <span>已经历时间:</span>
-                                  <span>{{ elapsedTime(item.planStartTime) }}</span>
-                                </div>
-                              </div>
-                              <div class="center-one-line">
-                                <div class="center-one-line-left">
-                                  <span>响应时间:</span>
-                                  <span>{{ item.responseTime }}</span>
-                                </div>
-                                <div class="center-one-line-right">
-                                  <span>开始时间:</span>
-                                  <span>{{ item.startTime }}</span>
-                                </div>
-                              </div>
-                              <div class="center-one-line">
-                                <div class="center-one-line-left">
-                                  <span>房间:</span>
-                                  <span>{{ disposeCheckType(item.spaces) }}</span>
-                                </div>
-                                <div class="center-one-line-right">
-                                  <span>维修员:</span>
-                                  <span>{{ item.workerName }}</span>
-                                </div>
-                              </div>
-                              <div class="issue-image">
-                                <div class="issue-image-left">
-                                  <span>问题图片:</span>
-                                </div>
-                              <div class="issue-image-list" v-if="item.images && item.images.length > 0">
-                                  <span v-for="(innerItem,innerIndex) in item.images" :key="innerIndex" >
-                                      <img alt="" :src="innerItem.path ? innerItem.path : ''" @click.stop="enlareEvent(innerItem.path)">
-                                  </span>
-                              </div>
-                              </div>
-                              <div class="issue-describe">
-                                <span>问题描述:</span>
-                                <span>{{ item.taskDesc }}</span>
-                              </div>
-                            </div>
-                            <div class="list-bottom appoint-list-bottom">
-                              <div class="list-bottom-left">
-                                <span @click.stop="() => { return }" class="delay-btn" v-if="item.hasDelay == 1">已延迟</span>
-                                <!-- <span @click.stop="() => { return }" class="allocation-btn" v-if="item.state != 0">已分配</span> -->
-                              </div>
-                              <div class="list-bottom-right">
-                                <span  v-if="item.state == 0" class="operate-one" @click.stop="allocationEvent(item,index,'维修任务')">分配</span>
-                                <span class="operate-two" @click.stop="editEvent(item,index,'维修任务')">编辑</span>
-                                <span v-if="item.hasDelay == 0" class="operate-three" @click.stop="delayReasonEvent(item,index,'维修任务')">延迟</span>
-                                <span class="operate-four" @click.stop="cancelReasonEvent(item,index,'维修任务')">取消</span>
-                              </div>
+                            <div class="list-top-right" :class="{'noLookupStyle':item.state == 1,'underwayStyle':item.state == 2,'tobeSigned':item.state == 3}">
+                              {{ taskStatusTransition(item.state) }}
                             </div>
                           </div>
-                        <div class="no-more-data" v-show="isShowAppointTaskNoMoreData">没有更多数据了</div>
-                      </div>
-                    </van-pull-refresh>      
+                          <div class="list-center appoint-list-center">
+                            <div class="center-one-line">
+                              <div class="center-one-line-left">
+                                <span>创建时间:</span>
+                                <span>{{ item.createTime }}</span>
+                              </div>
+                              <div class="center-one-line-right">
+                                <span>已经历时间:</span>
+                                <span>{{ elapsedTime(item.planStartTime) }}</span>
+                              </div>
+                            </div>
+                            <div class="center-one-line">
+                              <div class="center-one-line-left">
+                                <span>响应时间:</span>
+                                <span>{{ item.responseTime }}</span>
+                              </div>
+                              <div class="center-one-line-right">
+                                <span>开始时间:</span>
+                                <span>{{ item.startTime }}</span>
+                              </div>
+                            </div>
+                            <div class="center-one-line">
+                              <div class="center-one-line-left">
+                                <span>房间:</span>
+                                <span>{{ disposeCheckType(item.spaces) }}</span>
+                              </div>
+                              <div class="center-one-line-right">
+                                <span>维修员:</span>
+                                <span>{{ item.workerName }}</span>
+                              </div>
+                            </div>
+                            <div class="issue-image">
+                              <div class="issue-image-left">
+                                <span>问题图片:</span>
+                              </div>
+                            <div class="issue-image-list" v-if="item.images && item.images.length > 0">
+                                <span v-for="(innerItem,innerIndex) in item.images" :key="innerIndex" >
+                                    <img alt="" :src="innerItem.path ? innerItem.path : ''" @click.stop="enlareEvent(innerItem.path)">
+                                </span>
+                            </div>
+                            </div>
+                            <div class="issue-describe">
+                              <span>问题描述:</span>
+                              <span>{{ item.taskDesc }}</span>
+                            </div>
+                          </div>
+                          <div class="list-bottom appoint-list-bottom">
+                            <div class="list-bottom-left">
+                              <span @click.stop="() => { return }" class="delay-btn" v-if="item.hasDelay == 1">已延迟</span>
+                              <!-- <span @click.stop="() => { return }" class="allocation-btn" v-if="item.state != 0">已分配</span> -->
+                            </div>
+                            <div class="list-bottom-right">
+                              <span  v-if="item.state == 0" class="operate-one" @click.stop="allocationEvent(item,index,'维修任务')">分配</span>
+                              <span class="operate-two" @click.stop="editEvent(item,index,'维修任务')">编辑</span>
+                              <span v-if="item.hasDelay == 0" class="operate-three" @click.stop="delayReasonEvent(item,index,'维修任务')">延迟</span>
+                              <span class="operate-four" @click.stop="cancelReasonEvent(item,index,'维修任务')">取消</span>
+                            </div>
+                          </div>
+                        </div>
+                      <div class="no-more-data" v-show="isShowAppointTaskNoMoreData">没有更多数据了</div>
+                    </div>   
                 </van-tab>
             </van-tabs>
         </div>
+      </van-pull-refresh>  
     </div>
     <!-- 图片放大弹框  -->
     <div class="img-dislog-box">
@@ -1485,9 +1485,19 @@ export default {
         height: 100%
       }
     };
-    .content-box {
-        flex: 1;
-        margin-top: 50px;
+    /deep/ .van-pull-refresh {
+      .van-pull-refresh__head {
+        color: #fff !important;
+      };
+      .van-loading {
+        color: #fff !important;
+        .van-loading__text {
+          color: #fff !important;
+        }
+      };
+      flex: 1;
+      margin-top: 50px;
+      .content-box {
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -1834,7 +1844,8 @@ export default {
                 }        
             }
         }
-    }
+      }
+    }  
   }
 }
 </style>
