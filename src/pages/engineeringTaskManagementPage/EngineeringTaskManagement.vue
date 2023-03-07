@@ -19,7 +19,7 @@
         <div class="dialog-center">
           <div class="dialog-center-one-line">
             <span>目的区域选择</span>
-            <SelectSearch ref="departmentOption" :itemData="startPointDepartmentOption" :curData="startPointDepartmentValue" @change="startPointDepartmentOptionChange" />
+            <SelectSearch ref="departmentOption" :multiple="true" :itemData="startPointDepartmentOption" :curData="startPointDepartmentValue" @change="startPointDepartmentOptionChange" />
             <span @click="startPointDepartmentClear">清除</span>
           </div>
           <div class="dialog-center-one-line">
@@ -697,12 +697,14 @@ export default {
 
     // 筛选弹框目的科室下拉框选值变化事件
     startPointDepartmentOptionChange (item) {
-      this.startPointDepartmentValue = item.value;
-      this.startPointDepartmentText = item.text
+      console.log('科室',item);
+      // this.startPointDepartmentValue = item.value;
+      // this.startPointDepartmentText = item.text
     },
 
     // 筛选弹框运送员下拉框选值变化事件
     transporterOptionChange (item) {
+      console.log('运送员',item);
       this.transporterValue = item.value;
       this.transporterText = item.text
     },

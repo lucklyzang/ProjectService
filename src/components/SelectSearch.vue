@@ -166,19 +166,18 @@
 								item.selected = true
 							}
 						})
+					} else {
+						this.datalist.forEach(element => {
+							if (element['value']) {
+								element['selected'] = false
+							}
+						})
 					}
 				}
             } else {
 				if (this.multiple) {
 					this.$emit('change',this.selectedItem)
 				}
-			};
-			if (!this.current || this.current == this.itemData[0]['text']) {
-				this.datalist.forEach(element => {
-					if (element['value']) {
-						element['selected'] = false
-					}
-				})
 			}
         },
 
@@ -187,11 +186,6 @@
 			//单选
 			this.datalist = this.itemData.filter((item)=>{
 				return item.text.indexOf(this.searchValue) != -1
-			});
-			this.itemData.forEach(element => {
-				if (element['value']) {
-					element['selected'] = false
-				}
 			})
 		},
         
@@ -205,7 +199,7 @@
 			} else {
 				if (item['value'] == null) { return };
 				this.datalist[index]['selected'] = !this.datalist[index]['selected'];
-				this.selectedItem = this.datalist.filter((innerItem) => { return innerItem['selected'] == true });
+				this.selectedItem = this.itemData.filter((innerItem) => { return innerItem['selected'] == true });
 				this.$emit('change',this.selectedItem);
 				let temporaryArray = [];
 				for (let it of this.selectedItem) {

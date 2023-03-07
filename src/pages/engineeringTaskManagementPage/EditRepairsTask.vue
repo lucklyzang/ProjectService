@@ -1387,6 +1387,7 @@ export default {
                     height: 0;
                     display: none
                   };
+                  width: 90%;
                   height: 100%;
                   overflow-x: auto;
                   white-space: nowrap;
