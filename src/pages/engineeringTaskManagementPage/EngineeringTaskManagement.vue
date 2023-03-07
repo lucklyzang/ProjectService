@@ -1187,6 +1187,9 @@ export default {
           break;
         case 2 :
           return '进行中'
+          break;
+        case 3 :
+          return '待签字'
           break
       }
     },
