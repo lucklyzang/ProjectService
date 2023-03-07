@@ -153,7 +153,7 @@
                               <img :src="anxiousSignPng" alt="急" v-show="item.priority == 2 || item.priority == 3 || item.priority == 4">
                               <span>{{ item.depName == '/' ? '' : item.depName }}</span>
                             </div>
-                            <div class="list-top-right" :class="{'noLookupStyle':item.state == 1,'underwayStyle':item.state == 2,'tobeSigned':item.state == 3}">
+                            <div class="list-top-right" :class="{'noAllocationStyle':item.state == 0,'noStartStyle': item.state == 1,'underwayStyle':item.state == 2,'tobeSigned':item.state == 3}">
                               {{ taskStatusTransition(item.state) }}
                             </div>
                           </div>
@@ -1393,7 +1393,7 @@ export default {
   .allocation-box-one {
     /deep/ .dialog-center {
       .list-module {
-        max-height: 400px !important
+        max-height: 260px !important
       }
     }
   };
@@ -1634,8 +1634,11 @@ export default {
                                 font-size: 16px;
                                 color: #E86F50
                               };
-                              .noLookupStyle {
-                                color: #E8CB51 !important
+                              .noAllocationStyle {
+                                color: #E86F50 !important
+                              };
+                              .noStartStyle {
+                                color: #174E97 !important
                               };
                               .underwayStyle {
                                 color: #289E8E !important

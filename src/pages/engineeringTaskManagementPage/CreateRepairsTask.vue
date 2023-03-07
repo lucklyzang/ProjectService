@@ -38,7 +38,7 @@
     </div>
     <!-- 使用工具 -->
     <div class="transport-rice-box" v-if="showUseTool">
-      <BottomSelect :columns="useToolOption" title="工具" @sure="useToolSureEvent" @cancel="useToolCancelEvent" @close="useToolCloseEvent" />
+      <BottomSelect :columns="useToolOption" title="工具" :isShowSearch="true" @sure="useToolSureEvent" @cancel="useToolCancelEvent" @close="useToolCloseEvent" />
     </div>
      <!-- 参与人 -->
     <div class="transport-rice-box" v-if="showParticipant">

@@ -104,7 +104,7 @@
                         <span>编号:</span>
                         <span>{{ schedulingTaskDetails.taskNumber }}</span>
                     </div>
-                    <div class="message-one-right" :class="{'noLookupStyle':schedulingTaskDetails.state == 1,'underwayStyle':schedulingTaskDetails.state == 2,'tobeSigned':schedulingTaskDetails.state == 3}">
+                    <div class="message-one-right" :class="{'noAllocationStyle':schedulingTaskDetails.state == 0,'noStartStyle': schedulingTaskDetails.state == 1,'underwayStyle':schedulingTaskDetails.state == 2,'tobeSigned':schedulingTaskDetails.state == 3}">
                         {{ taskStatusTransition(schedulingTaskDetails.state) }}
                     </div>
                 </div>
@@ -926,8 +926,11 @@ export default {
                     background: #289E8E;
                     border-radius: 4px
                 };
-                .noLookupStyle {
-                    background: #E8CB51 !important
+                .noAllocationStyle {
+                  color: #E86F50 !important
+                };
+                .noStartStyle {
+                  color: #174E97 !important
                 };
                 .underwayStyle {
                     background: #289E8E !important
