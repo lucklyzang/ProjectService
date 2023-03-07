@@ -836,7 +836,7 @@ export default {
   .allocation-box-one {
     /deep/ .dialog-center {
       .list-module {
-        max-height: 400px !important
+        max-height: 260px !important
       }
     }
   };
@@ -923,17 +923,17 @@ export default {
                     text-align: center;
                     line-height: 27px;
                     color: #fff;
-                    background: #289E8E;
+                    background: #E86F50;
                     border-radius: 4px
                 };
                 .noAllocationStyle {
-                  color: #E86F50 !important
+                  background: #E86F50 !important
                 };
                 .noStartStyle {
-                  color: #174E97 !important
+                  background: #174E97 !important
                 };
                 .underwayStyle {
-                    background: #289E8E !important
+                  background: #289E8E !important
                 };
                 .tobeSigned {
                   background: #40f9e0 !important

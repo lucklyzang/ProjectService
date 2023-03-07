@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { deepClone } from '@/common/js/utils'
 export default {
   name: 'BottomSelect',
   props:{
@@ -50,6 +51,11 @@ export default {
     },
     // 展示的数据 格式[{id: '',text:''}]
     columns: {
+      type: Array,
+      default: []
+    },
+    // 当前选中的数据
+    currentSelectData: {
       type: Array,
       default: []
     },
@@ -88,9 +94,37 @@ export default {
         },
         deep: true
     },
+    currentSelectData: {
+        handler: function(newVal, oldVal) {
+          this.list = this.columns;
+          let temporaryArr = [];
+          if (newVal.length > 0) {
+            for (let itemOne of newVal) {
+              temporaryArr.push(itemOne.value)
+            };
+            for (let itemTwo of this.list) {
+              if (temporaryArr.indexOf(itemTwo.value) != -1) {
+                itemTwo['selected'] = true
+              } else {
+                itemTwo['selected'] = false
+              }
+            }
+          } else {
+            this.list.forEach((item) => {item['selected'] = false})
+          }
+        },
+        immediate: true,
+        deep: true
+    }
   },
 
   mounted () {
+    this.currentSelectData.forEach((item) => {
+      if (item.hasOwnProperty('id')){
+        item['value'] = Number(item['id'])
+      }
+    });
+    console.log('出苦力后',this.currentSelectData);
     this.list = this.columns;
     this.cacheList = this.list
   },
@@ -116,7 +150,7 @@ export default {
 
     // 确认事件
     sure() {
-      this.city = this.list.filter((item) => { return item.selected == true });
+      this.city = deepClone(this.cacheList.filter((item) => { return item.selected == true }));
       this.$emit('sure',this.city);
       // 没有搜索结果时点确认
       if (this.list.length == 0) {

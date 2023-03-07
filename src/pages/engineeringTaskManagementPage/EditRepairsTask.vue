@@ -26,7 +26,7 @@
     </div>
     <!-- 目的房间 -->
     <div class="transport-rice-box" v-if="showGoalSpaces">
-      <BottomSelect :columns="goalSpacesOption" title="目的房间" @sure="goalSpacesSureEvent" @cancel="goalSpacesCancelEvent" @close="goalSpacesCloseEvent" />
+      <BottomSelect :columns="goalSpacesOption" title="目的房间" :currentSelectData="currentGoalSpaces" @sure="goalSpacesSureEvent" @cancel="goalSpacesCancelEvent" @close="goalSpacesCloseEvent" />
     </div>
     <!-- 任务类型 -->
     <div class="transport-rice-box" v-if="showTaskType">
@@ -38,11 +38,11 @@
     </div>
     <!-- 使用工具 -->
     <div class="transport-rice-box" v-if="showUseTool">
-      <BottomSelect :columns="useToolOption" title="工具" @sure="useToolSureEvent" @cancel="useToolCancelEvent" @close="useToolCloseEvent" />
+      <BottomSelect :columns="useToolOption" title="工具" :currentSelectData="currentUseTool" @sure="useToolSureEvent" @cancel="useToolCancelEvent" @close="useToolCloseEvent" />
     </div>
      <!-- 参与人 -->
     <div class="transport-rice-box" v-if="showParticipant">
-      <BottomSelect :columns="participantOption" title="参与人" @sure="participantSureEvent" @cancel="participantCancelEvent" @close="participantCloseEvent" />
+      <BottomSelect :columns="participantOption" title="参与人" :currentSelectData="currentParticipant" @sure="participantSureEvent" @cancel="participantCancelEvent" @close="participantCloseEvent" />
     </div>
     <div class="nav">
        <van-nav-bar
@@ -563,7 +563,6 @@ export default {
               this.goalSpacesOption.push({
                 text: res.data.data[i].spaceName,
                 value: res.data.data[i].id,
-                id: i,
                 selected: false
               })
             }
@@ -631,8 +630,7 @@ export default {
                 this.participantOption.push({
                   text: item3[i].workerName,
                   value: item3[i]['id'],
-                  selected: false,
-                  id: i
+                  selected: false
                 })
               }
             };
@@ -661,7 +659,6 @@ export default {
                 this.useToolOption.push({
                   text: item5[i].toolName,
                   value: item5[i].id,
-                  id: i,
                   selected: false
                 })
               }
