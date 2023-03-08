@@ -237,7 +237,6 @@ import { deepClone } from '@/common/js/utils'
 		sureEvent () {
 			this.$emit('change',this.selectedItem);
 			this.isShow = false;
-			console.log('多选',)
 		},
 
 		//供父组件调用的清除选择框值的方法
