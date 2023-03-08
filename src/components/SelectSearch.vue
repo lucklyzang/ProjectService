@@ -33,6 +33,7 @@
 </template>
  
 <script>
+import { deepClone } from '@/common/js/utils'
  export default {
   name: 'SelectSearch',
   data(){
@@ -80,9 +81,25 @@
 		   	 	this.currentFullValue = this.datalist.length > 0 ? this.datalist.filter((item) => { return item.value == newVal['value']})[0] : null
 			 }
 		   } else {
+			    this.datalist = this.itemData;
 			    if (newVal == null) {
 					this.current = this.datalist.length > 0 ? this.datalist.filter((item) => { return item.value == newVal})[0]['text'] : '';
 				} else {
+					let temporarySelectArr = [];
+					if (newVal.length > 0) {
+						for (let item of newVal) {
+							temporarySelectArr.push(item['value'])
+						};
+						for (let itemTwo of this.datalist) {
+							if (temporarySelectArr.indexOf(itemTwo.value) != -1) {
+								itemTwo['selected'] = true
+							} else {
+								itemTwo['selected'] = false
+							}
+						}
+					} else {
+						this.datalist.forEach((item) => {item['selected'] = false})
+					};
 					let temporaryArray = [];
 					this.selectedItem = this.datalist.filter((innerItem) => { return innerItem['selected'] == true });
 					for (let it of this.datalist) {
@@ -90,7 +107,7 @@
 							temporaryArray.push(it['text'])
 						}
 					};
-					this.current = newVal.length > 0 ? temporaryArray.join(',') : this.itemData[0]['text']
+					this.current = newVal.length > 0 ? temporaryArray.join(',') : this.itemData[0]['text'];
 				}
 		   }
         },
@@ -160,12 +177,20 @@
                 this.datalist = this.itemData;
 				if (this.multiple) {
 					if (this.current != null && this.current != this.itemData[0]['text']) {
-						let temporaryArray = this.current.split(',');
-						this.datalist.forEach((item) => {
-							if (temporaryArray.indexOf(item.text) != -1) {
-								item.selected = true
-							}
-						})
+						let temporaryArray = [];
+						if (this.selectedItem.length > 0) {
+							console.log('选中的数据',this.selectedItem);
+							for (let item of this.selectedItem) {
+								temporaryArray.push(item.value)
+							};
+							this.datalist.forEach((item) => {
+								if (temporaryArray.indexOf(item.value) != -1 && item.text != this.itemData[0]['text']) {
+									item.selected = true
+								} else {
+									item.selected = false
+								}
+							})
+						}
 					} else {
 						this.datalist.forEach(element => {
 							if (element['value']) {
