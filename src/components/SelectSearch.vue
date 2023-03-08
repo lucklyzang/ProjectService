@@ -179,7 +179,6 @@ import { deepClone } from '@/common/js/utils'
 					if (this.current != null && this.current != this.itemData[0]['text']) {
 						let temporaryArray = [];
 						if (this.selectedItem.length > 0) {
-							console.log('选中的数据',this.selectedItem);
 							for (let item of this.selectedItem) {
 								temporaryArray.push(item.value)
 							};
