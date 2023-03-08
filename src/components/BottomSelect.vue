@@ -49,12 +49,12 @@ export default {
       type: String,
       default: '请选择'
     },
-    // 展示的数据 格式[{id: '',text:''}]
+    // 展示的数据 格式[{value: '',text:'',selected: false}]
     columns: {
       type: Array,
       default: []
     },
-    // 当前选中的数据
+    // 当前选中的数据 格式[{value: '',text:''}]
     currentSelectData: {
       type: Array,
       default: []
@@ -96,10 +96,16 @@ export default {
     },
     currentSelectData: {
         handler: function(newVal, oldVal) {
+          let currentNewVal = newVal;
+          currentNewVal.forEach((item) => {
+            if (item.hasOwnProperty('id')){
+              item['value'] = Number(item['id'])
+            }
+          });
           this.list = this.columns;
           let temporaryArr = [];
-          if (newVal.length > 0) {
-            for (let itemOne of newVal) {
+          if (currentNewVal.length > 0) {
+            for (let itemOne of currentNewVal) {
               temporaryArr.push(itemOne.value)
             };
             for (let itemTwo of this.list) {
@@ -124,7 +130,6 @@ export default {
         item['value'] = Number(item['id'])
       }
     });
-    console.log('出苦力后',this.currentSelectData);
     this.list = this.columns;
     this.cacheList = this.list
   },

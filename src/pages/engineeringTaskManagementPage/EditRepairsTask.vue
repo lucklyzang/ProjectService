@@ -1100,7 +1100,7 @@ export default {
       if (this.currentParticipant.length > 0) {
         for (let item of this.currentParticipant) {
             temporaryMessage['present'].push({
-              id: item.hasOwnProperty('id') ? item.id : item.value,
+              id: item.hasOwnProperty('value') ? item.value : item.id,
               name: item.hasOwnProperty('text') ? item.text : item.name
             })
         }
@@ -1109,7 +1109,7 @@ export default {
       if (this.currentUseTool.length > 0) {
         for (let item of this.currentUseTool) {
           temporaryMessage['tools'].push({
-            id: item.hasOwnProperty('id') ? item.id : item.value,
+            id: item.hasOwnProperty('value') ? item.value : item.id,
             name: item.hasOwnProperty('text') ? item.text : item.name
           })
         }
@@ -1118,7 +1118,7 @@ export default {
       if (this.currentGoalSpaces.length > 0) {
         for (let item of this.currentGoalSpaces) {
           temporaryMessage['spaces'].push({
-            id: item.hasOwnProperty('id') ? item.id : item.value,
+            id: item.hasOwnProperty('value') ? item.value : item.id,
             name: item.hasOwnProperty('text') ? item.text : item.name
           })
         }

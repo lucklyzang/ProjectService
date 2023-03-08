@@ -583,7 +583,6 @@ export default {
               this.goalSpacesOption.push({
                 text: res.data.data[i].spaceName,
                 value: res.data.data[i].id,
-                id: i,
                 selected: false
               })
             }
@@ -653,8 +652,7 @@ export default {
                 this.participantOption.push({
                   text: item3[i].workerName,
                   value: item3[i]['id'],
-                  selected: false,
-                  id: i
+                  selected: false
                 })
               }
             };
@@ -683,7 +681,6 @@ export default {
                 this.useToolOption.push({
                   text: item5[i].toolName,
                   value: item5[i].id,
-                  id: i,
                   selected: false
                 })
               }
@@ -1093,8 +1090,8 @@ export default {
       if (this.currentParticipant.length > 0) {
         for (let item of this.currentParticipant) {
           temporaryMessage['present'].push({
-            id: item.value,
-            name: item.text
+            id: item.value ? item.value : item.id,
+            name: item.text ? item.text : item.name
           })
         }
       };
@@ -1102,8 +1099,8 @@ export default {
       if (this.currentUseTool.length > 0) {
         for (let item of this.currentUseTool) {
           temporaryMessage['tools'].push({
-            id: item.value,
-            name: item.text
+            id: item.value ? item.value : item.id,
+            name: item.text ? item.text : item.name
           })
         }
       };
@@ -1111,8 +1108,8 @@ export default {
       if (this.currentGoalSpaces.length > 0) {
         for (let item of this.currentGoalSpaces) {
           temporaryMessage['spaces'].push({
-            id: item.value,
-            name: item.text
+            id: item.value ? item.value : item.id,
+            name: item.text ? item.text : item.name
           })
         }
       };
