@@ -153,7 +153,7 @@
                               <img :src="anxiousSignPng" alt="急" v-show="item.priority == 2 || item.priority == 3 || item.priority == 4">
                               <span>{{ item.depName == '/' ? '' : item.depName }}</span>
                             </div>
-                            <div class="list-top-right" :class="{'noAllocationStyle':item.state == 0,'noStartStyle': item.state == 1,'underwayStyle':item.state == 2,'tobeSigned':item.state == 3}">
+                            <div class="list-top-right" :class="{'noAllocationStyle':item.state == 0,'noLookupStyle':item.state == 1,'noStartStyle': item.state == 2,'underwayStyle':item.state == 3,'tobeSigned':item.state == 4}">
                               {{ taskStatusTransition(item.state) }}
                             </div>
                           </div>
@@ -427,7 +427,7 @@ export default {
             }
           };
           this.repairsTaskList = res.data.data;
-          // 显示未完成(不包括已取消)的任务状态(0-未分配，1-未开始，2-进行中，3-待签字，5-已完成，6-已取消)
+          // 显示未完成(不包括已取消)的任务状态(0-未分配，1-未查阅,2-未开始，3-进行中，4-待签字，5-已完成，6-已取消)
           this.repairsTaskList = this.repairsTaskList.filter(( item ) => { return item.state != 5 && item.state != 6});
           this.echoRepairsTaskList = this.repairsTaskList;
           if (this.repairsTaskList.length == 0) {
@@ -1181,12 +1181,15 @@ export default {
           return '未分配'
           break;
         case 1 :
-          return '未开始'
+          return '未查阅'
           break;
         case 2 :
-          return '进行中'
+          return '未开始'
           break;
         case 3 :
+          return '进行中'
+          break;
+        case 4 :
           return '待签字'
           break
       }
@@ -1634,6 +1637,9 @@ export default {
                               };
                               .noAllocationStyle {
                                 color: #E86F50 !important
+                              };
+                              .noLookupStyle {
+                                color: #E8CB51 !important
                               };
                               .noStartStyle {
                                 color: #174E97 !important

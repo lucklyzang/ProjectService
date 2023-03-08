@@ -104,7 +104,7 @@
                         <span>编号:</span>
                         <span>{{ schedulingTaskDetails.taskNumber }}</span>
                     </div>
-                    <div class="message-one-right" :class="{'noAllocationStyle':schedulingTaskDetails.state == 0,'noStartStyle': schedulingTaskDetails.state == 1,'underwayStyle':schedulingTaskDetails.state == 2,'tobeSigned':schedulingTaskDetails.state == 3}">
+                    <div class="message-one-right" :class="{'noAllocationStyle':schedulingTaskDetails.state == 0,'noLookupStyle':schedulingTaskDetails.state == 1,'noStartStyle': schedulingTaskDetails.state == 2,'underwayStyle':schedulingTaskDetails.state == 3,'tobeSigned':schedulingTaskDetails.state == 4}">
                         {{ taskStatusTransition(schedulingTaskDetails.state) }}
                     </div>
                 </div>
@@ -661,20 +661,23 @@ export default {
 
     // 任务状态转换
     taskStatusTransition (state) {
-        switch(state) {
-            case 0 :
-                return '未分配'
-                break;
-            case 1 :
-                return '未开始'
-                break;
-            case 2 :
-                return '进行中'
-                break;
-            case 3 :
-                return '待签字'
-                break
-        }
+      switch(state) {
+        case 0 :
+          return '未分配'
+          break;
+        case 1 :
+          return '未查阅'
+          break;
+        case 2 :
+          return '未开始'
+          break;
+        case 3 :
+          return '进行中'
+          break;
+        case 4 :
+          return '待签字'
+          break
+      }
     },
 
     // 分配点击事件
@@ -926,6 +929,9 @@ export default {
                 };
                 .noAllocationStyle {
                   background: #E86F50 !important
+                };
+                .noLookupStyle {
+                  color: #E8CB51 !important
                 };
                 .noStartStyle {
                   background: #174E97 !important
