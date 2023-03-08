@@ -809,7 +809,7 @@ export default {
             }
         }
       } catch (err) {
-        // this.$toast(`${err}`)
+        this.$toast(`${err}`)
       }  
     },
 
