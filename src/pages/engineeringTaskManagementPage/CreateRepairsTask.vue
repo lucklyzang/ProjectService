@@ -403,7 +403,7 @@ export default {
         that.$router.push({path: '/engineeringTaskManagement'})
       })
     };
-    // this.registerSlideEvent();
+    this.registerSlideEvent();
     this.parallelFunction();
     //判断是否回显暂存的数据
     if (JSON.stringify(this.temporaryStorageCreateRepairsTaskMessage) != '{}' && this.temporaryStorageCreateRepairsTaskMessage['isTemporaryStorage']) {
@@ -991,12 +991,10 @@ export default {
     taskRouterSkip (name, index) {
         this.functionListIndex = index;
         if (name === '报修任务') {
-          this.resetBtnClickStatus();
           this.$router.push({path: 'repairsWorkOrder'});
           this.changeTitleTxt({tit:'报修工单'});
           setStore('currentTitle','报修工单')
         } else if (name === '区域巡检') {
-          this.resetBtnClickStatus();
           this.$router.push({path: 'departmentService'});
           this.changeTitleTxt({tit:'区域巡检'});
           setStore('currentTitle','区域巡检')
