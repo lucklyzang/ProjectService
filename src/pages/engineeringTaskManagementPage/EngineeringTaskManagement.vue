@@ -1534,7 +1534,6 @@ export default {
                 padding: 0 4px 0px 4px;
                 box-sizing: border-box;
                 background: #f7f7f7;
-                overflow: scroll;
                 height: 0;
                 display: flex;
                 .van-tab__pane {
@@ -1594,8 +1593,9 @@ export default {
                       }
                     };
                     .backlog-task-list-box {
-                        overflow: scroll;
+                       overflow: scroll;
                         flex: 1;
+                        height: 100%;
                         .backlog-task-list {
                             padding: 2px 8px 4px 8px;
                             box-sizing: border-box;
