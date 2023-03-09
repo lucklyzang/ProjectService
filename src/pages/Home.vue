@@ -180,12 +180,12 @@
       // 控制模块显示
       controlModuleShow () {
         if (this.userInfo['extendData']) {
-          // if (!this.userInfo['extendData']['projectDisp']) {
-          //   this.taskList = this.taskList.filter((item) => { return item.tit != '报修工单'})
-          // };
-          // if (!this.userInfo['extendData']['projectAssgin']) {
-          //   this.taskList = this.taskList.filter((item) => { return item.tit != '调度管理'})
-          // }
+          if (!this.userInfo['extendData']['projectDisp']) {
+            this.taskList = this.taskList.filter((item) => { return item.tit != '报修工单'})
+          };
+          if (!this.userInfo['extendData']['projectAssgin']) {
+            this.taskList = this.taskList.filter((item) => { return item.tit != '调度管理'})
+          }
         }  
       },
 
