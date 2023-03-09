@@ -1516,14 +1516,16 @@ export default {
             height: 0;
             background: #f7f7f7;
             .van-tabs__wrap {
-                width: 50%;
+                width: 100%;
                 height: 0.8rem;
                 padding: 10px 0;
                 .van-tabs__nav {
                     border: none !important;
                     background: #f7f7f7 !important;
                     .van-tab {
-                        border-radius: 4px
+                      width: 50%;
+                      flex: none;
+                      border-radius: 4px
                     }
                 }
             };
