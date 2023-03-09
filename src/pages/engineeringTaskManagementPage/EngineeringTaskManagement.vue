@@ -1503,6 +1503,8 @@ export default {
       };
       flex: 1;
       margin-top: 50px;
+      padding-bottom: 50px;
+      box-sizing: border-box;
       .content-box {
         box-sizing: border-box;
         display: flex;
