@@ -52,7 +52,7 @@ import { deepClone } from '@/common/js/utils'
 			type: Boolean,
 			default: false
 		},
-		curData: String | Number | null,	// 当前选中数据
+		curData: String | Number | null | Array,	// 当前选中数据
 		itemData:Array,	// 所有选项数据
 		isNeedSearch:{	// 是否需要搜索
 			type: Boolean,
