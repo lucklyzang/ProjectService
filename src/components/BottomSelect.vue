@@ -97,6 +97,7 @@ export default {
     currentSelectData: {
         handler: function(newVal, oldVal) {
           let currentNewVal = newVal;
+          if (!currentNewVal) { return };
           currentNewVal.forEach((item) => {
             if (item.hasOwnProperty('id')){
               item['value'] = Number(item['id'])
@@ -125,6 +126,8 @@ export default {
   },
 
   mounted () {
+    if (!this.currentSelectData) { return };
+    if (this.currentSelectData.length == 0) { return };
     this.currentSelectData.forEach((item) => {
       if (item.hasOwnProperty('id')){
         item['value'] = Number(item['id'])

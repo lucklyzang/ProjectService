@@ -350,7 +350,7 @@ export default {
 
       participantOption: [],
       showParticipant: false,
-      currentParticipant: [],
+      currentParticipant: null,
 
       goalDepartmentOption: [],
       showGoalDepartment: false,
@@ -464,6 +464,7 @@ export default {
 
     // 处理维修任务参与者
     disposeTaskPresent (item) {
+      if (!item) { return '请选择'};
       if (item.length == 0) { return '请选择'};
       let temporaryArray = [];
       for (let innerItem of item) {
