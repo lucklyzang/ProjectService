@@ -126,15 +126,15 @@ export default {
   },
 
   mounted () {
+    this.list = this.columns;
+    this.cacheList = this.list;
     if (!this.currentSelectData) { return };
     if (this.currentSelectData.length == 0) { return };
     this.currentSelectData.forEach((item) => {
       if (item.hasOwnProperty('id')){
         item['value'] = Number(item['id'])
       }
-    });
-    this.list = this.columns;
-    this.cacheList = this.list
+    })
   },
 
   methods: {

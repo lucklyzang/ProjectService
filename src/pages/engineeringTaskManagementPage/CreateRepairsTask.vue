@@ -350,7 +350,7 @@ export default {
 
       participantOption: [],
       showParticipant: false,
-      currentParticipant: null,
+      currentParticipant: [],
 
       goalDepartmentOption: [],
       showGoalDepartment: false,
