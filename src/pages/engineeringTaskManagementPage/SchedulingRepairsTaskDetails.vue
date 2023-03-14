@@ -298,6 +298,7 @@ export default {
 
     // 处理维修任务空间信息
     disposeCheckType (item) {
+      if (!item) { return };
       if (item.length == 0) { return };
       let temporaryArray = [];
       for (let innerItem of item) {
@@ -308,6 +309,7 @@ export default {
 
     // 处理维修任务参与者
     disposeTaskPresent (item) {
+      if (!item) { return };
       if (item.length == 0) { return };
       let temporaryArray = [];
       for (let innerItem of item) {
@@ -919,19 +921,19 @@ export default {
                     color: #289E8E
                 };
                 .message-one-right {
-                    width: 61px;
-                    height: 27px;
-                    text-align: center;
-                    line-height: 27px;
-                    color: #fff;
-                    background: #E86F50;
-                    border-radius: 4px
+                  width: 61px;
+                  height: 27px;
+                  text-align: center;
+                  line-height: 27px;
+                  color: #fff;
+                  background: #E86F50;
+                  border-radius: 4px
                 };
                 .noAllocationStyle {
                   background: #E86F50 !important
                 };
                 .noLookupStyle {
-                  color: #E8CB51 !important
+                  background: #E8CB51 !important
                 };
                 .noStartStyle {
                   background: #174E97 !important

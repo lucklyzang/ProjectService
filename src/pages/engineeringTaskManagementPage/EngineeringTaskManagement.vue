@@ -391,7 +391,6 @@ export default {
         this.loadingShow = false;
         this.overlayShow = false;
         this.$toast('刷新失败,请检查网络');
-        console.log(this.isLoadingRepairsTask,this.loadingText,this.loadingShow,this.overlayShow,this.loadFreshTimer);
         if (this.loadFreshTimer) {clearTimeout(this.loadFreshTimer)}
       }, 3100);
     },
@@ -508,8 +507,7 @@ export default {
                 this.startPointDepartmentOption.push({
                   text: item['departmentName'],
                   value: item['id']
-                });
-                console.log('科室信息',this.startPointDepartmentOption);
+                })
               })
             };
             if (item2) {
@@ -709,7 +707,6 @@ export default {
 
     // 筛选弹框关闭前事件
     beforeCloseDialogEvent (action, done) {
-      console.log(action);
       if (action == 'cancel') {
         this.$refs['departmentOption'].clearSelectValue();
         this.$refs['transporterOption'].clearSelectValue();
@@ -1201,9 +1198,7 @@ export default {
         if (this.activeName == 'repairsTask') {
             let boxCompleteteScroll = this.$refs['scrollRepairsTask'];
             boxCompleteteScroll.addEventListener('scroll',(e)=> {
-                if (Math.ceil(e.srcElement.scrollTop) + e.srcElement.offsetHeight >= e.srcElement.scrollHeight) {
-                    console.log('完成滚动了',e.srcElement.scrollTop, e.srcElement.offsetHeight, e.srcElement.scrollHeight)
-                }
+              if (Math.ceil(e.srcElement.scrollTop) + e.srcElement.offsetHeight >= e.srcElement.scrollHeight) {}
             },true)
         }    
     },
