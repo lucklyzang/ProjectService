@@ -437,8 +437,8 @@ export default {
       this.priorityRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['priority'].toString();
       this.currentTaskType = casuallyTemporaryStorageCreateRepairsTaskMessage['typeName'] ? casuallyTemporaryStorageCreateRepairsTaskMessage['typeName'] : '请选择';
       this.problemOverview = casuallyTemporaryStorageCreateRepairsTaskMessage['taskDesc'];
-      this.currentTransporter = casuallyTemporaryStorageCreateRepairsTaskMessage['workerName'];
-      this.currentParticipant = casuallyTemporaryStorageCreateRepairsTaskMessage['present'];
+      this.currentTransporter = casuallyTemporaryStorageCreateRepairsTaskMessage['workerName'] ? casuallyTemporaryStorageCreateRepairsTaskMessage['workerName'] : '请选择';
+      this.currentParticipant = casuallyTemporaryStorageCreateRepairsTaskMessage['present'] ? casuallyTemporaryStorageCreateRepairsTaskMessage['present'] : [];
       this.isMeRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['isMe'].toString();
       this.taskDescribe = casuallyTemporaryStorageCreateRepairsTaskMessage['taskRemark'];
       this.consumableMsgList = casuallyTemporaryStorageCreateRepairsTaskMessage['materials'];
@@ -525,7 +525,7 @@ export default {
               })
             };
             if (isInitial) {
-              if (this.currentGoalDepartment != '请选择') {
+              if (this.currentGoalDepartment != '请选择' && this.currentGoalDepartment) {
                 this.getSpacesByDepartmentId(this.goalDepartmentOption.filter((item) => { return item['text'] == this.currentGoalDepartment})[0]['value'],false)
               }
             }  
@@ -678,8 +678,8 @@ export default {
                   this.currentUseTool = this.schedulingTaskDetails['tools']
                 }
               };
-              this.currentGoalSpaces = this.schedulingTaskDetails['spaces'].length == 0 ? [] : this.schedulingTaskDetails['spaces'];
-              if (this.currentStructure != '请选择') {
+              this.currentGoalSpaces = this.schedulingTaskDetails['spaces'].length == 0 || !this.schedulingTaskDetails['spaces'] ? [] : this.schedulingTaskDetails['spaces'];
+              if (this.currentStructure != '请选择' && this.currentStructure) {
                 this.getDepartmentByStructureId(this.structureOption.filter((item) => { return item['text'] == this.currentStructure})[0]['value'],false,true)
               }
             }
@@ -1081,8 +1081,8 @@ export default {
         createId: this.workerId,
         createName: this.userName,
         createType: 0, // 创建类型 0-调度员 2-医务人员 3-巡检人员
-        workerId: this.currentTransporter == '请选择' ? '' : this.getCurrentTransporterIdByName(this.currentTransporter),
-        workerName: this.currentTransporter == '请选择' ? '' : this.currentTransporter,
+        workerId: this.currentTransporter == '请选择' || !this.currentTransporter ? '' : this.getCurrentTransporterIdByName(this.currentTransporter),
+        workerName: this.currentTransporter == '请选择' || !this.currentTransporter ? '' : this.currentTransporter,
         modifyName: this.userName, //修改者姓名
         modifyId: this.workerId, //修改者id
         spaces: [], //空间信息
