@@ -640,6 +640,17 @@ export default {
       })
     },
 
+    // 处理空间信息
+    disposeTaskPresent (item) {
+      if (!item) { return};
+      if (item.length == 0) { return};
+      let temporaryArray = [];
+      for (let innerItem of item) {
+        temporaryArray.push(innerItem.text)
+      };
+      return temporaryArray.join('、')
+    },
+
     // 注册滑动事件  
     registerSlideEvent () {
       this.$refs.wrapper.addEventListener('touchstart',this.touchstartHandle,false);

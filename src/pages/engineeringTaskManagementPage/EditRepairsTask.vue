@@ -1070,7 +1070,7 @@ export default {
         typeId: this.taskTypeOption.filter((item) => { return item['text'] == this.currentTaskType})[0]['value'], // 任务类型
         taskDesc: this.problemOverview, // 问题描述
         destinationId: '', // 目的地id
-        depId: '', // 出发地id
+        depId: this.currentGoalDepartment == '请选择' || !this.currentGoalDepartment ? '' : this.goalDepartmentOption.filter((item) => { return item['text'] == this.currentGoalDepartment})[0]['value'], // 目的地id
         select: '',
         isMe: this.isMe, // 是否我方解决 0-否，1-是
         isApp: 1,
@@ -1088,12 +1088,10 @@ export default {
         spaces: [], //空间信息
         present: [], //参与者
         tools: [],  //使用工具
-        depName: `${this.currentStructure == '请选择' ? '' : this.currentStructure}/${this.currentGoalDepartment == '请选择' ? '' : this.currentGoalDepartment}/${this.currentGoalSpaces.length > 0 ? this.disposeTaskPresent(this.currentGoalSpaces) : ''}`, //出发地名称
+        depName: `${this.currentStructure == '请选择' || !this.currentStructure ? '' : this.currentStructure}/${this.currentGoalDepartment == '请选择' || !this.currentGoalDepartment ? '' : this.currentGoalDepartment}`, //目的地名称
         typeName: this.currentTaskType, // 类型名称
-        materials: []        // 需要的物料
+        materials: []  // 需要的物料
       };
-      //处理拼接的地点信息
-      temporaryMessage['depName'] =  temporaryMessage['depName'].replace('//','/');
       // 拼接参与者数据
       if (this.currentParticipant.length > 0) {
         for (let item of this.currentParticipant) {
