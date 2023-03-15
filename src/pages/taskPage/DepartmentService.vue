@@ -109,7 +109,9 @@
         currentIndex: 0,
         tabTitleList: ['待办任务','已完成'],
         isRefresh: false,
+        toolShow: false,
         noDataShow: false,
+        vehicleOperationList: [],
         showLoadingHint: false,
         taskMessageList: [],
         taskCompleteMessageList: []
@@ -239,6 +241,14 @@
       // 计算点位数量(未完成)
       calculateCountUnfinish (item,sum,finishNum) {
         return deteleObject(sum).length - deteleObject(finishNum).length
+      },
+
+      toolSure () {
+
+      },
+
+      toolCancel () {
+
       },
 
       // tab点击事件
