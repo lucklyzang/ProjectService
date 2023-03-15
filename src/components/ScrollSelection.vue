@@ -70,9 +70,10 @@ export default {
       searchValue: '',
       cacheList: '',
       list: [],
+      currentValue: '',
       show: false,
       active: null,
-      city: "",
+      currentText: "",
       listOffsetTop: [],
       timer: null
     };
@@ -132,9 +133,9 @@ export default {
     // 确认事件
     sure() {
       this.list.map((item, index) => {
-        item.id == this.active ? (this.city = item.text) : null
+        item.id == this.active ? (this.currentText = item.text,this.currentValue = item.value) : null
       });
-      this.$emit('sure',this.city);
+      this.$emit('sure',this.currentText,this.currentValue);
       // 没有搜索结果时点确认
       if (this.list.length == 0) {
         this.$emit('sure',null)
@@ -144,13 +145,13 @@ export default {
 
     // 关闭事件
     close () {
-      this.$emit('close',this.city);
+      this.$emit('close',this.currentText);
       this.show = false
     },
 
     // 取消事件
     cancel() {
-      this.$emit('cancel',this.city);
+      this.$emit('cancel',this.currentText);
       this.show = false
     },
 
@@ -158,8 +159,9 @@ export default {
       this.listOffsetTop = [];
       this.list.map((item, index) => {
         let liTop = this.$refs["li" + item.id];
-        this.listOffsetTop.push(liTop[0].offsetTop - liTop[0]['offsetHeight'])
-      })
+        this.listOffsetTop.push(liTop[0].offsetTop - liTop[0]['offsetHeight']);
+        console.log('偏移数据',this.listOffsetTop)
+      });
     },
 
     computeActive() {
@@ -251,7 +253,7 @@ export default {
         font-size: 18px;
         line-height: 40px;
         text-align: center;
-        // height: 40px;
+        height: 40px;
         background-color: #fff;
       }
     };
