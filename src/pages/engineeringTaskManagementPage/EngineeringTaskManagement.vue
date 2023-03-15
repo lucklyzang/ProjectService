@@ -131,7 +131,7 @@
 			<img :src="statusBackgroundPng" />
 		</div>
       <!-- 下拉刷新 -->
-      <van-pull-refresh v-model="isLoadingRepairsTask" loading-text="刷新中..." @refresh="onRefreshRepairsTaskEvent">
+      <van-pull-refresh v-model="isLoadingRepairsTask" :disabled="isDiabledPullRefresh" loading-text="刷新中..." @refresh="onRefreshRepairsTaskEvent">
         <div class="content-box">
             <van-tabs v-model="activeName" type="card" color="#fff" title-inactive-color="#9E9E9A" title-active-color="#174E97" @change="vanTabsChangeEvent">
                 <van-tab title="报修任务" name="repairsTask">
@@ -247,6 +247,7 @@ export default {
   data() {
     return {
       loadingShow: false,
+      isDiabledPullRefresh: false,
       isLoadingRepairsTask: false,
       loadingText: '加载中...',
       screenDialogShow: false,
@@ -1209,6 +1210,12 @@ export default {
         if (this.activeName == 'repairsTask') {
             let boxCompleteteScroll = this.$refs['scrollRepairsTask'];
             boxCompleteteScroll.addEventListener('scroll',(e)=> {
+              // 列表滚动到最顶部时才能下拉刷新
+              if (e.srcElement.scrollTop <= 0) {
+                this.isDiabledPullRefresh = false
+              } else {
+                this.isDiabledPullRefresh = true
+              };
               if (Math.ceil(e.srcElement.scrollTop) + e.srcElement.offsetHeight >= e.srcElement.scrollHeight) {}
             },true)
         }    
