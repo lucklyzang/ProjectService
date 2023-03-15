@@ -1267,7 +1267,7 @@ export default {
             color: #101010;
             text-align: center
           };
-          /deep/ .van-icon {
+          .van-icon {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
@@ -1296,7 +1296,7 @@ export default {
                 background: #E86F50
               }
             };
-            /deep/ .vue-dropdown {
+            .vue-dropdown {
               width: 55%
             }
           };
@@ -1517,7 +1517,7 @@ export default {
         flex-direction: column;
         width: 100%;
         height: 100%;
-        /deep/ .van-tabs {
+        .van-tabs {
             flex: 1;
             display: flex;
             flex-direction: column;
