@@ -179,14 +179,14 @@
 
       // 控制模块显示
       controlModuleShow () {
-        if (this.userInfo['extendData']) {
-          if (!this.userInfo['extendData']['projectDisp']) {
-            this.taskList = this.taskList.filter((item) => { return item.tit != '报修工单'})
-          };
-          if (!this.userInfo['extendData']['projectAssgin']) {
-            this.taskList = this.taskList.filter((item) => { return item.tit != '调度管理'})
-          }
-        }  
+        // if (this.userInfo['extendData']) {
+        //   if (!this.userInfo['extendData']['projectDisp']) {
+        //     this.taskList = this.taskList.filter((item) => { return item.tit != '报修工单'})
+        //   };
+        //   if (!this.userInfo['extendData']['projectAssgin']) {
+        //     this.taskList = this.taskList.filter((item) => { return item.tit != '调度管理'})
+        //   }
+        // }  
       },
 
       juddgeIspc () {
@@ -336,7 +336,6 @@
           this.changeTitleTxt({tit:'区域巡检'});
           setStore('currentTitle','区域巡检')
         } else if (item.tit == '调度管理') {
-          this.changeIsFreshDepartmentServicePage(true);
           this.$router.push({path: 'engineeringTaskManagement'});
           this.changeTitleTxt({tit:'工程维保任务管理'});
           setStore('currentTitle','工程维保任务管理')

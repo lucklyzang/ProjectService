@@ -198,7 +198,7 @@
                   <van-stepper 
                   @change="(value,detail) => {stepperEvent(value,detail,item,index)}" 
                   @plus="stepperPlusEvent(item,index)"
-                  v-model.number="item.number" min="0" :max="item.quantity" />
+                  v-model.number="item.number" min="0" />
                 </span>
                 <span>
                   <van-icon name="delete" color="red" @click="deleteEvent(item,index)" />
@@ -322,6 +322,7 @@ export default {
   mixins:[mixinsDeviceReturn],
   data() {
     return {
+      isMaterialChange: false,
       materialShow: false,
       deleteInfoPng: require('@/common/images/home/delete-info.png'),
       materialDeleteShow: false,
@@ -445,7 +446,9 @@ export default {
       // 处理目的建筑、目的科室显示信息
       let trmporaryMessage = casuallyTemporaryStorageCreateRepairsTaskMessage['depName'].split("/");
       this.currentStructure = trmporaryMessage[0] ? trmporaryMessage[0] : '请选择';
-      this.currentGoalDepartment = trmporaryMessage[1] ? trmporaryMessage[1] : '请选择'
+      this.currentGoalDepartment = trmporaryMessage[1] ? trmporaryMessage[1] : '请选择';
+      // 物料信息回显完毕时，再次添加物料时进行是否超过库存判断
+      setTimeout(() => {this.isMaterialChange = true},100)
     },
 
     // 处理维修任务参与者
@@ -468,10 +471,12 @@ export default {
 
     // 物料数量变化事件
     stepperEvent (value,detail,item,index) {
-      console.log('变化',value);
+      if (item.quantity == null) { return};
+      // 回显提交的物料时,不进行是否超出库存判断
+      if (!this.isMaterialChange) { return };
       if (item.number > item.quantity) {
         this.$set(this.consumableMsgList[index],'number',item.quantity);
-        this.$toast('已超出库存数量')
+        this.$toast(`已超出库存数量${item.quantity}`)
       }
     },
 
@@ -616,8 +621,7 @@ export default {
                   value: item2[i].id,
                   id: i
                 })
-              };
-              console.log('查询目的建筑',this.structureOption)
+              }
             };
             if (item3) {
               // 运送员
@@ -942,7 +946,14 @@ export default {
       if (this.currentGoalDepartment == '请选择') {
         this.$toast('请选择科室')
       } else {
-        this.getSpacesByDepartmentId(this.goalDepartmentOption.filter((item) => { return item['text'] == this.currentGoalDepartment})[0]['value'],true)
+        try {
+          this.getSpacesByDepartmentId(this.goalDepartmentOption.filter((item) => { return item['text'] == this.currentGoalDepartment})[0]['value'],true)
+        } catch (err) {
+           this.$dialog.alert({
+            message: `${err}`,
+            closeOnPopstate: true
+          }).then(() => {})
+        }
       }
     },
 
@@ -1091,6 +1102,9 @@ export default {
         depName: `${this.currentStructure == '请选择' || !this.currentStructure ? '' : this.currentStructure}/${this.currentGoalDepartment == '请选择' || !this.currentGoalDepartment ? '' : this.currentGoalDepartment}`, //目的地名称
         typeName: this.currentTaskType, // 类型名称
         materials: []  // 需要的物料
+      };
+      if (temporaryMessage['depName'] == '/') {
+        temporaryMessage['depName'] = ''
       };
       // 拼接参与者数据
       if (this.currentParticipant.length > 0) {

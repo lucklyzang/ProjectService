@@ -3,6 +3,7 @@
     <div class="no-data" v-show="noDataShow">
       <NoData></NoData>
     </div>
+    <van-overlay :show="overlayShow"/>
     <div class="loading">
       <loading :isShow="showLoadingHint" textContent="加载中,请稍候····" textColor="#2db8f9"></loading>
     </div>
@@ -107,6 +108,7 @@
         reasonShow: false,
         isRefresh: false,
         noDataShow: false,
+        overlayShow: false,
         showLoadingHint: false,
         reasonOperationList: [],
         reasonIndex: '',
@@ -323,10 +325,12 @@
       // 查询报修项目列表
       getRepairsProjectList (data,index) {
         this.noDataShow = false;
+        this.overlayShow = true;
         this.showLoadingHint = true;
         queryRepairsProjectList(data)
         .then((res) => {
           this.showLoadingHint = false;
+          this.overlayShow = false;
           this.taskMessageList = [];
           this.taskCompleteMessageList = [];
           if(res && res.data.code == 200) {
@@ -386,6 +390,7 @@
           }).then(() => {
           });
           this.noDataShow = true;
+          this.overlayShow = false;
           this.showLoadingHint = false
         })
       },

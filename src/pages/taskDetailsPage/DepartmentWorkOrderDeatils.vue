@@ -35,7 +35,7 @@
       <div class="content-middle">
         <p>巡检地点</p>
         <ul v-show="oneRepairsMsg.spaces ? oneRepairsMsg.spaces.length > 0 : false">
-          <li v-for="(item,index) in oneRepairsMsg.spaces" :key="`${item}-${index}`" :class="{listStyle: item.checked}">{{item.depName}}</li>
+          <li v-for="(item,index) in oneRepairsMsg.spaces" :key="`${item}-${index}`" :class="{listStyle: oneRepairsMsg.hasSpaces.filter((innerItem) => { return innerItem['depId'] == item['depId']}).length > 0}">{{item.depName}}</li>
         </ul>
       </div>
       <div class="content-bottom" v-show="departmentServiceMsg.state !== 4">
@@ -192,7 +192,7 @@
 
       // 扫一扫
       fillConsumable () {
-        if (this.oneRepairsMsg.spaces.every((item) => {return item.checked == true})) {
+        if (this.oneRepairsMsg.spaces.length == this.oneRepairsMsg.hasSpaces.length) {
           this.$toast('该任务下所有区域都已完成检修,不能执行该操作');
           return
         };
@@ -331,11 +331,10 @@
 
       // 完成巡检
       completeTask () {
-        // let flag = this.oneRepairsMsg.spaces.some((item) => { return item.checked == false});
-        // if (flag) {
-        //   this.$toast('请完成所有房间的巡检');
-        //   return
-        // };
+        if (this.oneRepairsMsg.hasSpaces.length < 1) {
+          this.$toast('请至少完成一个区域的巡检,才能完成');
+          return
+        };
         updateDepartmentServiceTaskBeSigned(this.proId, this.taskId).then((res) => {
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);

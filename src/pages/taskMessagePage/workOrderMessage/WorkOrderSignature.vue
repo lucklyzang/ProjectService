@@ -160,6 +160,9 @@
 
       // 更改任务状态为已完成
       updateTaskComplete () {
+        this.loadinText = '加载中,请稍等···';
+        this.showLoadingHint = true;
+        this.overlayShow = true;
         completeRepairsTaskFinal({
           proId: this.proId,
           taskId: this.taskId
@@ -174,9 +177,15 @@
             setStore('currentTitle','报修工单')
           } else {
             this.$toast(`${res.data.msg}`);
-          }
+          };
+          this.loadinText = '';
+          this.showLoadingHint = false;
+          this.overlayShow = false
         })
         .catch((err) => {
+          this.loadinText = '';
+          this.showLoadingHint = false;
+          this.overlayShow = false;
           this.$dialog.alert({
             message: `${err.message}`,
             closeOnPopstate: true

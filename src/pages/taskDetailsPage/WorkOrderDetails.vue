@@ -72,13 +72,13 @@
           <div class="issue-photo">
             <span>问题拍照</span>
             <ul class="photo-list">
-              <li v-for="(item,index) in issueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
+              <li v-for="(item,index) in issueImageList" :key="`${item}-${index}`">
                 <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item,0)" />
-                <van-icon name="cross" @click="issueDelete(index)"/>
+                <van-icon name="cross" @click="issueDelete(index)" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6" />
               </li>
-              <li v-for="(item,index) in historyIssueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
+              <!-- <li v-for="(item,index) in historyIssueImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
                 <img width="100" height="130" :src="item" @click="enlargeIssueImgEvent(item,1)"/>
-              </li>
+              </li> -->
             </ul>
             <span @click="issueClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
               <van-icon name="plus"/>
@@ -87,13 +87,13 @@
           <div class="complete-photo">
             <span>完成拍照</span>
             <ul class="photo-list">
-              <li v-for="(item,index) in completeImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
+              <li v-for="(item,index) in completeImageList" :key="`${item}-${index}`">
                 <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item,0)"/>
-                <van-icon name="cross" @click="completeDelete(index)"/>
+                <van-icon name="cross" @click="completeDelete(index)" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6"/>
               </li>
-              <li v-for="(item,index) in historyCompleteImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
+              <!-- <li v-for="(item,index) in historyCompleteImageList" :key="`${item}-${index}`" v-show="repairsWorkOrderMsg.state == 5">
                 <img width="100" height="130" :src="item" @click="enlargeCompleteImgEvent(item,1)"/>
-              </li>
+              </li> -->
             </ul>
             <span @click="completeClickEvent" class="icon-wrapper" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
               <van-icon name="plus"/>
@@ -252,12 +252,12 @@
           this.isFinishShow = true;
           return
         };
-        if (this.repairsWorkOrderMsg.state == 5) {
-          this.changeIsFreshRepairsWorkOrderPage(false)
-        } else {
-          this.changeIsFreshRepairsWorkOrderPage(true)
-        };
         this.gotoURL(() => {
+          if (this.repairsWorkOrderMsg.state == 5 || this.repairsWorkOrderMsg.state == 6) {
+            this.changeIsFreshRepairsWorkOrderPage(false)
+          } else {
+            this.changeIsFreshRepairsWorkOrderPage(true)
+          };
           this.$router.push({path: 'repairsWorkOrder'});
           this.changeTitleTxt({tit:'报修工单'});
           setStore('currentTitle','报修工单')
@@ -269,15 +269,12 @@
           this.overlayShow = false
         }
       });
-      if (this.repairsWorkOrderMsg.state == 5) {
-        this.getOneRepairsProjectNoComplete(this.taskId);
-        this.parallelFunction()
-      } else {
-        this.echoPhoto();
-        this.getOneRepairsProjectNoComplete(this.taskId)
-      };
+      this.getOneRepairsProjectNoComplete(this.taskId);
+      this.parallelFunction();
       this.echoIsMaterial();
-      this.queryStoreId({proId: this.proId,state: 0});
+      if (this.repairsWorkOrderMsg.state != 5 && this.repairsWorkOrderMsg.state != 6) {
+        this.queryStoreId({proId: this.proId,state: 0});
+      };
       this.getMaterialById(this.taskId)
     },
 
@@ -355,7 +352,7 @@
 
       //返回上一页
       backTo () {
-        if (this.repairsWorkOrderMsg.state == 5) {
+        if (this.repairsWorkOrderMsg.state == 5 || this.repairsWorkOrderMsg.state == 6) {
           this.changeIsFreshRepairsWorkOrderPage(false)
         } else {
           this.changeIsFreshRepairsWorkOrderPage(true)
@@ -405,50 +402,6 @@
 
       },
 
-      //查询所有物料信息
-      getAllMaterial (data) {
-        queryAllMaterial(data)
-        .then((res) => {
-          if(res && res.data.code == 200) {
-            if (res.data.data.length > 0) {
-              this.inventoryMsgList = [];
-              this.temporaryInventoryMsgList = [];
-              for (let item of res.data.data) {
-                item.checked = false;
-                // 添加过的物料不允许再次添加,数量为0不容许选择操作
-                let isExist = this.consumableMsgList.filter((innerItem) => { return innerItem.mateId == item.id});
-                if (isExist.length > 0) {
-                  item['disabled'] = true
-                } else {
-                  if (item.quantity > 0) {
-                    item['disabled'] = false
-                  } else {
-                    item['disabled'] = true
-                  }
-                }
-              };
-              this.inventoryMsgList = res.data.data;
-              this.temporaryInventoryMsgList = res.data.data;
-              this.storeId = this.inventoryMsgList[0]['storeId'];
-              this.systemId = this.inventoryMsgList[0]['systemId'];
-            } else {
-              this.$dialog.alert({
-                message: '没有查询到对应的物料信息',
-                closeOnPopstate: true
-              }).then(() => {
-              })
-            }
-          }
-        })
-        .catch((err) => {
-          this.$dialog.alert({
-            message: `${err.message}`,
-            closeOnPopstate: true
-          }).then(() => {
-          })
-        })
-      },
-
       // 耗材名称点击事件
       mateNameEvent (name,index) {
         this.inventoryMsgList[index]['checked'] = !this.inventoryMsgList[index]['checked'];
@@ -489,6 +442,7 @@
 
       // 步进器值变化事件
       stepValueChange (item,index,val) {
+        if (item.quantity == null) { return};
         if (val === "") {return};
         this.consumableIndex = index;
         if (val == 0) {
@@ -496,8 +450,8 @@
           return
         };
         if (val > item.quantity) {
-          this.$toast("数量已经超过耗材库存数量");
-          this.consumableMsgList[index]['number'] = 1;
+          this.$toast(`数量已经超过耗材库存数量${item.quantity}`);
+          this.consumableMsgList[index]['number'] = item.quantity;
           return
         };
         this.lastConsumableNumber = val
@@ -571,6 +525,7 @@
         this.showLoadingHint = true;
         this.overlayShow = true;
         Promise.all([this.getOneRepairsProjectPhoto()]).then((values) => {
+          console.log('图片信息',values);
           this.showLoadingHint = false;
           this.overlayShow = false;
           if (values.length > 0) {
@@ -578,13 +533,16 @@
             if (this.photonList.length > 0) {
               for (let i = 0, len = this.photonList.length; i < len; i++) {
                 if (this.photonList[i].imgType == 1) {
-                  this.historyIssueImageList.push(this.photonList[i].path)
+                  this.issueImageList.push(this.photonList[i].path);
                 } else if (this.photonList[i].imgType == 2) {
-                  this.historyCompleteImageList.push(this.photonList[i].path)
+                  this.completeImageList.push(this.photonList[i].path)
                 }
               }
             };
-          }
+          };
+          this.loadinText = '';
+          this.showLoadingHint = false;
+          this.overlayShow = false
         })
         .catch((err) => {
           this.$dialog.alert({
@@ -592,6 +550,7 @@
             closeOnPopstate: true
           }).then(() => {
           });
+          this.loadinText = '';
           this.showLoadingHint = false;
           this.overlayShow = false
         })
@@ -599,6 +558,9 @@
 
       // 查询单条工单信息
       getOneRepairsProjectNoComplete () {
+        this.loadinText = '加载中,请稍等···';
+        this.showLoadingHint = true;
+        this.overlayShow = true;
         queryOneRepairsProject(this.taskId).then((res) => {
           if(res && res.data.code == 200) {
             this.oneRepairsMsg = res.data.data;
@@ -607,14 +569,20 @@
               temporaryArr.push(item.name)
             };
             this.oneRepairsMsg['spaces'] = temporaryArr
-          }
+          };
+          this.loadinText = '';
+          this.showLoadingHint = false;
+          this.overlayShow = false
         })
         .catch((err) => {
           this.$dialog.alert({
           message: `${err}`,
             closeOnPopstate: true
           }).then(() => {
-          })
+          });
+          this.loadinText = '';
+          this.showLoadingHint = false;
+          this.overlayShow = false
         })
       },
 
@@ -645,7 +613,7 @@
         })
       },
 
-      //查询storeId与systemId
+      //查询查询所有物料信息
       queryStoreId (data) {
         queryAllMaterial(data)
         .then((res) => {
@@ -653,6 +621,50 @@
             if (res.data.data.length > 0) {
               this.storeId = res.data.data[0]['storeId'];
               this.systemId = res.data.data[0]['systemId'];
+            } else {
+              this.$dialog.alert({
+                message: '没有查询到对应的物料信息',
+                closeOnPopstate: true
+              }).then(() => {
+              })
+            }
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
+      },
+
+      //查询所有物料信息
+      getAllMaterial (data) {
+        queryAllMaterial(data)
+        .then((res) => {
+          if(res && res.data.code == 200) {
+            if (res.data.data.length > 0) {
+              this.inventoryMsgList = [];
+              this.temporaryInventoryMsgList = [];
+              for (let item of res.data.data) {
+                item.checked = false;
+                // 添加过的物料不允许再次添加,数量为0不容许选择操作
+                let isExist = this.consumableMsgList.filter((innerItem) => { return innerItem.mateId == item.id});
+                if (isExist.length > 0) {
+                  item['disabled'] = true
+                } else {
+                  if (item.quantity > 0) {
+                    item['disabled'] = false
+                  } else {
+                    item['disabled'] = true
+                  }
+                }
+              };
+              this.inventoryMsgList = res.data.data;
+              this.temporaryInventoryMsgList = res.data.data;
+              this.storeId = this.inventoryMsgList[0]['storeId'];
+              this.systemId = this.inventoryMsgList[0]['systemId'];
             } else {
               this.$dialog.alert({
                 message: '没有查询到对应的物料信息',
@@ -917,25 +929,33 @@
         if (this.issueImageList.length > 0) {
           imageType = 1;
           for (let item of this.issueImageList) {
-            photoMsg.images.push({
-              imgType: imageType,
-              image: item
-            })
+            // 上传过的图片不在进行上传
+            if (item.indexOf('https') == -1 && item.indexOf('http') == -1) {
+              photoMsg.images.push({
+                imgType: imageType,
+                image: item
+              })
+            } 
           }
         };
         if (this.completeImageList.length > 0) {
           imageType = 2;
           for (let item of this.completeImageList) {
-            photoMsg.images.push({
-              imgType: imageType,
-              image: item
-            })
+            // 上传过的图片不在进行上传
+             if (item.indexOf('https') == -1 && item.indexOf('http') == -1) {
+              photoMsg.images.push({
+                imgType: imageType,
+                image: item
+              })
+            }  
           }
         };
         return new Promise((resolve,reject) => {
           uploadRepairsTaskPhoto(photoMsg)
           .then((res) => {
             if (res && res.data.code == 200) {
+              this.issueImageList = [];
+              this.completeImageList = [];
               this.$toast('图片上传成功');
               resolve()
             } else {
@@ -980,6 +1000,9 @@
 
       // 是否确定完成确认
       isFinishSure () {
+        this.loadinText = '完成中,请稍等···';
+        this.showLoadingHint = true;
+        this.overlayShow = true;
         completeRepairsTask({
           proId: this.proId,
           taskId: this.taskId
@@ -987,14 +1010,25 @@
         .then((res) => {
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
+            if (this.repairsWorkOrderMsg.state == 5 || this.repairsWorkOrderMsg.state == 6) {
+              this.changeIsFreshRepairsWorkOrderPage(false)
+            } else {
+              this.changeIsFreshRepairsWorkOrderPage(true)
+            };
             this.$router.push({path: 'repairsWorkOrder'});
             this.changeTitleTxt({tit:'报修工单'});
             setStore('currentTitle','报修工单')
           } else {
             this.$toast(`${res.data.msg}`);
-          }
+          };
+          this.loadinText = '';
+          this.showLoadingHint = false;
+          this.overlayShow = false
         })
         .catch((err) => {
+          this.loadinText = '';
+          this.showLoadingHint = false;
+          this.overlayShow = false;
           this.$dialog.alert({
             message: `${err.message}`,
             closeOnPopstate: true
@@ -1008,6 +1042,7 @@
           let mateMsg = {
             proId: this.proId,
             id: this.taskId,
+            isApp: 1,
             materials: []
           };
           for (let item of this.consumableMsgList) {
@@ -1042,6 +1077,11 @@
 
       // 是否确定完成取消
       isFinishCancel () {
+        if (this.repairsWorkOrderMsg.state == 5 || this.repairsWorkOrderMsg.state == 6) {
+          this.changeIsFreshRepairsWorkOrderPage(false)
+        } else {
+          this.changeIsFreshRepairsWorkOrderPage(true)
+        };
         this.$router.push({path: 'repairsWorkOrder'});
         this.changeTitleTxt({tit:'报修工单'});
         setStore('currentTitle','报修工单')
@@ -1062,16 +1102,18 @@
         this.overlayShow = true;
         // 并行提交图片和耗材数据
         Promise.all([this.submitMaterials(),this.uploadPhoto()]).then(() => {
-          this.showLoadingHint = false;
-          this.overlayShow = false;
           this.clearStorageMaterial();
           if (this.repairsWorkOrderMsg.state == 4) {
+            this.changeIsFreshRepairsWorkOrderPage(true);
             this.$router.push({path: 'workOrderSignature'});
             this.changeTitleTxt({tit:'工单完成签名'});
-            setStore('currentTitle','工单完成签名')
+            setStore('currentTitle','工单完成签名');
           } else {
             this.isFinishShow = true
-          }
+          };
+          this.loadinText = '';
+          this.showLoadingHint = false;
+          this.overlayShow = false
         })
         .catch((err) => {
           this.$dialog.alert({
@@ -1079,6 +1121,7 @@
             closeOnPopstate: true
           }).then(() => {
           });
+          this.loadinText = '';
           this.showLoadingHint = false;
           this.overlayShow = false
         })
@@ -1429,14 +1472,16 @@
                 > span {
                   height: 50px;
                   line-height: 50px;
-                  width: 40%;
                   font-size: 16px;
                   display: inline-block;
                   text-align: center;
                   &:first-child {
-                    width: 10%
+                    width: 15%;
+                    .no-wrap()
                   };
                   &:nth-child(2) {
+                    width: 55%;
+                    .no-wrap();
                     text-align: left;
                     /deep/ .van-cell {
                       .van-cell__value--alone {
@@ -1450,7 +1495,7 @@
                     position: absolute;
                     top:0;
                     right: 4px;
-                    width: 50%;
+                    width: 30%;
                     text-align: right;
                     /deep/ .van-stepper--round {
                       .van-stepper__minus {
