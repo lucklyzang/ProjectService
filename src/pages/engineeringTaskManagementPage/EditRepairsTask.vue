@@ -868,12 +868,12 @@ export default {
     },
 
     // 任务类型下拉选择框取消事件
-    structureCancelEvent () {
+    taskTypeCancelEvent () {
       this.showTaskType = false
     },
 
     // 任务类型下拉选择框关闭事件
-    structureCloseEvent () {
+    taskTypeCloseEvent () {
       this.showTaskType = false
     },
 
