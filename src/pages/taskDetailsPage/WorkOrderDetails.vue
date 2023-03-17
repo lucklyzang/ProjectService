@@ -217,7 +217,6 @@
         toolShow: false,
         isDeleteShow: false,
         consumableIndex: null,
-        lastConsumableNumber: null,
         isFinishShow: false,
         isChangeConsumableShow: false,
         showLoadingHint: false,
@@ -424,8 +423,7 @@
 
       // 是否删除耗材取消事件
       isDeleteCancel () {
-        // 耗材数量恢复为0之前的值
-        this.consumableMsgList[this.consumableIndex]['number'] = this.lastConsumableNumber
+        this.consumableMsgList[this.consumableIndex]['number'] = 1
       },
 
       // 回显当前是否填写过耗材
@@ -446,21 +444,25 @@
         if (val === "") {return};
         this.consumableIndex = index;
         if (val == 0) {
-          this.isDeleteShow = true;
-          return
+          if (!this.isDeleteShow) {
+            this.isDeleteShow = true;
+            return
+          }
         };
-        if (val > item.quantity) {
-          this.$toast(`数量已经超过耗材库存数量${item.quantity}`);
-          this.consumableMsgList[index]['number'] = item.quantity;
-          return
-        };
-        this.lastConsumableNumber = val
+        if (item.quantity > 0) {
+          if (val > item.quantity) {
+            this.$toast(`数量不能超过耗材库存数量${item.quantity}`);
+            this.$nextTick(() => {
+              this.$set(this.consumableMsgList[index],'number',item.quantity)
+            });
+            return
+          }
+        }  
       },
 
       // 步进器聚焦事件
       stepValueFocus (item,index,val) {
         if (val != 0) {
-          this.lastConsumableNumber = item.number
         }
       },
 
@@ -593,6 +595,7 @@
           if(res && res.data.code == 200) {
             if (res.data.data.length > 0) {
               this.consumableMsgList = [];
+              console.log('使用物料',res.data.data);
               this.consumableMsgList = res.data.data;
             } else {
             }
@@ -1046,19 +1049,21 @@
             materials: []
           };
           for (let item of this.consumableMsgList) {
-            mateMsg.materials.push(
-              {
-                proId: this.proId,
-                proName: item.mateName,
-                mateId: item.mateId,
-                number: item.number,
-                mateNumber: item.mateNumber,
-                mateName: item.mateName,
-                model: item.model,
-                storeId: this.storeId,
-                systemId: this.systemId
-              }
-            )
+            if (item.number > 0) {
+              mateMsg.materials.push(
+                {
+                  proId: this.proId,
+                  proName: item.mateName,
+                  mateId: item.mateId,
+                  number: item.number,
+                  mateNumber: item.mateNumber,
+                  mateName: item.mateName,
+                  model: item.model,
+                  storeId: this.storeId,
+                  systemId: this.systemId
+                }
+              )
+            }  
           };
           return new Promise((resolve,reject) => {
             saveMate(mateMsg).then((res) => {
