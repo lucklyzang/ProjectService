@@ -61,6 +61,7 @@
   import departmentServiceOnePng from '@/common/images/home/department-service-one.png'
   import dispatchingManagementPng from '@/common/images/home/dispatching-management.png'
   import deviceServiceOnePng from '@/common/images/home/device-service-one.png'
+  import autoRepairPng from '@/common/images/home/auto-repair.png'
   import repairsWorkOrderOnePng from '@/common/images/home/repairs-work-order-one.png'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
@@ -90,7 +91,8 @@
           {tit:'报修工单', imgUrl: repairsWorkOrderOnePng},
           {tit:'设备巡检', imgUrl: deviceServiceOnePng},
           {tit:'区域巡检', imgUrl: departmentServiceOnePng},
-          {tit:'调度管理', imgUrl: dispatchingManagementPng}
+          {tit:'调度管理', imgUrl: dispatchingManagementPng},
+          {tit:'自主报修', imgUrl: autoRepairPng}
         ],
         btnList: [
           {name: '主页', icon: 'wap-home-o'},
@@ -339,6 +341,10 @@
           this.$router.push({path: 'engineeringTaskManagement'});
           this.changeTitleTxt({tit:'工程维保任务管理'});
           setStore('currentTitle','工程维保任务管理')
+        } else if (item.tit == '自主报修') {
+          this.$router.push({path: 'autoRepairList'});
+          this.changeTitleTxt({tit:'自主报修'});
+          setStore('currentTitle','自主报修')
         }
       },
 

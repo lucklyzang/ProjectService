@@ -26,6 +26,9 @@ const EngineeringTaskManagement = () => import('@/pages/engineeringTaskManagemen
 const SchedulingRepairsTaskDetails = () => import('@/pages/engineeringTaskManagementPage/SchedulingRepairsTaskDetails')
 const CreateRepairsTask = () => import('@/pages/engineeringTaskManagementPage/createRepairsTask')
 const EditRepairsTask = () => import('@/pages/engineeringTaskManagementPage/EditRepairsTask')
+const AutoRepairList = () => import('@/pages/autoRepair/autoRepairList')
+const AutoRepairHistoryRecord = () => import('@/pages/autoRepair/autoRepairHistoryRecord')
+const AutoRepairCreate = () => import('@/pages/autoRepair/autoRepairCreate')
 Vue.use(Router) 
 
 let baseRoute  = [
@@ -148,6 +151,21 @@ let baseRoute  = [
     path: '/editRepairsTask',
     name: 'editRepairsTask',
     component: EditRepairsTask
+  },
+  {
+    path: '/autoRepairList',
+    name: 'autoRepairList',
+    component: AutoRepairList
+  },
+  {
+    path: '/autoRepairHistoryRecord',
+    name: 'autoRepairHistoryRecord',
+    component: AutoRepairHistoryRecord
+  },
+  {
+    path: '/autoRepairCreate',
+    name: 'autoRepairCreate',
+    component: AutoRepairCreate
   }
 ];
 let router = new Router({

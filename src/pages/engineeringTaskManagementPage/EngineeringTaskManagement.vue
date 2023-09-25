@@ -1227,7 +1227,7 @@ export default {
           this.getRepairsList(false)
         };
         this.$nextTick(()=> {
-            this.initScrollChange()
+          this.initScrollChange()
         })
     }
   }
