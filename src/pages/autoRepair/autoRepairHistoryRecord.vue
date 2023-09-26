@@ -97,6 +97,37 @@
                     </div>
                </div>
            </div>
+           <div class="use-material-box">
+              <div class="material-tit">
+                <span>使用物料</span>
+              </div>
+              <div class="material-content">
+                <div class="material-list">
+                  <div class="material-list-left">
+                    <span>1</span>
+                    <span>灯管-型号</span>
+                  </div>
+                  <div class="material-list-right">
+                    <span>4</span>
+                  </div>
+                </div>
+                <div class="material-list">
+                  <div class="material-list-left">
+                    <span>2</span>
+                    <span>灯管2-型号</span>
+                  </div>
+                  <div class="material-list-right">
+                    <span>3</span>
+                  </div>
+                </div>
+              </div>
+           </div>
+           <div class="signature-box">
+            <div class="signature-tit">
+              <span>签字</span>
+            </div>
+            <div class="signature-content"></div>
+           </div>
         </div>
     </div> 
   </div>
@@ -402,12 +433,14 @@ export default {
         .maintenance-record-box {
             .maintenance-record-tit {
                 font-size: 14px;
-                font-weight: bold;
                 color: #101010;
                 height: 35px;
                 line-height: 35px;
                 padding-left: 10px;
-                box-sizing: border-box; 
+                box-sizing: border-box;
+                >span {
+                  font-weight: bold;
+                } 
             };
             .maintenance-record-content {
                .line-content {
@@ -429,7 +462,6 @@ export default {
                             .no-wrap();
                             text-align: right;
                             padding-left: 6px;
-                            font-weight: bold;
                             color: #101010;
                         }
                     }
@@ -463,6 +495,74 @@ export default {
                     }
                 }
             }
+        };
+        .use-material-box {
+          .material-tit {
+            font-size: 14px;
+            color: #101010;
+            height: 35px;
+            line-height: 35px;
+            padding-left: 10px;
+            box-sizing: border-box;
+            >span {
+              font-weight: bold;
+            } 
+          };
+          .material-content {
+            padding: 10px;
+            box-sizing: border-box;
+            background: #fff; 
+            .material-list {
+              height: 40px;
+              background: #e9e9e9;
+              display: flex;
+              align-items: center;
+              border-radius: 2px;
+              justify-content: space-between;
+              margin-bottom: 6px;
+              .material-list-left {
+                display: flex;
+                flex: 1;
+                width: 0;
+                >span {
+                  font-size: 14px;
+                  color: #101010;
+                  &:first-child {
+                    text-align: center;
+                    width: 40px;
+                    color: #333
+                  };
+                  &:last-child {
+                    flex: 1;
+                    .no-wrap()
+                  }
+                }
+              };
+              .material-list-right {
+                width: 40px;
+                font-size: 14px;
+                color: #101010
+              };
+            }
+          }
+        };
+        .signature-box {
+          .signature-tit {
+            font-size: 14px;
+            color: #101010;
+            height: 35px;
+            line-height: 35px;
+            padding-left: 10px;
+            box-sizing: border-box;
+            >span {
+              font-weight: bold;
+            } 
+          };
+          .signature-content {
+            padding: 10px;
+            box-sizing: border-box;
+            background: #fff; 
+          }
         }
     }
   }
