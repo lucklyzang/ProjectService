@@ -149,6 +149,7 @@
           if (res && res.data.code == 200) {
             if(this.globalTimer) {window.clearInterval(this.globalTimer)};
             removeAllLocalStorage();
+            store.dispatch('resetAutoRepairTaskStore');
             this.$router.push({path:'/'})
           } else {
             this.$dialog.alert({

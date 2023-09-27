@@ -49,6 +49,7 @@ service.interceptors.response.use(
         Toast('token已过期,请重新登录');
         if(store.getters.globalTimer) {window.clearInterval(store.getters.globalTimer)};
         removeAllLocalStorage();
+        store.dispatch('resetAutoRepairTaskStore');
         setTimeout(() => {
           router.push({path: '/'})
         },2000);

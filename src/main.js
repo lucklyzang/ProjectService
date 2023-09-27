@@ -7,11 +7,18 @@ import 'vant/lib/index.css';
 import moment from 'moment'
 import {setStore, getStore, IsPC} from '@/common/js/utils.js'
 import echarts from 'echarts'
+import Create from '@/common/js/create.js';
+import Alert from '@/components/LightHint.vue';
 if (process.env.NODE_ENV == 'development') {
   Vue.config.devtools = true;
 } else {
   Vue.config.devtools = false;
 };
+Vue.prototype.$Alert= ((obj)=>{//挂载在原型上
+  return Create(Alert,obj).show(); //返回组件实例
+});
+import _ from 'lodash';
+Vue.prototype._ = _;
 Vue.prototype.$echarts = echarts;
 Vue.prototype.Base64 = require('js-base64').Base64;
 // 全局挂载时间格式化方法

@@ -12,19 +12,27 @@
         :style="{ height: '45%' }"
       >
         <div class="department-content-box">
-          <div class="left">
-            <div class="construction-list" v-for="(item,index) in constructionList" :key="index" @click="constructionItemClickEvent(item,index)" :class="{'constructionListStyle': currentConstructionIndex == index}">
-              {{ item['text'] }}
+          <div class="left-wrapper">
+            <div class="left">
+              <van-empty description="暂无楼栋" v-show="constructionList.length == 0" />
+              <div class="construction-list" v-for="(item,index) in constructionList" :key="index" @click="constructionItemClickEvent(item,index)" :class="{'constructionListStyle': currentConstructionIndex === index}">
+                {{ item['text'] }}
+              </div>
             </div>
-          </div>
-          <div class="center">
-            <div class="tier-list" v-for="(item,index) in tierList" :key="index" @click="tierItemClickEvent(item,index)" :class="{'tierListStyle': currentTierIndex == index}">
-              {{ item }}
+          </div>  
+          <!-- <div class="center-wrapper">
+            <div class="center">
+              <div class="tier-list" v-for="(item,index) in tierList" :key="index" @click="tierItemClickEvent(item,index)" :class="{'tierListStyle': currentTierIndex == index}">
+                {{ item }}
+              </div>
             </div>
-          </div>
-          <div class="right">
-            <div class="department-list" v-for="(item,index) in departmentList" :key="index" @click="departmentItemClickEvent(item,index)" :class="{'departmentListStyle': currentDepartmrntIndex == index}">
-              {{ item.text }}
+          </div> -->
+          <div class="right-wrapper">
+            <div class="right">
+              <van-empty description="暂无科室" v-show="departmentList.length == 0" />
+              <div class="department-list" v-for="(item,index) in departmentList" :key="index" @click="departmentItemClickEvent(item,index)" :class="{'departmentListStyle': currentDepartmentIndex == index}">
+                {{ item.text }}
+              </div>
             </div>
           </div>
         </div>
@@ -40,6 +48,7 @@
         :style="{ height: '45%' }"
       >
         <div class="room-content-box">
+          <van-empty description="暂无房间" v-show="roomList.length == 0" />
           <div class="room-content" @click="roomItemClickEvent(item,index)" :class="{'roomContentStyle': currentRoomIndex == index}" v-for="(item,index) in roomList" :key="index">
             {{ item.text }}
           </div>
@@ -52,10 +61,12 @@
         v-model="participationPersonDialogShow"
         round
         closeable
+        @close="closeParticipationPersonDialogEvent"
         position="bottom"
         :style="{ height: '45%' }"
       >
         <div class="participation-person-box">
+          <van-empty description="暂无参与人" v-show="participationPersonList.length == 0" />
           <div class="participation-person-content" v-for="(item,index) in participationPersonList" :key="index">
             <div class="participation-person-content-left">
               {{ item.text }}
@@ -212,7 +223,7 @@
                       <span>任务类型</span>
                     </div>
                     <div class="problem-description-content-bottom">
-                      <span v-for="(item,index) in taskTypeOption" :key="index" @click="taskTypeClickEvent(index)" :class="{'taskTypeStyle': taskTypeIndex === index}">
+                      <span v-for="(item,index) in taskTypeOption" :key="index" @click="taskTypeClickEvent(index,item)" :class="{'taskTypeStyle': taskTypeIndex === index}">
                         {{ item.text }}
                       </span>
                     </div>
@@ -223,7 +234,7 @@
                       <span>目的科室</span>
                     </div>
                     <div class="goal-department-right" @click="goalDepartmentClickEvent">
-                      <span>住院部</span>
+                      <span>{{ currentDepartment.text }}</span>
                       <van-icon name="arrow" color="#989999" size="24" />
                     </div>
                   </div>
@@ -232,7 +243,7 @@
                       <span>目的房间</span>
                     </div>
                     <div class="goal-department-right" @click="goalRoomClickEvent">
-                      <span>002</span>
+                      <span>{{ currentRoom.text }}</span>
                       <van-icon name="arrow" color="#989999" size="24" />
                     </div>
                   </div>
@@ -264,7 +275,6 @@
                       <van-field
                         v-model="issueDescribe"
                         rows="3"
-                        autosize
                         type="textarea"
                         maxlength="300"
                         placeholder="请输入问题描述"
@@ -291,7 +301,7 @@
                   <span>参与人</span>
                 </div>
                 <div class="participation-man-right" @click="participationPersonClickEvent">
-                  <span>张三</span>
+                  <span>{{ disposeTaskPresent(curretnParticipant) }}</span>
                   <van-icon name="arrow" color="#989999" size="24" />
                 </div>
               </div>
@@ -390,11 +400,11 @@ export default {
   mixins:[mixinsDeviceReturn],
   data() {
     return {
-      currentRoomIndex: 0,
+      currentRoomIndex: null,
       deleteInfoPng: require('@/common/images/home/delete-info.png'),
-      currentConstructionIndex: 0,
-      currentDepartmrntIndex: 0,
-      currentTierIndex: 0,
+      currentConstructionIndex: null,
+      currentDepartmentIndex: null,
+      currentTierIndex: null,
       isIssuePhoto: false,
       isRepairPhoto: false,
       loadingShow: false,
@@ -405,6 +415,20 @@ export default {
       deleteRepairInfoDialogShow: false,
       quitInfoShow: false,
       imgIndex: '',
+      currentTaskType: {},
+      currentConstruction: {
+        text: '',
+        value: ''
+      },
+      currentDepartment: {
+        text: '',
+        value: ''
+      },
+      currentRoom: {
+        text: '',
+        value: ''
+      },
+      curretnParticipant: [],
       taskTypeOption: [],
       imgOnlinePathArr: [],
       imgDeleteUrlArr: [],
@@ -450,31 +474,51 @@ export default {
   mounted() {
     // 控制设备物理返回按键
     this.deviceReturn('/autoRepairList');
-    this.parallelFunction();
-    //判断是否回显暂存的数据
-    // if (JSON.stringify(this.temporaryStorageCreateRepairsTaskMessage) != '{}' && this.temporaryStorageCreateRepairsTaskMessage['isTemporaryStorage']) {
-    //   this.echoTemporaryStorageMessage()
-    // }
+    this.parallelFunction()
   },
 
   watch: {},
 
   computed: {
-    ...mapGetters(["userInfo","schedulingTaskDetails","schedulingTaskAboutMessage","operateBtnClickRecord"]),
+    ...mapGetters(["userInfo","createAutoRepairTaskMessage"]),
     proId () {
       return this.userInfo.extendData.proId
     }
   },
 
   methods: {
-    ...mapMutations(["changeTitleTxt","changeCatchComponent","changeOverDueWay","changeOperateBtnClickRecord"]),
+    ...mapMutations(["changeCreateAutoRepairTaskMessage"]),
 
     onClickLeft() {
+      this.quitInfoShow = true;
       this.$router.push({ path: "/autoRepairList"})
     },
 
     onClickRight() {
 
+    },
+
+    // 回显暂存的创建自主报修任务信息
+    echoTemporaryStorageMessage () {
+      let casuallyTemporaryStorageCreateAutoRepairTaskMessage = this._.cloneDeep(this.createAutoRepairTaskMessage);
+      this.taskTypeIndex = casuallyTemporaryStorageCreateAutoRepairTaskMessage['taskTypeIndex'];
+      this.currentTaskType = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentTaskType'];
+      this.currentConstructionIndex = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentConstructionIndex'];
+      this.currentConstruction = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentConstruction'];
+      this.currentDepartment = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartment'];
+      this.currentDepartmentIndex = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartmentIndex'];
+      this.currentRoom = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoom'];
+      this.currentRoomIndex = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoomIndex'];
+      this.problemPicturesList = casuallyTemporaryStorageCreateAutoRepairTaskMessage['problemPicturesList'];
+      this.issueDescribe = casuallyTemporaryStorageCreateAutoRepairTaskMessage['issueDescribe'];
+      this.curretnParticipant = casuallyTemporaryStorageCreateAutoRepairTaskMessage['curretnParticipant'];
+      this.repairPicturesList = casuallyTemporaryStorageCreateAutoRepairTaskMessage['repairPicturesList'];
+      this.consumableMsgList = casuallyTemporaryStorageCreateAutoRepairTaskMessage['consumableMsgList']
+    },
+
+    // 关闭参与人弹窗事件
+    closeParticipationPersonDialogEvent () {
+      this.curretnParticipant = this.participationPersonList.filter((item) => { return item.checked == true })
     },
 
     // 处理维修任务空间信息
@@ -494,7 +538,7 @@ export default {
       if (item.length == 0) { return };
       let temporaryArray = [];
       for (let innerItem of item) {
-        temporaryArray.push(innerItem.name)
+        temporaryArray.push(innerItem.text)
       };
       return temporaryArray.join('、')
     },
@@ -511,14 +555,19 @@ export default {
     },
 
     // 任务类型点击事件
-    taskTypeClickEvent (index) {
+    taskTypeClickEvent (index,item) {
       this.taskTypeIndex = index;
+      this.currentTaskType = item;
       this.taskTypeOption[index]['selected'] = !this.taskTypeOption[index]['selected']
     },
 
     // 楼栋名称点击事件
     constructionItemClickEvent (item,index) {
-      this.currentConstructionIndex = index
+      this.currentConstruction['text'] = item['text'];
+      this.currentConstruction['value'] = item['value'];
+      this.currentConstructionIndex = index;
+      // 根据楼栋建筑查询科室
+      this.getDepartmentByStructureId(this.currentConstruction['value'],false)
     },
 
     // 楼层点击事件
@@ -528,16 +577,27 @@ export default {
 
     // 房间名称点击事件
     roomItemClickEvent (item,index) {
-      this.currentRoomIndex = index
+      this.currentRoomIndex = index;
+      this.currentRoom['text'] = item['text'];
+      this.currentRoom['value'] = item['value']
     },
 
     // 科室名称点击事件
     departmentItemClickEvent (item,index) {
-      this.currentDepartmrntIndex = index
+      this.currentDepartmentIndex = index;
+      this.currentDepartment['text'] = item['text'];
+      this.currentDepartment['value'] = item['value'];
+      // 根据科室查询房间信息
+      this.getSpacesByDepartmentId(this.currentDepartment['value'],true)
     },
 
     // 目的房间点击事件
     goalRoomClickEvent () {
+      // 根据科室查询房间信息
+      if (!this.currentDepartment['value'] && this.currentDepartment['value'] !== 0) { 
+        this.$toast('请选择目的科室');
+        return 
+      };
       this.roomDialogShow = true
     },
 
@@ -635,13 +695,15 @@ export default {
       })
     },
 
-    // 确认事件
-    sureEvent () {
-      this.$router.push({path: '/autoRepairTaskSignature'})
+    // 确定退出(暂存)
+    quitSure () {
+      this.temporaryStorageEvent()
     },
 
-    // 取消事件
-    cancelEvent () {},
+    // 取消退出(不暂存)
+    quitCancel () {
+      this.$router.push({path: '/autoRepairList'})
+    },
 
     // 并行查询任务类型、目的建筑、维修员、物料信息、维修工具
     parallelFunction (type) {
@@ -655,9 +717,8 @@ export default {
           this.overlayShow = false;
           if (res && res.length > 0) {
             this.constructionList = [];
-            this.participantOption = [];
-            this.constructionList = [];
-            this.transporterOption = [];
+            this.participationPersonList = [];
+            this.taskTypeOption = [];
             this.useToolOption = [];
             let [item1,item2,item3,item4,item5] = res;
             if (item1) {
@@ -669,7 +730,15 @@ export default {
                   id: i,
                   selected: false
                 })
-              }
+              };
+              if (JSON.stringify(this.createAutoRepairTaskMessage) != '{}') {
+                if (this.createAutoRepairTaskMessage['currentTaskType']['value'] || this.createAutoRepairTaskMessage['currentTaskType']['value'] === 0) {
+                  let casuallyTemporaryStorageCreateAutoRepairTaskMessage = this._.cloneDeep(this.createAutoRepairTaskMessage);
+                  let TemporaryIndex = this.taskTypeOption.findIndex((innerItem) => { return innerItem.value == this.createAutoRepairTaskMessage['currentTaskType']['value']});
+                  casuallyTemporaryStorageCreateAutoRepairTaskMessage['taskTypeIndex'] = TemporaryIndex;
+                  this.changeCreateAutoRepairTaskMessage(casuallyTemporaryStorageCreateAutoRepairTaskMessage);
+                }
+              }  
             };
             if (item2) {
               // 目的建筑
@@ -680,8 +749,14 @@ export default {
                   id: i
                 })
               };
-              if (this.currentStructure != '请选择') {
-                // this.getDepartmentByStructureId(this.constructionList.filter((item) => { return item['text'] == this.currentStructure})[0]['value'],false,true)
+              if (JSON.stringify(this.createAutoRepairTaskMessage) != '{}') {
+                if (this.createAutoRepairTaskMessage['currentConstruction']['value'] || this.createAutoRepairTaskMessage['currentConstruction']['value'] === 0) {
+                  let casuallyTemporaryStorageCreateAutoRepairTaskMessage = this._.cloneDeep(this.createAutoRepairTaskMessage);
+                  let TemporaryIndex = this.constructionList.findIndex((innerItem) => { return innerItem.value == this.createAutoRepairTaskMessage['currentConstruction']['value']});
+                  casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentConstructionIndex'] = TemporaryIndex;
+                  this.changeCreateAutoRepairTaskMessage(casuallyTemporaryStorageCreateAutoRepairTaskMessage);
+                  this.getDepartmentByStructureId(this.createAutoRepairTaskMessage['currentConstruction']['value'],true)
+                }
               }
             };
             if (item3) {
@@ -723,12 +798,10 @@ export default {
                 })
               }
             };
-            // if (item4) {
-            //   //任务类型
-            //   // 有暂存的话,则回显该暂存信息
-            //   if (this.temporaryStorageCreateRepairsTaskMessage['isTemporaryStorage']) {
-            //   }
-            // }
+            //判断是否回显暂存的数据
+            if (JSON.stringify(this.createAutoRepairTaskMessage) != '{}') {
+              this.echoTemporaryStorageMessage()
+            }
           }
         })
         .catch((err) => {
@@ -743,11 +816,16 @@ export default {
       },
 
       // 根据建筑查询科室信息
-      getDepartmentByStructureId (structureId,flag,isInitial) {
+      getDepartmentByStructureId (structureId,isInitial) {
       this.loadingText = '查询中...';
       this.loadingShow = true;
       this.overlayShow = true;
-      this.goalDepartmentOption = [];
+      this.departmentList = [];
+      this.currentDepartment = {};
+      this.currentDepartmentIndex = null;
+      this.roomList = [];
+      this.currentRoom = {};
+      this.currentRoomIndex = null;
       queryDepartment(this.proId,structureId)
       .then((res) => {
         this.loadingText = '';
@@ -763,13 +841,18 @@ export default {
               })
             };
             if (isInitial) {
-              if (this.currentGoalDepartment != '请选择') {
-                this.getSpacesByDepartmentId(this.goalDepartmentOption.filter((item) => { return item['text'] == this.currentGoalDepartment})[0]['value'],false)
-              }
+              // 根据科室查询房间信息
+              if (JSON.stringify(this.createAutoRepairTaskMessage) != '{}') {
+                if (this.createAutoRepairTaskMessage['currentDepartment']['value'] || this.createAutoRepairTaskMessage['currentDepartment']['value'] === 0) {
+                  let casuallyTemporaryStorageCreateAutoRepairTaskMessage = this._.cloneDeep(this.createAutoRepairTaskMessage);
+                  let TemporaryIndex = this.departmentList.findIndex((innerItem) => { return innerItem.value == this.createAutoRepairTaskMessage['currentDepartment']['value']});
+                  casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartmentIndex'] = TemporaryIndex;
+                  this.currentDepartmentIndex = TemporaryIndex;
+                  this.changeCreateAutoRepairTaskMessage(casuallyTemporaryStorageCreateAutoRepairTaskMessage);
+                  this.getSpacesByDepartmentId(this.createAutoRepairTaskMessage['currentDepartment']['value'],false)
+                }
+              }  
             }  
-          };
-          if (flag) {
-            this.showGoalDepartment = true
           }
         }
       })
@@ -789,7 +872,11 @@ export default {
       this.loadingText = '查询中...';
       this.loadingShow = true;
       this.overlayShow = true;
-      this.goalSpacesOption = [];
+      this.roomList = [];
+      if (flag) {
+        this.currentRoom = {};
+        this.currentRoomIndex = null;
+      };
       querySpace(this.proId,depId)
       .then((res) => {
         this.loadingText = '';
@@ -803,7 +890,16 @@ export default {
                 value: res.data.data[i].id,
                 selected: false
               })
-            }
+            };
+            if (JSON.stringify(this.createAutoRepairTaskMessage) != '{}' && !flag) {
+              if (this.createAutoRepairTaskMessage['currentRoom']['value'] || this.createAutoRepairTaskMessage['currentRoom']['value'] === 0) {
+                let casuallyTemporaryStorageCreateAutoRepairTaskMessage = this._.cloneDeep(this.createAutoRepairTaskMessage);
+                let TemporaryIndex = this.roomList.findIndex((innerItem) => { return innerItem.value == this.createAutoRepairTaskMessage['currentRoom']['value']});
+                casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoomIndex'] = TemporaryIndex;
+                this.currentDepartmentIndex = TemporaryIndex;
+                this.changeCreateAutoRepairTaskMessage(casuallyTemporaryStorageCreateAutoRepairTaskMessage)
+              }
+            }  
           }
         }
       })
@@ -890,22 +986,36 @@ export default {
       })
     },
 
+    // 任务创建维修确认事件
+    sureEvent () {
+      this.$router.push({path: '/autoRepairTaskSignature'})
+    },
+
+    // 任务创建维修取消事件
+    cancelEvent () {
+      this.quitInfoShow = true
+    },
+
     // 自主报修提交事件
-    async abnormalRecordEvent () {
-      if (this.currentAbnormalType == '请选择') {
-        this.$toast('异常类型不能为空');
+    async sureEvent () {
+      if (JSON.stringify(this.currentTaskType) == '{}') {
+        this.$toast('任务类型不能为空');
         return
       };
-      if (this.currentSeverityLevel == '请选择') {
-        this.$toast('严重程度不能为空');
+      if (JSON.stringify(this.currentDepartment) == '{}') {
+        this.$toast('目的科室不能为空');
         return
       };
-      if (this.currentEquipmentStatus == '请选择') {
-        this.$toast('设备状态不能为空');
+      if (JSON.stringify(this.curretnParticipant) == '{}') {
+        this.$toast('参与人不能为空');
         return
       };
-      if (!this.currentFindTime) {
-        this.$toast('记录时间不能为空');
+      if (this.problemPicturesList.length == 0) {
+        this.$toast('问题图片不能为空');
+        return
+      };
+      if (this.repairPicturesList.length == 0) {
+        this.$toast('修复图片不能为空');
         return
       };
       // 上传图片到阿里云服务器(问题图片)
@@ -932,7 +1042,7 @@ export default {
       this.loadingText ='图片上传中...';
       this.overlayShow = true;
       this.loadingShow = true;
-      for (let imgI of temporaryProblemPicturesList) {
+      for (let imgI of temporaryRepairPicturesList) {
           if (Object.keys(this.timeMessage).length > 0) {
           // 判断签名信息是否过期
           if (new Date().getTime()/1000 - this.timeMessage['expire']  >= -30) {
@@ -984,10 +1094,12 @@ export default {
       this.overlayShow = true;
       saveDeviceAbnormalRecord(data).then((res) => {
         if (res && res.data.code == 200) {
+          this.$router.push({path: '/autoRepairTaskSignature'});
           this.$Alert({message:"新增成功",duration:3000,type:'success'});
         } else {
           // 防止任务生成失败后，再次生成时造成同一图片重复上传
           this.imgOnlinePathArr = [];
+          this.imgRepairOnlinePathArr = [];
           this.$dialog.alert({
             message: `${res.data.msg}`,
             closeOnPopstate: true
@@ -1000,6 +1112,7 @@ export default {
       })
       .catch((err) => {
         this.imgOnlinePathArr = [];
+        this.imgRepairOnlinePathArr = [];
         this.$dialog.alert({
           message: `${err.message}`,
           closeOnPopstate: true
@@ -1211,16 +1324,6 @@ export default {
       }
     },
 
-    // 确定退出(暂存)
-    quitSure () {
-      this.temporaryStorageEvent()
-    },
-
-    // 取消退出(不暂存)
-    quitCancel () {
-      this.$router.push({path: '/autoRepairList'})
-    },
-
     // 搜索物料事件
     searchEvent () {
       if (this.searchValue == '') {
@@ -1356,93 +1459,24 @@ export default {
     // 暂存事件
     temporaryStorageEvent () {
       try {
-        let casuallyTemporaryStoragePatrolTaskAbnormalRecordList = this.patrolTaskAbnormalRecordList;
-        if (casuallyTemporaryStoragePatrolTaskAbnormalRecordList.length > 0 ) {
-            let temporaryIndex = casuallyTemporaryStoragePatrolTaskAbnormalRecordList.findIndex((item) => { return item.storeId == this.$route.query.eventId &&
-            item.showDate ==  this.devicePatrolDetailsSelectMessage.showDate && item.collect == this.devicePatrolDetailsSelectMessage.selectTaskSetId && item.selectTime == this.devicePatrolDetailsSelectMessage.selectTime &&
-            item.taskSite == this.devicePatrolDetailsSelectMessage.taskSite && item.extendData.deviceId == this.patrolTaskDeviceChecklist.deviceId && item.extendData.checkTypeId == this.patrolTaskAbnormalCheckItemEventList.typeId && 
-            item.extendData.checkItemId == this.patrolTaskAbnormalCheckItemEventList.itemId && item.checkResultId == this.patrolTaskAbnormalCheckItemEventList.resultId
-            });
-            if (temporaryIndex != -1) {
-              casuallyTemporaryStoragePatrolTaskAbnormalRecordList[temporaryIndex]['eventType'] = this.currentAbnormalType == '请选择' ? '' : this.abnormalTypeOption.filter((item) => { return item.text == this.currentAbnormalType })[0]['value'];
-              casuallyTemporaryStoragePatrolTaskAbnormalRecordList[temporaryIndex]['registerSeverity'] = this.currentSeverityLevel == '请选择' ? '' : this.severityLevelOption.filter((item) => { return item.text == this.currentSeverityLevel })[0]['id'];
-              casuallyTemporaryStoragePatrolTaskAbnormalRecordList[temporaryIndex]['registerState'] = this.currentEquipmentStatus == '请选择' ? '' : this.equipmentStatusOption.filter((item) => { return item.text == this.currentEquipmentStatus })[0]['id'];
-              casuallyTemporaryStoragePatrolTaskAbnormalRecordList[temporaryIndex]['description'] = this.problemOverview;
-              casuallyTemporaryStoragePatrolTaskAbnormalRecordList[temporaryIndex]['findTime'] = this.getNowFormatDate(this.currentFindTime);
-              casuallyTemporaryStoragePatrolTaskAbnormalRecordList[temporaryIndex]['remark'] = this.taskDescribe;
-              casuallyTemporaryStoragePatrolTaskAbnormalRecordList[temporaryIndex]['images'] = this.problemPicturesList;
-              casuallyTemporaryStoragePatrolTaskAbnormalRecordList[temporaryIndex]['videos'] = this.problemVideosList
-            } else {
-              casuallyTemporaryStoragePatrolTaskAbnormalRecordList.push({
-                storeId: uuidv4(), 
-                eventType: this.currentAbnormalType == '请选择' ? '' : this.abnormalTypeOption.filter((item) => { return item.text == this.currentAbnormalType })[0]['value'],
-                registerSeverity: this.currentSeverityLevel == '请选择' ? '' : this.severityLevelOption.filter((item) => { return item.text == this.currentSeverityLevel })[0]['id'],
-                registerState: this.currentEquipmentStatus == '请选择' ? '' : this.equipmentStatusOption.filter((item) => { return item.text == this.currentEquipmentStatus })[0]['id'],
-                checkResultId: this.patrolTaskAbnormalCheckItemEventList.resultId,
-                depId: this.patrolTaskDeviceChecklist.deviceId,
-                depName: this.patrolTaskDeviceChecklist.deviceName,
-                findTime: this.getNowFormatDate(this.currentFindTime),
-                description: this.problemOverview,
-                remark: this.taskDescribe,
-                selectTime: this.devicePatrolDetailsSelectMessage.selectTime,
-                showDate: this.devicePatrolDetailsSelectMessage.showDate,
-                taskSite: this.devicePatrolDetailsSelectMessage.taskSite,
-                extendData: {
-                  colName: this.patrolTaskDeviceChecklist.configName,
-                  deviceId: this.patrolTaskDeviceChecklist.deviceId,
-                  deviceName: this.patrolTaskDeviceChecklist.deviceName,
-                  checkItemId: this.patrolTaskAbnormalCheckItemEventList.itemId,
-                  checkTypeId: this.patrolTaskAbnormalCheckItemEventList.typeId,
-                  deviceNorms: this.patrolTaskDeviceChecklist.norms,
-                  checkItemName: this.patrolTaskAbnormalCheckItemEventList.itemName,
-                  checkTypeName: this.patrolTaskAbnormalCheckItemEventList.typeName
-                },
-                images: this.problemPicturesList,
-                videos: this.problemVideosList,
-                collect: this.devicePatrolDetailsSelectMessage.selectTaskSetId,
-                proId: this.userInfo.proIds[0],
-                system: 9,
-                createName: this.userInfo.name,
-                taskNumber: this.patrolTaskAbnormalCheckItemEventList.taskNumber
-              })
-            }
-          } else {
-            casuallyTemporaryStoragePatrolTaskAbnormalRecordList.push({
-              storeId: uuidv4(),
-              eventType: this.currentAbnormalType == '请选择' ? '' : this.abnormalTypeOption.filter((item) => { return item.text == this.currentAbnormalType })[0]['value'],
-              registerSeverity: this.currentSeverityLevel == '请选择' ? '' : this.severityLevelOption.filter((item) => { return item.text == this.currentSeverityLevel })[0]['id'],
-              registerState: this.currentEquipmentStatus == '请选择' ? '' : this.equipmentStatusOption.filter((item) => { return item.text == this.currentEquipmentStatus })[0]['id'],
-              checkResultId: this.patrolTaskAbnormalCheckItemEventList.resultId,
-              depId: this.patrolTaskDeviceChecklist.deviceId,
-              depName: this.patrolTaskDeviceChecklist.deviceName,
-              findTime: this.getNowFormatDate(this.currentFindTime),
-              description: this.problemOverview,
-              remark: this.taskDescribe,
-              selectTime: this.devicePatrolDetailsSelectMessage.selectTime,
-              showDate: this.devicePatrolDetailsSelectMessage.showDate,
-              taskSite: this.devicePatrolDetailsSelectMessage.taskSite,
-              extendData: {
-                colName: this.patrolTaskDeviceChecklist.configName,
-                deviceId: this.patrolTaskDeviceChecklist.deviceId,
-                deviceName: this.patrolTaskDeviceChecklist.deviceName,
-                checkItemId: this.patrolTaskAbnormalCheckItemEventList.itemId,
-                checkTypeId: this.patrolTaskAbnormalCheckItemEventList.typeId,
-                deviceNorms: this.patrolTaskDeviceChecklist.norms,
-                checkItemName: this.patrolTaskAbnormalCheckItemEventList.itemName,
-                checkTypeName: this.patrolTaskAbnormalCheckItemEventList.typeName
-              },
-              images: this.problemPicturesList,
-              videos: this.problemVideosList,
-              collect: this.devicePatrolDetailsSelectMessage.selectTaskSetId,
-              proId: this.userInfo.proIds[0],
-              system: 9,
-              createName: this.userInfo.name,
-              taskNumber: this.patrolTaskAbnormalCheckItemEventList.taskNumber
-            })
-        };
-        this.changePatrolTaskAbnormalRecordList(casuallyTemporaryStoragePatrolTaskAbnormalRecordList);
+        let casuallyTemporaryStorageCreateAutoRepairTaskMessage = this._.cloneDeep(this.createAutoRepairTaskMessage);
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['taskTypeIndex'] = this.taskTypeIndex;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentTaskType'] = this.currentTaskType;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentConstructionIndex'] = this.currentConstructionIndex;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentConstruction'] = this.currentConstruction;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartment'] = this.currentDepartment;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartmentIndex'] = this.currentDepartmentIndex;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoom'] = this.currentRoom;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoomIndex'] = this.currentRoomIndex;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['problemPicturesList'] = this.problemPicturesList;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['issueDescribe'] = this.issueDescribe;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['curretnParticipant'] = this.curretnParticipant;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['repairPicturesList'] = this.repairPicturesList;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['consumableMsgList'] = this.consumableMsgList;
+        console.log('暂存信息',casuallyTemporaryStorageCreateAutoRepairTaskMessage,this.currentConstruction);
+        this.changeCreateAutoRepairTaskMessage(casuallyTemporaryStorageCreateAutoRepairTaskMessage);
         this.$Alert({message:"暂存成功",duration:3000,type:'success'});
-        this.$router.push({path: `${this.enterPatrolAbnormalRecordPageSource}`})
+        this.$router.push({path: '/autoRepairList'})
       } catch (err) {
         this.$dialog.alert({
           message: `${err}`,
@@ -1473,56 +1507,62 @@ export default {
           overflow: auto;
           font-size: 14px;
         };
-        .left {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          .construction-list {
-            width: 100%;
-            flex-shrink: 0;
-            .no-wrap();
-            padding-left: 10px;
-            box-sizing: border-box;
-            height: 40px;
-            line-height: 40px
-          };
-          .constructionListStyle {
-            color: #3B9DF9 !important;
-            background-color: rgba(0, 0, 0, 0.05) !important; 
+        .left-wrapper {
+          .left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            .construction-list {
+              width: 100%;
+              flex-shrink: 0;
+              .no-wrap();
+              padding-left: 10px;
+              box-sizing: border-box;
+              height: 40px;
+              line-height: 40px
+            };
+            .constructionListStyle {
+              color: #3B9DF9 !important;
+              background-color: rgba(0, 0, 0, 0.05) !important; 
+            }
           }
         };
-        .center {
-          display: flex;
-          flex-direction: column;
-          .tier-list {
-            padding-left: 10px;
-            .no-wrap();
-            flex-shrink: 0;
-            box-sizing: border-box;
-            height: 40px;
-            line-height: 40px
-          };
-          .tierListStyle {
-            color: #3B9DF9 !important;
-            background-color: rgba(0, 0, 0, 0.05) !important; 
+        .center-wrapper {  
+          .center {
+            display: flex;
+            flex-direction: column;
+            .tier-list {
+              padding-left: 10px;
+              .no-wrap();
+              flex-shrink: 0;
+              box-sizing: border-box;
+              height: 40px;
+              line-height: 40px
+            };
+            .tierListStyle {
+              color: #3B9DF9 !important;
+              background-color: rgba(0, 0, 0, 0.05) !important; 
+            }
           }
         };
-        .right {
-          display: flex;
-          flex-direction: column;
-          .department-list {
-            padding-left: 10px;
-            flex-shrink: 0;
-            .no-wrap();
-            box-sizing: border-box;
-            height: 40px;
-            line-height: 40px
-          };
-          .departmentListStyle {
-            color: #3B9DF9 !important;
-            background-color: rgba(0, 0, 0, 0.05) !important; 
+        .right-wrapper {  
+          .right {
+            display: flex;
+            flex-direction: column;
+            .department-list {
+              padding-left: 10px;
+              flex-shrink: 0;
+              .no-wrap();
+              box-sizing: border-box;
+              height: 40px;
+              line-height: 40px
+            };
+            .departmentListStyle {
+              color: #3B9DF9 !important;
+              background-color: rgba(0, 0, 0, 0.05) !important; 
+            }
           }
-        }
+        }  
       };
       .van-icon {
         top: 10px !important;

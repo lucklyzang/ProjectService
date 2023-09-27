@@ -17,6 +17,7 @@
     "echarts": "^4.2.1",
     "js-base64": "^2.6.3",
     "lib-flexible": "^0.3.2",
+    "lodash": "^4.17.21",
     "moment": "^2.24.0",
     "px2rem-loader": "^0.1.9",
     "qs": "^6.6.0",
