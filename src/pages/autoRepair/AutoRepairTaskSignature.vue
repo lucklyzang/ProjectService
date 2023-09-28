@@ -80,11 +80,11 @@ export default {
   watch: {},
 
   computed: {
-    ...mapGetters(["userInfo","currentElectronicSignature","patrolTaskListMessage","ossMessage","timeMessage","originalSignature","devicePatrolDetailsSelectMessage"])
+    ...mapGetters(["userInfo","submitAutoRepairTaskMessage","currentElectronicSignature","createAutoRepairTaskMessage","patrolTaskListMessage","ossMessage","timeMessage","originalSignature","devicePatrolDetailsSelectMessage"])
   },
 
   methods: {
-    ...mapMutations(["changeOssMessage","changeTimeMessage","changePatrolTaskListMessage"]),
+    ...mapMutations(["changeOssMessage","changeTimeMessage","changePatrolTaskListMessage","changeCreateAutoRepairTaskMessage"]),
 
 
     resizeScreen() {

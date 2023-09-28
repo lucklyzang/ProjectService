@@ -10,6 +10,8 @@ export default {
     // 过期方式
     overDueWay: false,
     originalSignature: null,
+    timeMessage: {}, //阿里云签名过期时间信息
+    ossMessage: {}, //阿里云签名信息
     currentElectronicSignature: null,
     newTaskName: [],
     taskType: '',
@@ -26,6 +28,8 @@ export default {
     newTaskName: state => state.newTaskName,
     taskType: state => state.taskType,
     globalTimer: state => state.globalTimer,
+    timeMessage: state => state.timeMessage,
+    ossMessage: state => state.ossMessage,
     navTopTitle: state => state.navTopTitle,
     originalSignature: state => state.originalSignature,
     currentElectronicSignature: state => state.currentElectronicSignature,
@@ -61,6 +65,15 @@ export default {
     // 修改过期方式
     changeOverDueWay (state, playLoad) {
       state.overDueWay = playLoad
+    },
+    //保存阿里云签名过期日期
+    changeTimeMessage (state, playLoad) {
+      state.timeMessage = playLoad
+    },
+
+    //保存阿里云签名信息
+    changeOssMessage (state, playLoad) {
+      state.ossMessage = playLoad
     },
     // 改变新任务列表状态
     changeNewTaskList (state, playLoad) {

@@ -30,7 +30,7 @@
           <div class="right-wrapper">
             <div class="right">
               <van-empty description="暂无科室" v-show="departmentList.length == 0" />
-              <div class="department-list" v-for="(item,index) in departmentList" :key="index" @click="departmentItemClickEvent(item,index)" :class="{'departmentListStyle': currentDepartmentIndex == index}">
+              <div class="department-list" v-for="(item,index) in departmentList" :key="index" @click="departmentItemClickEvent(item,index)" :class="{'departmentListStyle': currentDepartmentIndex === index}">
                 {{ item.text }}
               </div>
             </div>
@@ -44,12 +44,13 @@
         v-model="roomDialogShow"
         round
         closeable
+        @close="closeRoomDialogEvent"
         position="bottom"
         :style="{ height: '45%' }"
       >
         <div class="room-content-box">
           <van-empty description="暂无房间" v-show="roomList.length == 0" />
-          <div class="room-content" @click="roomItemClickEvent(item,index)" :class="{'roomContentStyle': currentRoomIndex == index}" v-for="(item,index) in roomList" :key="index">
+          <div class="room-content" @click="roomItemClickEvent(item,index)" :class="{'roomContentStyle': item.selected}" v-for="(item,index) in roomList" :key="index">
             {{ item.text }}
           </div>
         </div>
@@ -243,7 +244,7 @@
                       <span>目的房间</span>
                     </div>
                     <div class="goal-department-right" @click="goalRoomClickEvent">
-                      <span>{{ currentRoom.text }}</span>
+                      <span>{{ disposeCheckType(currentRoom) }}</span>
                       <van-icon name="arrow" color="#989999" size="24" />
                     </div>
                   </div>
@@ -293,7 +294,7 @@
                   <span>维修员</span>
                 </div>
                 <div class="maintenance-man-right">
-                  <span>张三</span>
+                  <span>{{ userName }}</span>
                 </div>
               </div>
               <div class="participation-man">
@@ -301,7 +302,7 @@
                   <span>参与人</span>
                 </div>
                 <div class="participation-man-right" @click="participationPersonClickEvent">
-                  <span>{{ disposeTaskPresent(curretnParticipant) }}</span>
+                  <span>{{ disposeTaskPresent(currentParticipant) }}</span>
                   <van-icon name="arrow" color="#989999" size="24" />
                 </div>
               </div>
@@ -400,7 +401,6 @@ export default {
   mixins:[mixinsDeviceReturn],
   data() {
     return {
-      currentRoomIndex: null,
       deleteInfoPng: require('@/common/images/home/delete-info.png'),
       currentConstructionIndex: null,
       currentDepartmentIndex: null,
@@ -424,18 +424,11 @@ export default {
         text: '',
         value: ''
       },
-      currentRoom: {
-        text: '',
-        value: ''
-      },
-      curretnParticipant: [],
+      currentRoom: [],
+      currentParticipant: [],
       taskTypeOption: [],
       imgOnlinePathArr: [],
-      imgDeleteUrlArr: [],
-      existOnlineImgPath: [],
       imgRepairOnlinePathArr: [],
-      imgRepairDeleteUrlArr: [],
-      existOnlineImgRepairPath: [],
       imgDeleteUrl: '',
       loadingText: '加载中',
       issueDescribe: '',
@@ -466,28 +459,59 @@ export default {
       materialShow: false,
       materialDeleteShow: false,
       deleteMaterialIndex: '',
+      fromSource: '',
       deleteMaterial: '',
       searchValue: ''
     }
   },
 
   mounted() {
-    // 控制设备物理返回按键
-    this.deviceReturn('/autoRepairList');
+    if (!IsPC()) {
+      let that = this;
+      pushHistory();
+      that.gotoURL(() => {
+        pushHistory();
+        that.$router.push({path: '/autoRepairList'})
+      })
+    };
+    // 二维码回调方法绑定到window下面,提供给外部调用
+    let me = this;
+    window['scanQRcodeCallback'] = (code) => {
+        me.scanQRcodeCallback(code);
+    };
+    window['scanQRcodeCallbackCanceled'] = () => {
+      me.scanQRcodeCallbackCanceled();
+    };
     this.parallelFunction()
+  },
+
+  beforeRouteEnter(to, from, next) {
+    next(vm=>{
+      vm.fromSource = from.path
+	  });
+    next() 
   },
 
   watch: {},
 
   computed: {
-    ...mapGetters(["userInfo","createAutoRepairTaskMessage"]),
+    ...mapGetters(["userInfo","createAutoRepairTaskMessage","ossMessage","timeMessage"]),
     proId () {
       return this.userInfo.extendData.proId
+    },
+    userName () {
+      return this.userInfo.userName
+    },
+    proName () {
+      return this.userInfo.extendData.proName
+    },
+    workerId () {
+      return this.userInfo.extendData.userId
     }
   },
 
   methods: {
-    ...mapMutations(["changeCreateAutoRepairTaskMessage"]),
+    ...mapMutations(["changeCreateAutoRepairTaskMessage","changeSubmitAutoRepairTaskMessage","changeOssMessage","changeTimeMessage",]),
 
     onClickLeft() {
       this.quitInfoShow = true;
@@ -495,7 +519,7 @@ export default {
     },
 
     onClickRight() {
-
+      this.scanQRCode()
     },
 
     // 回显暂存的创建自主报修任务信息
@@ -506,19 +530,30 @@ export default {
       this.currentConstructionIndex = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentConstructionIndex'];
       this.currentConstruction = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentConstruction'];
       this.currentDepartment = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartment'];
-      this.currentDepartmentIndex = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartmentIndex'];
       this.currentRoom = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoom'];
-      this.currentRoomIndex = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoomIndex'];
       this.problemPicturesList = casuallyTemporaryStorageCreateAutoRepairTaskMessage['problemPicturesList'];
       this.issueDescribe = casuallyTemporaryStorageCreateAutoRepairTaskMessage['issueDescribe'];
-      this.curretnParticipant = casuallyTemporaryStorageCreateAutoRepairTaskMessage['curretnParticipant'];
+      this.currentParticipant = casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentParticipant'];
       this.repairPicturesList = casuallyTemporaryStorageCreateAutoRepairTaskMessage['repairPicturesList'];
-      this.consumableMsgList = casuallyTemporaryStorageCreateAutoRepairTaskMessage['consumableMsgList']
+      this.consumableMsgList = casuallyTemporaryStorageCreateAutoRepairTaskMessage['consumableMsgList'];
+      this.imgOnlinePathArr = casuallyTemporaryStorageCreateAutoRepairTaskMessage['imgOnlinePathArr'];
+      this.imgRepairOnlinePathArr = casuallyTemporaryStorageCreateAutoRepairTaskMessage['imgRepairOnlinePathArr'];
+      if (this.fromSource == '/autoRepairTaskSignature') {
+        this.problemPicturesList = this.imgOnlinePathArr.concat(this.problemPicturesList.filter((item) => { return item.indexOf('https://') != -1}));
+        this.imgOnlinePathArr = [];
+        this.repairPicturesList = this.imgRepairOnlinePathArr.concat(this.repairPicturesList.filter((item) => { return item.indexOf('https://') != -1}));
+        this.imgRepairOnlinePathArr = []
+      }
     },
 
     // 关闭参与人弹窗事件
     closeParticipationPersonDialogEvent () {
-      this.curretnParticipant = this.participationPersonList.filter((item) => { return item.checked == true })
+      this.currentParticipant = this.participationPersonList.filter((item) => { return item.checked == true })
+    },
+
+    // 关闭目的房间弹窗事件
+    closeRoomDialogEvent () {
+      this.currentRoom = this.roomList.filter((item) => { return item.selected == true })
     },
 
     // 处理维修任务空间信息
@@ -527,7 +562,7 @@ export default {
       if (item.length == 0) { return };
       let temporaryArray = [];
       for (let innerItem of item) {
-        temporaryArray.push(innerItem.name)
+        temporaryArray.push(innerItem.text)
       };
       return temporaryArray.join('、')
     },
@@ -577,9 +612,7 @@ export default {
 
     // 房间名称点击事件
     roomItemClickEvent (item,index) {
-      this.currentRoomIndex = index;
-      this.currentRoom['text'] = item['text'];
-      this.currentRoom['value'] = item['value']
+      item['selected'] = !item['selected']
     },
 
     // 科室名称点击事件
@@ -767,6 +800,15 @@ export default {
                   value: item3[i]['id'],
                   checked: false
                 })
+              };
+              if (JSON.stringify(this.createAutoRepairTaskMessage) != '{}') {
+                if (this.createAutoRepairTaskMessage['currentParticipant'].length > 0) {
+                  this.participationPersonList.forEach((innerItem) => {
+                    if (this.createAutoRepairTaskMessage['currentParticipant'].findIndex((el) => { return el.value == innerItem.value }) != -1) {
+                      innerItem['checked'] = true
+                    }
+                  })
+                }
               }
             };
             // 物料信息
@@ -824,8 +866,7 @@ export default {
       this.currentDepartment = {};
       this.currentDepartmentIndex = null;
       this.roomList = [];
-      this.currentRoom = {};
-      this.currentRoomIndex = null;
+      this.currentRoom = [];
       queryDepartment(this.proId,structureId)
       .then((res) => {
         this.loadingText = '';
@@ -874,8 +915,7 @@ export default {
       this.overlayShow = true;
       this.roomList = [];
       if (flag) {
-        this.currentRoom = {};
-        this.currentRoomIndex = null;
+        this.currentRoom = []
       };
       querySpace(this.proId,depId)
       .then((res) => {
@@ -892,12 +932,12 @@ export default {
               })
             };
             if (JSON.stringify(this.createAutoRepairTaskMessage) != '{}' && !flag) {
-              if (this.createAutoRepairTaskMessage['currentRoom']['value'] || this.createAutoRepairTaskMessage['currentRoom']['value'] === 0) {
-                let casuallyTemporaryStorageCreateAutoRepairTaskMessage = this._.cloneDeep(this.createAutoRepairTaskMessage);
-                let TemporaryIndex = this.roomList.findIndex((innerItem) => { return innerItem.value == this.createAutoRepairTaskMessage['currentRoom']['value']});
-                casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoomIndex'] = TemporaryIndex;
-                this.currentDepartmentIndex = TemporaryIndex;
-                this.changeCreateAutoRepairTaskMessage(casuallyTemporaryStorageCreateAutoRepairTaskMessage)
+              if (this.createAutoRepairTaskMessage['currentRoom'].length > 0) {
+                this.roomList.forEach((innerItem) => {
+                  if (this.createAutoRepairTaskMessage['currentRoom'].findIndex((el) => { return el.value == innerItem.value }) != -1) {
+                    innerItem['selected'] = true
+                  }
+                })
               }
             }  
           }
@@ -986,11 +1026,6 @@ export default {
       })
     },
 
-    // 任务创建维修确认事件
-    sureEvent () {
-      this.$router.push({path: '/autoRepairTaskSignature'})
-    },
-
     // 任务创建维修取消事件
     cancelEvent () {
       this.quitInfoShow = true
@@ -1006,7 +1041,7 @@ export default {
         this.$toast('目的科室不能为空');
         return
       };
-      if (JSON.stringify(this.curretnParticipant) == '{}') {
+      if (this.currentParticipant.length == 0) {
         this.$toast('参与人不能为空');
         return
       };
@@ -1058,70 +1093,65 @@ export default {
       };
       // 新增自主报修
       let temporaryMessage = {
-        eventType: this.abnormalTypeOption.filter((item) => { return item.text == this.currentAbnormalType })[0]['value'],
-        registerSeverity: this.severityLevelOption.filter((item) => { return item.text == this.currentSeverityLevel })[0]['id'],
-        registerState: this.equipmentStatusOption.filter((item) => { return item.text == this.currentEquipmentStatus })[0]['id'],
-        checkResultId: this.patrolTaskAbnormalCheckItemEventList.resultId,
-        depId: this.patrolTaskDeviceChecklist.deviceId,
-        depName: this.patrolTaskDeviceChecklist.deviceName,
-        findTime: this.getNowFormatDate(this.currentFindTime),
-        description: this.problemOverview,
-        remark: this.taskDescribe,
-        extendData: {
-          colName: this.patrolTaskDeviceChecklist.configName,
-          deviceId: this.patrolTaskDeviceChecklist.deviceId,
-          deviceName: this.patrolTaskDeviceChecklist.deviceName,
-          checkItemId: this.patrolTaskAbnormalCheckItemEventList.itemId,
-          checkTypeId: this.patrolTaskAbnormalCheckItemEventList.typeId,
-          deviceNorms: this.patrolTaskDeviceChecklist.norms,
-          checkItemName: this.patrolTaskAbnormalCheckItemEventList.itemName,
-          checkTypeName: this.patrolTaskAbnormalCheckItemEventList.typeName
-        },
-        images: this.imgOnlinePathArr.concat(this.problemPicturesList.filter((item) => { return item.indexOf('https://') != -1})),
-        collect: this.devicePatrolDetailsSelectMessage.selectTaskSetId,
-        proId: this.userInfo.proIds[0],
-        system: 9,
-        createName: this.userInfo.name,
-        taskNumber: this.patrolTaskAbnormalCheckItemEventList.taskNumber
+        typeId: this.currentTaskType['value'], // 任务类型
+        typeName: this.currentTaskType['text'], // 类型名称
+        taskDesc: this.issueDescribe, // 问题描述
+        destinationId: this.currentDepartment['value'], // 目的地id
+        isOwn: 1,
+        proId: this.proId,
+        issueImages: this.imgOnlinePathArr.concat(this.problemPicturesList.filter((item) => { return item.indexOf('https://') != -1})),
+        repairImages: this.imgRepairOnlinePathArr.concat(this.repairPicturesList.filter((item) => { return item.indexOf('https://') != -1})),
+        proName: this.proName,
+        createId: this.workerId,
+        createName: this.userName,
+        createType: 0, // 创建类型 0-调度员 2-医务人员 3-巡检人员
+        workerId: this.workerId,
+        workerName: this.userName,
+        spaces: [], //空间信息
+        present: [], //参与者
+        materials: []        // 需要的物料
       };
-      this.postGenerateRepairsTask(temporaryMessage)
-    },
-
-    // 新增自主报修
-    postGenerateRepairsTask (data) {
-      this.loadingText = '登记中...';
-      this.loadingShow = true;
-      this.overlayShow = true;
-      saveDeviceAbnormalRecord(data).then((res) => {
-        if (res && res.data.code == 200) {
-          this.$router.push({path: '/autoRepairTaskSignature'});
-          this.$Alert({message:"新增成功",duration:3000,type:'success'});
-        } else {
-          // 防止任务生成失败后，再次生成时造成同一图片重复上传
-          this.imgOnlinePathArr = [];
-          this.imgRepairOnlinePathArr = [];
-          this.$dialog.alert({
-            message: `${res.data.msg}`,
-            closeOnPopstate: true
-          }).then(() => {
-          });
-        };
-        this.loadingText = '';
-        this.loadingShow = false;
-        this.overlayShow = false
-      })
-      .catch((err) => {
-        this.imgOnlinePathArr = [];
-        this.imgRepairOnlinePathArr = [];
-        this.$dialog.alert({
-          message: `${err.message}`,
-          closeOnPopstate: true
-        }).then(() => {
-        });
-        this.loadingText = '';
-        this.loadingShow = false;
-        this.overlayShow = false
-      })
+      // 拼接参与者数据
+      if (this.currentParticipant.length > 0) {
+        for (let item of this.currentParticipant) {
+          temporaryMessage['present'].push({
+            id: item.value,
+            name: item.text
+          })
+        }
+      };
+      // 拼接空间信息
+      if (this.room.length > 0) {
+        for (let item of this.currentRoom) {
+          temporaryMessage['spaces'].push({
+            id: item.value,
+            name: item.text
+          })
+        }
+      };
+      // 拼接使用耗材数据
+      if (this.consumableMsgList.length > 0) {
+        for (let item of this.consumableMsgList) {
+          if (item.number > 0) {
+            temporaryMessage['materials'].push({
+              mateNumber: item['mateNumber'],
+              storeId: item['storeId'],
+              number: item['number'],
+              mateName: item['mateName'],
+              mateId: item['mateId'],
+              proId: this.proId,
+              proName: this.proName,
+              systemId: item['systemId'],
+              unit: item['unit'],
+              model: item['model']
+            })
+          }  
+        }
+      };
+      this.changeSubmitAutoRepairTaskMessage(temporaryMessage);
+      this.temporaryStorageEvent();
+      // 去往签字页
+      // this.$router.push({path: '/autoRepairTaskSignature'});
     },
 
     // 问题图片放大事件
@@ -1144,26 +1174,12 @@ export default {
 
     // 图片确定删除提示框确定事件(问题图片)
     sureDeleteEvent () {
-      this.imgDeleteUrlArr.push(this.imgDeleteUrl);
-      this.problemPicturesList.splice(this.imgIndex, 1);
-      for (let item of this.imgDeleteUrlArr) {
-        let temporaryIndex = this.existOnlineImgPath.indexOf(item);
-        if (temporaryIndex > -1) {
-          this.existOnlineImgPath.splice(this.existOnlineImgPath.indexOf(item),1)
-        }
-      }
+      this.problemPicturesList.splice(this.imgIndex, 1)
     },
 
     // 图片确定删除提示框确定事件(修复图片)
     sureRepairDeleteEvent () {
-      this.imgRepairDeleteUrlArr.push(this.imgDeleteUrl);
-      this.repairPicturesList.splice(this.imgIndex, 1);
-      for (let item of this.imgRepairDeleteUrlArr) {
-        let temporaryIndex = this.existOnlineImgRepairPath.indexOf(item);
-        if (temporaryIndex > -1) {
-          this.existOnlineImgPath.splice(this.existOnlineImgRepairPath.indexOf(item),1)
-        }
-      }
+      this.repairPicturesList.splice(this.imgIndex, 1)
     },
 
     // 问题拍照照片删除
@@ -1283,6 +1299,51 @@ export default {
     enlareEvent (item) {
       this.currentImgUrl = item;
       this.imgBoxShow = true
+    },
+
+    // 扫描二维码方法
+    scanQRCode () {
+      window.android.scanQRcode()
+    },
+
+    // 摄像头扫码后的回调
+    scanQRcodeCallback(code) {
+      if (code) {
+        let codeData = code.split('|');
+        if (codeData.length > 0) {
+          // 获取扫码科室信息;
+          this.currentDepartment['value'] = codeData[0];
+          let currentDempartmentListInfo = this.departmentList.filter((item) => { return item.value == codeData[0]});
+          if (currentDempartmentListInfo.length > 0) {
+            this.currentDepartment['text'] = currentDempartmentListInfo[0]['text'];
+          };
+          // 根据科室获取房间信息
+          this.getSpacesByDepartmentId(codeData[0],true)
+          try {
+          } catch (err) {
+            this.$toast({
+              message: `${err}`,
+              type: 'fail'
+            })
+          }
+        } else {
+          this.$dialog.alert({
+            message: '当前二维码数据格式不正确,请重新扫描!'
+          }).then(() => {
+            this.scanQRCode()
+          })
+        }   
+      } else {
+        this.$dialog.alert({
+            message: '当前没有扫描到任何信息,请重新扫描!'
+        }).then(() => {
+            this.scanQRCode()
+        })
+      }
+    },
+
+    // 摄像头取消扫码后的回调
+    scanQRcodeCallbackCanceled () {
     },
 
     // 优先级转换
@@ -1467,13 +1528,13 @@ export default {
         casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartment'] = this.currentDepartment;
         casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartmentIndex'] = this.currentDepartmentIndex;
         casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoom'] = this.currentRoom;
-        casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentRoomIndex'] = this.currentRoomIndex;
         casuallyTemporaryStorageCreateAutoRepairTaskMessage['problemPicturesList'] = this.problemPicturesList;
         casuallyTemporaryStorageCreateAutoRepairTaskMessage['issueDescribe'] = this.issueDescribe;
-        casuallyTemporaryStorageCreateAutoRepairTaskMessage['curretnParticipant'] = this.curretnParticipant;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentParticipant'] = this.currentParticipant;
         casuallyTemporaryStorageCreateAutoRepairTaskMessage['repairPicturesList'] = this.repairPicturesList;
         casuallyTemporaryStorageCreateAutoRepairTaskMessage['consumableMsgList'] = this.consumableMsgList;
-        console.log('暂存信息',casuallyTemporaryStorageCreateAutoRepairTaskMessage,this.currentConstruction);
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['imgOnlinePathArr'] = this.imgOnlinePathArr;
+        casuallyTemporaryStorageCreateAutoRepairTaskMessage['imgRepairOnlinePathArr'] = this.imgRepairOnlinePathArr;
         this.changeCreateAutoRepairTaskMessage(casuallyTemporaryStorageCreateAutoRepairTaskMessage);
         this.$Alert({message:"暂存成功",duration:3000,type:'success'});
         this.$router.push({path: '/autoRepairList'})
