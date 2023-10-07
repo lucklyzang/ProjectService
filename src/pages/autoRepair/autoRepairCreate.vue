@@ -1572,7 +1572,6 @@ export default {
           .left {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             .construction-list {
               width: 100%;
               flex-shrink: 0;
