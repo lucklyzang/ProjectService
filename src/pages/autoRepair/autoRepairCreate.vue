@@ -386,7 +386,8 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from "vuex";
-import {getAliyunSign} from '@/api/login.js'
+import { getAliyunSign } from '@/api/login.js'
+import { scanDepartment, completeAutoRepairsTask } from '@/api/autoRepairCreate.js'
 import { getTransporter, querySpace, queryDepartment, queryRepairsTaskTool, queryStructure, queryRepairsTaskMaterial, getRepairsTaskType} from '@/api/taskScheduling.js'
 import {mixinsDeviceReturn} from '@/mixins/deviceReturnFunction'
 import { setStore,removeAllLocalStorage } from '@/common/js/utils'
@@ -414,6 +415,7 @@ export default {
       deleteInfoDialogShow: false,
       deleteRepairInfoDialogShow: false,
       quitInfoShow: false,
+      isExpire: false,
       imgIndex: '',
       currentTaskType: {},
       currentConstruction: {
@@ -477,7 +479,7 @@ export default {
     // 二维码回调方法绑定到window下面,提供给外部调用
     let me = this;
     window['scanQRcodeCallback'] = (code) => {
-        me.scanQRcodeCallback(code);
+      me.scanQRcodeCallback(code);
     };
     window['scanQRcodeCallbackCanceled'] = () => {
       me.scanQRcodeCallbackCanceled();
@@ -648,11 +650,11 @@ export default {
     getSign (filePath = '',text) {
       return new Promise((resolve, reject) => {
         getAliyunSign().then((res) => {
-          if (res && res.data.code == 200) {
+          if (res && res.status == 200) {
             // 存储签名信息
-            this.changeOssMessage(res.data.data);
+            this.changeOssMessage(res.data);
             let temporaryTimeInfo = {};
-            temporaryTimeInfo['expire'] = Number(res.data.data.expire);
+            temporaryTimeInfo['expire'] = Number(res.data.expire);
             // 存储过期时间信息
             this.changeTimeMessage(temporaryTimeInfo);
             if (this.isExpire) {
@@ -663,6 +665,7 @@ export default {
           } else {
             this.overlayShow = false;
             this.loadingShow = false;
+            this.loadingText = '';
             this.$toast({
               message: `${res.data.msg}`,
               type: 'fail'
@@ -673,6 +676,7 @@ export default {
         .catch((err) => {
           this.overlayShow = false;
           this.loadingShow = false;
+          this.loadingText = '';
           this.$toast({
             message: `${err}`,
             type: 'fail'
@@ -960,6 +964,8 @@ export default {
         queryRepairsTaskTool(this.proId).then((res) => {
           if (res && res.data.code == 200) {
             resolve(res.data.data)
+          } else {
+            reject(res.data.msg)
           }
         })
         .catch((err) => {
@@ -974,6 +980,8 @@ export default {
           queryRepairsTaskMaterial(this.proId).then((res) => {
             if (res && res.data.code == 200) {
               resolve(res.data.data)
+            } else {
+              reject(res.data.msg)
             }
           })
           .catch((err) => {
@@ -988,6 +996,8 @@ export default {
           queryStructure(this.proId).then((res) => {
             if (res && res.data.code == 200) {
               resolve(res.data.data)
+            } else {
+              reject(res.data.msg)
             }
           })
           .catch((err) => {
@@ -1003,6 +1013,8 @@ export default {
         .then((res) => {
           if (res && res.data.code == 200) {
             resolve(res.data.data)
+          } else {
+            reject(res.data.msg)
           }
         })
         .catch((err) => {
@@ -1018,6 +1030,8 @@ export default {
         .then((res) => {
           if (res && res.data.code == 200) {
             resolve(res.data.data)
+          } else {
+            reject(res.data.msg)
           }
         })
         .catch((err) => {
@@ -1041,10 +1055,10 @@ export default {
         this.$toast('目的科室不能为空');
         return
       };
-      if (this.currentParticipant.length == 0) {
-        this.$toast('参与人不能为空');
-        return
-      };
+      // if (this.currentParticipant.length == 0) {
+      //   this.$toast('参与人不能为空');
+      //   return
+      // };
       if (this.problemPicturesList.length == 0) {
         this.$toast('问题图片不能为空');
         return
@@ -1059,18 +1073,18 @@ export default {
       this.overlayShow = true;
       this.loadingShow = true;
       for (let imgI of temporaryProblemPicturesList) {
-          if (Object.keys(this.timeMessage).length > 0) {
+        if (Object.keys(this.timeMessage).length > 0) {
           // 判断签名信息是否过期
           if (new Date().getTime()/1000 - this.timeMessage['expire']  >= -30) {
-              await this.getSign('repair');
-              await this.uploadImageToOss(imgI,'issue')
+            await this.getSign(imgI,'issue');
+            await this.uploadImageToOss(imgI,'issue')
           } else {
-              await this.uploadImageToOss(imgI,'issue')
-          }
-          } else {
-          await this.getSign('repair');
+            await this.uploadImageToOss(imgI,'issue')
+          };
+        } else {
+          await this.getSign(imgI,'issue');
           await this.uploadImageToOss(imgI,'issue')
-          }
+        }
       };
       // 上传图片到阿里云服务器(修复图片)
       let temporaryRepairPicturesList = this.repairPicturesList.filter((item) => { return item.indexOf('https://') == -1});
@@ -1078,18 +1092,18 @@ export default {
       this.overlayShow = true;
       this.loadingShow = true;
       for (let imgI of temporaryRepairPicturesList) {
-          if (Object.keys(this.timeMessage).length > 0) {
+        if (Object.keys(this.timeMessage).length > 0) {
           // 判断签名信息是否过期
           if (new Date().getTime()/1000 - this.timeMessage['expire']  >= -30) {
-              await this.getSign('repair');
-              await this.uploadImageToOss(imgI,'repair')
+            await this.getSign(imgI,'repair');
+            await this.uploadImageToOss(imgI,'repair')
           } else {
-              await this.uploadImageToOss(imgI,'repair')
+            await this.uploadImageToOss(imgI,'repair')
           }
-          } else {
-          await this.getSign('repair');
+        } else {
+          await this.getSign(imgI,'repair');
           await this.uploadImageToOss(imgI,'repair')
-          }
+        }
       };
       // 新增自主报修
       let temporaryMessage = {
@@ -1098,19 +1112,38 @@ export default {
         taskDesc: this.issueDescribe, // 问题描述
         destinationId: this.currentDepartment['value'], // 目的地id
         isOwn: 1,
+        isApp: 1,
         proId: this.proId,
-        issueImages: this.imgOnlinePathArr.concat(this.problemPicturesList.filter((item) => { return item.indexOf('https://') != -1})),
-        repairImages: this.imgRepairOnlinePathArr.concat(this.repairPicturesList.filter((item) => { return item.indexOf('https://') != -1})),
+        images: [],
         proName: this.proName,
         createId: this.workerId,
         createName: this.userName,
-        createType: 0, // 创建类型 0-调度员 2-医务人员 3-巡检人员
+        createType: 3, // 创建类型 0-调度员 2-医务人员 3-巡检人员
         workerId: this.workerId,
         workerName: this.userName,
         spaces: [], //空间信息
         present: [], //参与者
-        materials: []        // 需要的物料
+        materials: [] // 需要的物料
       };
+      // 拼接图片信息
+      let temporaryIssueImages = this.imgOnlinePathArr.concat(this.problemPicturesList.filter((item) => { return item.indexOf('https://') != -1}));
+      let temporaryRepairImages = this.imgRepairOnlinePathArr.concat(this.repairPicturesList.filter((item) => { return item.indexOf('https://') != -1}));
+      temporaryIssueImages.forEach((item) => {
+        temporaryMessage['images'].push({
+          imgType: 1,
+          proId: this.proId,
+          proName: this.proName,
+          path: item
+        })
+      });
+      temporaryRepairImages.forEach((item) => {
+        temporaryMessage['images'].push({
+          imgType: 2,
+          proId: this.proId,
+          proName: this.proName,
+          path: item
+        })
+      });
       // 拼接参与者数据
       if (this.currentParticipant.length > 0) {
         for (let item of this.currentParticipant) {
@@ -1121,7 +1154,7 @@ export default {
         }
       };
       // 拼接空间信息
-      if (this.room.length > 0) {
+      if (this.currentRoom.length > 0) {
         for (let item of this.currentRoom) {
           temporaryMessage['spaces'].push({
             id: item.value,
@@ -1148,10 +1181,38 @@ export default {
           }  
         }
       };
-      this.changeSubmitAutoRepairTaskMessage(temporaryMessage);
-      this.temporaryStorageEvent();
-      // 去往签字页
-      // this.$router.push({path: '/autoRepairTaskSignature'});
+      this.loadingText ='提交中...';
+      this.overlayShow = true;
+      this.loadingShow = true;
+      completeAutoRepairsTask(temporaryMessage).then((res) => {
+        this.loadingText ='';
+        this.overlayShow = false;
+        this.loadingShow = false;
+        if (res && res.data.code == 200) {
+          this.changeSubmitAutoRepairTaskMessage(temporaryMessage);
+          this.temporaryStorageEvent();
+          // 去往签字页
+          this.$router.push({path: '/autoRepairTaskSignature',query:{ taskId: res.data.data}});
+        } else {
+          this.imgOnlinePathArr = [];
+          this.imgRepairOnlinePathArr = [];
+          this.$dialog.alert({
+            message: `${res.data.msg}`
+          }).then(() => {
+          })
+        }
+      })
+      .catch((err) => {
+        this.imgOnlinePathArr = [];
+        this.imgRepairOnlinePathArr = [];
+        this.loadingText ='';
+        this.overlayShow = false;
+        this.loadingShow = false;
+        this.$dialog.alert({
+          message: `${err}`
+        }).then(() => {
+        })
+      })
     },
 
     // 问题图片放大事件
@@ -1309,35 +1370,54 @@ export default {
     // 摄像头扫码后的回调
     scanQRcodeCallback(code) {
       if (code) {
-        let codeData = code.split('|');
-        if (codeData.length > 0) {
-          // 获取扫码科室信息;
-          this.currentDepartment['value'] = codeData[0];
-          let currentDempartmentListInfo = this.departmentList.filter((item) => { return item.value == codeData[0]});
-          if (currentDempartmentListInfo.length > 0) {
-            this.currentDepartment['text'] = currentDempartmentListInfo[0]['text'];
-          };
-          // 根据科室获取房间信息
-          this.getSpacesByDepartmentId(codeData[0],true)
-          try {
-          } catch (err) {
-            this.$toast({
-              message: `${err}`,
-              type: 'fail'
+        try {
+          let codeData = code.split('|');
+          if (codeData.length > 0) {
+            scanDepartment(codeData[0]).then((res) => {
+              if (res && res.data.code == 200) {
+                // 获取扫码科室信息;
+                this.currentDepartment['value'] = codeData[0];
+                this.currentDepartment['text'] = res.data.data.data['name'];
+                let TemporaryDepartmentIndex = this.departmentList.findIndex((innerItem) => { return innerItem.value == this.currentDepartment['value']});
+                this.currentDepartmentIndex = TemporaryDepartmentIndex;
+                // 获取当前科室所在建筑信息
+                this.currentConstruction['text'] = res.data.data.data['structName'];
+                this.currentConstruction['value'] = res.data.data.data['structId'];
+                let TemporaryIndex = this.constructionList.findIndex((innerItem) => { return innerItem.value == this.currentConstruction['value']});
+                this.currentConstructionIndex = TemporaryIndex;
+                // 根据科室获取房间信息
+                this.getSpacesByDepartmentId(codeData[0],true)
+              } else {
+                this.$dialog.alert({
+                  message: `${res.data.msg}`,
+                  closeOnPopstate: true
+                }).then(() => {})
+              }
+            })
+            .catch((err) => {
+              this.$dialog.alert({
+                message: `${err}`,
+                closeOnPopstate: true
+              }).then(() => {})
+            })
+          } else {
+            this.$dialog.alert({
+              message: '当前二维码数据格式不正确,请重新扫描!'
+            }).then(() => {
+              this.scanQRCode()
             })
           }
-        } else {
+        } catch (err) {
           this.$dialog.alert({
-            message: '当前二维码数据格式不正确,请重新扫描!'
-          }).then(() => {
-            this.scanQRCode()
-          })
-        }   
+            message: `${err}`,
+            closeOnPopstate: true
+          }).then(() => {})
+        }     
       } else {
         this.$dialog.alert({
-            message: '当前没有扫描到任何信息,请重新扫描!'
+          message: '当前没有扫描到任何信息,请重新扫描!'
         }).then(() => {
-            this.scanQRCode()
+          this.scanQRCode()
         })
       }
     },

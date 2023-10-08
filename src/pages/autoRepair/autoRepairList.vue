@@ -136,7 +136,7 @@ export default {
     },
 
     onClickRight() {
-        this.$router.push({ path: "/autoRepairCreate" })
+      this.$router.push({ path: "/autoRepairCreate" })
     },
 
     // 元素滚动事件

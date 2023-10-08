@@ -30,7 +30,7 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-   import {uploadRepairsTaskPhoto, completeRepairsTaskFinal} from '@/api/worker.js'
+  import {uploadRepairsTaskPhoto, completeRepairsTaskFinal} from '@/api/worker.js'
   import { formatTime, setStore, getStore, removeStore, IsPC, deepClone } from '@/common/js/utils'
   export default {
     name: 'WorkOrderSignature',
@@ -150,7 +150,6 @@
           this.showLoadingHint = false;
           this.overlayShow = false
         })
-        console.log('sas1',this.currentElectronicSignature);
       },
 
       // 重写

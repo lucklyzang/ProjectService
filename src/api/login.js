@@ -70,7 +70,7 @@ export function registerChannel (data) {
 // 获取阿里云签名接口
 export function getAliyunSign() {
 	return request({
-	    url: 'nblink/project/oss/upload',
+	    url: 'oss/upload',
 	    method: 'get'
 	})
 }
