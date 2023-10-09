@@ -10,9 +10,18 @@ export function scanDepartment(depId) {
 
 // 完成任务(不签字)
 export function completeAutoRepairsTask(data) {
-    return request({
-      url: 'bxTask/isOwn/add',
-      method: 'post',
-      data
-    })
-  };
+  return request({
+    url: 'bxTask/isOwn/add',
+    method: 'post',
+    data
+  })
+};
+
+// 自主报修历史列表
+export function getHistoryAutoRepairsTaskList(data) {
+  return request({
+    url: 'bxTask/isOwn4App/selectByPage',
+    method: 'get',
+    params: data
+  })
+};

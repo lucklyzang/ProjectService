@@ -32,34 +32,33 @@
         <div class="content-box">
             <van-empty description="暂无数据" v-show="repairsTaskEmptyShow" />
             <div class="list-box" ref="repairListBox">
-                <div class="repair-list" @click="enterTaskDetailsEvent">
+                <div class="repair-list" @click="enterTaskDetailsEvent(item)" v-for="(item,index) in repairsTaskList" :key="index">
                     <div class="list-line-one">
                         <div class="list-line-one-left">
                             <span>工单号: </span>
-                            <span>xdsasa12</span>
+                            <span>{{ item.taskNumber }}</span>
                         </div>
                         <div class="list-line-one-right">
-                            <span>2023-08-17 14:00</span>
+                            <span>{{ item.createTime }}</span>
                         </div>
                     </div>
                     <div class="list-line-two">
                         <span>类型: </span>
-                        <span>杀就杀大大</span>
+                        <span>{{ item.typeName }}</span>
                     </div>
                     <div class="list-line-three">
                         <span>概述: </span>
-                        <span>杀就杀飒飒飒飒撒大大</span>
+                        <span>{{ item. taskDesc }}</span>
                     </div>
                     <div class="list-line-four">
                         <div>问题图片</div>
                         <div>
-                            <img :src="statusBackgroundPng" alt="" @click.stop="enlareEvent(statusBackgroundPng)">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
+                            <img v-for="(innerItem,innerIndex) in item.images" :key="innerIndex" :src="innerItem.path" alt="" @click.stop="enlareEvent(innerItem.path)">
                         </div>
                     </div>
+                </div>
+                <div class="no-more-data" v-if="isShowNoMoreData">
+                  - 没有更多数据了 -
                 </div>
             </div>    
         </div> 
@@ -68,10 +67,8 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from "vuex";
-import {userSignOut} from '@/api/login.js'
-import { assignRepairsTask, delayRepairsTask, cancelRepairsTask } from '@/api/taskScheduling.js'
+import { getHistoryAutoRepairsTaskList } from '@/api/autoRepairCreate.js'
 import {mixinsDeviceReturn} from '@/mixins/deviceReturnFunction'
-import { setStore,removeAllLocalStorage } from '@/common/js/utils'
 import SelectSearch from "@/components/SelectSearch";
 export default {
   name: "AutoRepairList",
@@ -91,11 +88,13 @@ export default {
       },
       loadFreshTimer: null,
       isLoadMore: true,
+      isShowNoMoreData: false,
       currentPageList: [],
       repairsTaskList: [],
       eventTime: 0,
       totalCount: '',
       currentPage: 1,
+      timeTwo: null,
       pageSize: 10,
       currentImgUrl: '',
       imgBoxShow: false,
@@ -116,7 +115,13 @@ export default {
         })
       }
     });
-    // this.getRepairsList(false)
+    this.getRepairsList(this.currentPage,this.pageSize,this.workerId,1,this.proId,false)
+  },
+
+   beforeDestroy () {
+    if (this.timeTwo) {
+      clearTimeout(this.timeTwo)
+    }
   },
 
   watch: {},
@@ -125,6 +130,9 @@ export default {
     ...mapGetters(["userInfo","schedulingTaskDetails","schedulingTaskAboutMessage","operateBtnClickRecord"]),
     proId () {
       return this.userInfo.extendData.proId
+    },
+    workerId () {
+      return this.userInfo.extendData.userId
     }
   },
 
@@ -141,8 +149,8 @@ export default {
 
     // 元素滚动事件
     initScrollChange () {
-        let boxBackScroll = this.$refs['repairListBox'];
-        boxBackScroll.addEventListener('scroll',this.repairListLoadMore,true)
+      let boxBackScroll = this.$refs['repairListBox'];
+      boxBackScroll.addEventListener('scroll',this.repairListLoadMore,true)
     },
 
     // 自主报修任务列表加载事件
@@ -155,12 +163,10 @@ export default {
         this.timeTwo = setTimeout(() => {
           let totalPage = Math.ceil(this.totalCount/this.pageSize);
           if (this.currentPage >= totalPage) {
+            this.isShowNoMoreData = true
           } else {
             this.currentPage = this.currentPage + 1;
-            this.loadingShow = true;
-            this.overlayShow = true;
-            this.loadText = '加载中...';
-            this.getRepairsList(true)
+            this.getRepairsList(this.currentPage,this.pageSize,this.workerId,1,this.proId,true)
           };
           this.eventTime = 0
         },300)
@@ -168,22 +174,33 @@ export default {
     },
 
     // 自主报修任务列表
-    getRepairsList (flag) {
+    getRepairsList (currentPage,pageSize,workerId,isOwn,proId,flag) {
       this.loadingShow = true;
       this.overlayShow = true;
+      this.loadingText = '加载中...';
       this.repairsTaskEmptyShow = false;
-      repairsList(-3,this.proId,1)
+      this.isShowNoMoreData = false;
+      this.currentPageList = [];
+      getHistoryAutoRepairsTaskList({
+        page:currentPage,
+        limit: pageSize,
+        workerId,
+        isOwn,
+        proId
+      })
       .then((res) => {
         this.loadingShow = false;
         this.overlayShow = false;
         this.loadingText = '';
-        if (res && res.data.code == 200) {
+        if (res && res.status == 200) {
+          this.currentPageList = res.data.data;
+          this.totalCount = res.data.recordsTotal;
           // 是否上拉加载
           if (flag) {
             this.isLoadingRepairsTask = false;
             this.$toast('加载成功');
           };
-          this.repairsTaskList = this.repairsTaskList.concat(currentPageList);
+          this.repairsTaskList = this.repairsTaskList.concat(this.currentPageList);
           if (this.repairsTaskList.length == 0) {
             this.repairsTaskEmptyShow = true
           }
@@ -200,7 +217,7 @@ export default {
         this.overlayShow = false;
         if (flag) {
           this.isLoadingRepairsTask = false;
-          this.$toast('刷新失败,请检查网络');
+          this.$toast('加载失败!');
           if (this.loadFreshTimer) {
             clearTimeout(this.loadFreshTimer)
           };
@@ -247,8 +264,8 @@ export default {
     },
 
     // 进入任务详情事件
-    enterTaskDetailsEvent () {
-        this.$router.push({ path: "/autoRepairHistoryRecord" })
+    enterTaskDetailsEvent (item) {
+      this.$router.push({ name: "autoRepairHistoryRecord", params: item})
     },
 
     // 图片放大事件
@@ -383,7 +400,24 @@ export default {
         background: #f7f7f7;
         z-index: 10;
         position: relative;
+        /deep/ .van-empty {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%,-50%)
+        };
         .list-box {
+          overflow: auto;
+          height: 100%;
+          padding-bottom: 10px;
+          box-sizing: border-box;
+            .no-more-data {
+              height: 30px;
+              line-height: 30px;
+              text-align: center;
+              font-size: 12px;
+              color: #c4c4c4
+            };
             .repair-list {
                 background: #fff;
                 border-radius: 4px;
@@ -426,7 +460,10 @@ export default {
                         line-height: 20px;
                         font-size: 14px;
                         font-weight: bold;
-                        color: #00070F;  
+                        color: #00070F;
+                        &:last-child {
+                          word-break: break-all
+                        }  
                     }
                 };
                 .list-line-three {
@@ -436,6 +473,9 @@ export default {
                         font-size: 14px;
                         font-weight: bold;
                         color: #00070F;  
+                        &:last-child {
+                          word-break: break-all
+                        }
                     }
                 };
                 .list-line-four {

@@ -26,38 +26,32 @@
         <div class="content-top-area">
 			<img :src="statusBackgroundPng" />
 		</div>
-        <div class="content-box">
+        <div class="content-box" v-if="isLoadComplete">
            <div class="problem-description-box">
                <div class="problem-description-tit">
-                   问题描述
+                  问题描述
                </div>
                <div class="problem-description-content">
                    <div class="line-content">
                        <span>类型</span>
-                       <span>空调类</span>
+                       <span>{{ taskMessage.typeName }}</span>
                    </div>
                    <div class="line-content">
                        <span>建筑</span>
-                       <span>住院部</span>
+                       <span>{{ taskMessage.structName }}</span>
                    </div>
                    <div class="line-content">
                        <span>科室</span>
-                       <span>住院部</span>
+                       <span>{{ taskMessage.depName }}</span>
                    </div>
                    <div class="line-content">
                        <span>房间</span>
-                       <span>201</span>
+                       <span>{{ disposeCheckType(taskMessage.spaces) }}</span>
                    </div>
                    <div class="list-line-image">
                         <div>问题图片</div>
                         <div>
-                            <img :src="statusBackgroundPng" alt="" @click.stop="enlareEvent(statusBackgroundPng)">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
+                            <img v-for="(innerItem,innerIndex) in taskMessage.images" :key="innerIndex" :src="innerItem.path" alt="" @click.stop="enlareEvent(innerItem.path)">
                         </div>
                     </div>
                     <div class="issue-content">
@@ -65,7 +59,7 @@
                             问题描述
                         </div>
                         <div class="issue-right">
-                            啥JKSHJA看到啥肯定还是卡德哈卡大厦
+                            {{ taskMessage.taskDesc }}
                         </div>
                     </div>
                </div>
@@ -77,22 +71,16 @@
                <div class="maintenance-record-content">
                     <div class="line-content">
                        <span>维修员</span>
-                       <span>里斯啊</span>
+                       <span>{{ taskMessage.workerName }}</span>
                    </div>
                    <div class="line-content">
                        <span>参与人</span>
-                       <span>住院部</span>
+                       <span>{{ disposeTaskPresent(taskMessage.present) }}</span>
                    </div>
                     <div class="list-line-image">
                         <div>修复图片</div>
                         <div>
-                            <img :src="statusBackgroundPng" alt="" @click.stop="enlareEvent(statusBackgroundPng)">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
-                            <img :src="statusBackgroundPng" alt="">
+                            <img v-for="(innerItem,innerIndex) in taskMessage.repairImg" :key="innerIndex" :src="innerItem.path" @click.stop="enlareEvent(innerItem.path)">
                         </div>
                     </div>
                </div>
@@ -102,22 +90,13 @@
                 <span>使用物料</span>
               </div>
               <div class="material-content">
-                <div class="material-list">
+                <div class="material-list" v-for="(item,index) in taskMessage.materials" :key="index">
                   <div class="material-list-left">
-                    <span>1</span>
-                    <span>灯管-型号</span>
+                    <span>{{ index+1 }}</span>
+                    <span>{{ `${item.mateName}-${item.mateNumber}` }}</span>
                   </div>
                   <div class="material-list-right">
-                    <span>4</span>
-                  </div>
-                </div>
-                <div class="material-list">
-                  <div class="material-list-left">
-                    <span>2</span>
-                    <span>灯管2-型号</span>
-                  </div>
-                  <div class="material-list-right">
-                    <span>3</span>
+                    <span>{{ item.number }}</span>
                   </div>
                 </div>
               </div>
@@ -126,7 +105,9 @@
             <div class="signature-tit">
               <span>签字</span>
             </div>
-            <div class="signature-content"></div>
+            <div class="signature-content">
+              <img v-if="taskMessage.signImg.length > 0 && taskMessage.signImg[0].hasOwnProperty('path')" :src="taskMessage.signImg[0]['path']">
+            </div>
            </div>
         </div>
     </div> 
@@ -134,10 +115,7 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from "vuex";
-import {userSignOut} from '@/api/login.js'
-import { assignRepairsTask, delayRepairsTask, cancelRepairsTask } from '@/api/taskScheduling.js'
 import {mixinsDeviceReturn} from '@/mixins/deviceReturnFunction'
-import { setStore,removeAllLocalStorage } from '@/common/js/utils'
 import SelectSearch from "@/components/SelectSearch";
 export default {
   name: "AutoRepairHistoryRecord",
@@ -148,12 +126,14 @@ export default {
   data() {
     return {
       loadingShow: false,
+      isLoadComplete: false,
       loadingText: '加载中',
       statusBackgroundPng: require("@/common/images/home/status-background.png"),
       moveInfo: {
         startX: ''
       },
       currentImgUrl: '',
+      taskMessage: {},
       imgBoxShow: false,
       overlayShow: false
     }
@@ -161,7 +141,9 @@ export default {
 
   mounted() {
     // 控制设备物理返回按键
-    this.deviceReturn('/autoRepairList')
+    this.deviceReturn('/autoRepairList');
+    this.taskMessage = this.$route.params;
+    this.isLoadComplete = true
   },
 
   watch: {},
@@ -356,22 +338,22 @@ export default {
             };
             .problem-description-content {
                 .line-content {
-                    padding: 0 14px;
-                    box-sizing: border-box; 
-                    height: 40px;
+                    padding: 14px;
+                    box-sizing: border-box;
                     background: #fff;
                     display: flex;
-                    align-items: center;
                     justify-content: space-between;
                     margin-bottom: 6px;
                     >span {
+                        display: inline-block;
                         font-size: 14px;
                         &:first-child {
                             color: #9E9E9A
                         };
                         &:last-child {
                             flex: 1;
-                            .no-wrap();
+                            word-break: break-all;
+                            line-height: 18px;
                             text-align: right;
                             padding-left: 6px;
                             font-weight: bold;
@@ -422,7 +404,9 @@ export default {
                         padding-left: 10px;
                         box-sizing: border-box;
                         text-align: right;
+                        word-break: break-all;
                         font-size: 14px;
+                        font-weight: bold;
                         color: #101010;
                         flex: 1;
                         line-height: 18px
@@ -444,24 +428,25 @@ export default {
             };
             .maintenance-record-content {
                .line-content {
-                    padding: 0 14px;
+                    padding: 14px;
                     box-sizing: border-box; 
-                    height: 40px;
                     background: #fff;
                     display: flex;
-                    align-items: center;
                     justify-content: space-between;
                     margin-bottom: 6px;
                     >span {
+                        display: inline-block;
                         font-size: 14px;
                         &:first-child {
-                            color: #9E9E9A
+                          color: #9E9E9A
                         };
                         &:last-child {
                             flex: 1;
-                            .no-wrap();
+                            line-height: 18px;
+                            word-break: break-all;
                             text-align: right;
                             padding-left: 6px;
+                            font-weight: bold;
                             color: #101010;
                         }
                     }
@@ -499,10 +484,12 @@ export default {
         .use-material-box {
           .material-tit {
             font-size: 14px;
+            background: #fff;
             color: #101010;
             height: 35px;
             line-height: 35px;
             padding-left: 10px;
+            margin-top: 10px;
             box-sizing: border-box;
             >span {
               font-weight: bold;
@@ -514,7 +501,7 @@ export default {
             background: #fff; 
             .material-list {
               height: 40px;
-              background: #e9e9e9;
+              background: #f7f7f7;
               display: flex;
               align-items: center;
               border-radius: 2px;
@@ -561,7 +548,11 @@ export default {
           .signature-content {
             padding: 10px;
             box-sizing: border-box;
-            background: #fff; 
+            background: #fff;
+            >img {
+              width: 100%;
+              background: #e9e9e9;
+            } 
           }
         }
     }

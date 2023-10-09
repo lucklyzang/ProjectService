@@ -604,7 +604,7 @@ export default {
       this.currentConstruction['value'] = item['value'];
       this.currentConstructionIndex = index;
       // 根据楼栋建筑查询科室
-      this.getDepartmentByStructureId(this.currentConstruction['value'],false)
+      this.getDepartmentByStructureId(this.currentConstruction['value'],false,'常规')
     },
 
     // 楼层点击事件
@@ -792,7 +792,7 @@ export default {
                   let TemporaryIndex = this.constructionList.findIndex((innerItem) => { return innerItem.value == this.createAutoRepairTaskMessage['currentConstruction']['value']});
                   casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentConstructionIndex'] = TemporaryIndex;
                   this.changeCreateAutoRepairTaskMessage(casuallyTemporaryStorageCreateAutoRepairTaskMessage);
-                  this.getDepartmentByStructureId(this.createAutoRepairTaskMessage['currentConstruction']['value'],true)
+                  this.getDepartmentByStructureId(this.createAutoRepairTaskMessage['currentConstruction']['value'],true,'常规')
                 }
               }
             };
@@ -862,12 +862,17 @@ export default {
       },
 
       // 根据建筑查询科室信息
-      getDepartmentByStructureId (structureId,isInitial) {
+      getDepartmentByStructureId (structureId,isInitial,text) {
       this.loadingText = '查询中...';
       this.loadingShow = true;
       this.overlayShow = true;
       this.departmentList = [];
-      this.currentDepartment = {};
+      if (text == '常规') {
+        this.currentDepartment = {
+          text: '',
+          value: ''
+        }
+      };  
       this.currentDepartmentIndex = null;
       this.roomList = [];
       this.currentRoom = [];
@@ -884,6 +889,13 @@ export default {
                 value: res.data.data[i].id,
                 id: i
               })
+            };
+            if (text == '扫码') {
+              let casuallyTemporaryStorageCreateAutoRepairTaskMessage = this._.cloneDeep(this.createAutoRepairTaskMessage);
+              let TemporaryIndex = this.departmentList.findIndex((innerItem) => { return innerItem.value == this.currentDepartment['value']});
+              casuallyTemporaryStorageCreateAutoRepairTaskMessage['currentDepartmentIndex'] = TemporaryIndex;
+              this.currentDepartmentIndex = TemporaryIndex;
+              this.changeCreateAutoRepairTaskMessage(casuallyTemporaryStorageCreateAutoRepairTaskMessage);
             };
             if (isInitial) {
               // 根据科室查询房间信息
@@ -1051,7 +1063,7 @@ export default {
         this.$toast('任务类型不能为空');
         return
       };
-      if (JSON.stringify(this.currentDepartment) == '{}') {
+      if (JSON.stringify(this.currentDepartment) == '{}' || !this.currentDepartment['text']) {
         this.$toast('目的科室不能为空');
         return
       };
@@ -1110,7 +1122,10 @@ export default {
         typeId: this.currentTaskType['value'], // 任务类型
         typeName: this.currentTaskType['text'], // 类型名称
         taskDesc: this.issueDescribe, // 问题描述
-        destinationId: this.currentDepartment['value'], // 目的地id
+        depId: this.currentDepartment['value'], // 目的地id
+        depName: this.currentDepartment['text'],
+        structId:  this.currentConstruction['value'],
+        structName: this.currentConstruction['text'],
         isOwn: 1,
         isApp: 1,
         proId: this.proId,
@@ -1383,8 +1398,10 @@ export default {
                 // 获取当前科室所在建筑信息
                 this.currentConstruction['text'] = res.data.data.data['structName'];
                 this.currentConstruction['value'] = res.data.data.data['structId'];
-                let TemporaryIndex = this.constructionList.findIndex((innerItem) => { return innerItem.value == this.currentConstruction['value']});
-                this.currentConstructionIndex = TemporaryIndex;
+                let temporaryIndex = this.constructionList.findIndex((innerItem) => { return innerItem.value == this.currentConstruction['value']});
+                // 根据楼栋建筑查询科室
+                this.getDepartmentByStructureId(this.currentConstruction['value'],false,'扫码');
+                this.currentConstructionIndex = temporaryIndex;
                 // 根据科室获取房间信息
                 this.getSpacesByDepartmentId(codeData[0],true)
               } else {
