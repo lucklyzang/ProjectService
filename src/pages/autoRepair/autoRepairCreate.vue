@@ -439,7 +439,7 @@ export default {
         startX: ''
       },
       constructionList: [],
-      tierList: ['一层','二层','三层','四层'],
+      tierList: [],
       departmentList: [],
       roomList: [],
       participationPersonList: [],
@@ -513,11 +513,15 @@ export default {
   },
 
   methods: {
-    ...mapMutations(["changeCreateAutoRepairTaskMessage","changeSubmitAutoRepairTaskMessage","changeOssMessage","changeTimeMessage",]),
+    ...mapMutations(["changeCreateAutoRepairTaskMessage","changeOssMessage","changeTimeMessage",]),
 
     onClickLeft() {
-      this.quitInfoShow = true;
-      this.$router.push({ path: "/autoRepairList"})
+      this.quitInfoShow = true
+      // if (this.judgeIsChangeTaskMessage()) {
+      //   this.quitInfoShow = true
+      // } else {
+      //   this.$router.push({path: '/autoRepairList'})
+      // }
     },
 
     onClickRight() {
@@ -1055,6 +1059,26 @@ export default {
     // 任务创建维修取消事件
     cancelEvent () {
       this.quitInfoShow = true
+      // if (this.judgeIsChangeTaskMessage()) {
+      //   this.quitInfoShow = true
+      // } else {
+      //   this.$router.push({path: '/autoRepairList'})
+      // }
+    },
+
+    // 判断是否选择或修改任务信息
+    judgeIsChangeTaskMessage () {
+      let flag = false;
+      if ( JSON.stringify(this.currentTaskType) != '{}' || (this.currentDepartment['value'] || this.currentDepartment['value'] === 0) || this.currentParticipant.length > 0
+        || this.problemPicturesList.length > 0 || this.repairPicturesList.length > 0 || this.currentRoom.length > 0
+        || this.issueDescribe
+        || this.consumableMsgList.length > 0 || (this.currentConstruction['value'] || this.currentConstruction['value'] === 0)
+      ) {
+        flag = true
+      } else {
+        this.changeCreateAutoRepairTaskMessage({})
+      };
+      return flag
     },
 
     // 自主报修提交事件
@@ -1063,7 +1087,7 @@ export default {
         this.$toast('任务类型不能为空');
         return
       };
-      if (JSON.stringify(this.currentDepartment) == '{}' || !this.currentDepartment['text']) {
+      if (!this.currentDepartment['value'] && this.currentDepartment['value'] !== 0) {
         this.$toast('目的科室不能为空');
         return
       };
@@ -1204,10 +1228,10 @@ export default {
         this.overlayShow = false;
         this.loadingShow = false;
         if (res && res.data.code == 200) {
-          this.changeSubmitAutoRepairTaskMessage(temporaryMessage);
-          this.temporaryStorageEvent();
+          // 清除保存的创建自主报修任务信息
+          this.changeCreateAutoRepairTaskMessage({});
           // 去往签字页
-          this.$router.push({path: '/autoRepairTaskSignature',query:{ taskId: res.data.data}});
+          this.$router.push({ name: 'autoRepairTaskSignature',params:{ taskId: res.data.data}});
         } else {
           this.imgOnlinePathArr = [];
           this.imgRepairOnlinePathArr = [];
@@ -1917,12 +1941,23 @@ export default {
     }
   };
   .img-dislog-box {
-    .van-dialog {
-        .van-dialog__content {
-            >img {
-                width: 100%
-            }
+    /deep/ .van-dialog {
+      top: 50% !important;
+      max-height: 98vh;
+      display: flex;
+      flex-direction: column;
+      .van-dialog__content {
+        flex: 1;
+        overflow: auto;
+        >img {
+          width: 100%;
         }
+      };
+      .van-dialog__footer {
+        .van-dialog__confirm {
+          background: #f2f2f2
+        }
+      }
     }
   };
   .material-box {

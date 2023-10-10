@@ -93,7 +93,7 @@
                 <div class="material-list" v-for="(item,index) in taskMessage.materials" :key="index">
                   <div class="material-list-left">
                     <span>{{ index+1 }}</span>
-                    <span>{{ `${item.mateName}-${item.mateNumber}` }}</span>
+                    <span>{{ `${item.mateName}-${item.model}` }}</span>
                   </div>
                   <div class="material-list-right">
                     <span>{{ item.number }}</span>
@@ -249,12 +249,23 @@ export default {
 .page-box {
   .content-wrapper();
   .img-dislog-box {
-    .van-dialog {
-        .van-dialog__content {
-            >img {
-                width: 100%
-            }
+    /deep/ .van-dialog {
+      top: 50% !important;
+      max-height: 98vh;
+      display: flex;
+      flex-direction: column;
+      .van-dialog__content {
+        flex: 1;
+        overflow: auto;
+        >img {
+          width: 100%;
         }
+      };
+      .van-dialog__footer {
+        .van-dialog__confirm {
+          background: #f2f2f2
+        }
+      }
     }
   };
   /deep/ .van-popup--right {

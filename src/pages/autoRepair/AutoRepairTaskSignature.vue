@@ -94,7 +94,7 @@ export default {
   },
 
   methods: {
-    ...mapMutations(["changeOssMessage","changeTimeMessage","changePatrolTaskListMessage","changeCreateAutoRepairTaskMessage"]),
+    ...mapMutations(["changeOssMessage","changeTimeMessage","changePatrolTaskListMessage"]),
 
 
     resizeScreen() {
@@ -157,7 +157,7 @@ export default {
     this.loadingShow = true;
     this.overlayShow = true;
     let photoMsg = {
-      taskId: this.$route.query.taskId,  //任务ID
+      taskId: this.$route.params.taskId,  //任务ID
       images: []
     };
     photoMsg.images = [];
@@ -196,19 +196,17 @@ export default {
       this.overlayShow = true;
       completeRepairsTaskFinal({
         proId: this.proId,
-        taskId: this.$route.query.taskId
+        taskId: this.$route.params.taskId
       })
       .then((res) => {
         if (res && res.data.code == 200) {
           this.$toast(`${res.data.msg}`);
-          // 清除保存的创建自主报修任务信息
-          this.changeCreateAutoRepairTaskMessage({});
           this.$router.push({ path: "/autoRepairList" })
         } else {
           this.$toast(`${res.data.msg}`);
         };
         this.loadinText = '';
-        this.showLoadingHint = false;
+        this.loadingShow = false;
         this.overlayShow = false
       })
       .catch((err) => {
@@ -226,7 +224,7 @@ export default {
     // 签名取消
     cancel () {
       this.$refs.mychild.overwrite();
-      this.$router.push({path: '/autoRepairCreate'})
+      this.$router.push({path: '/autoRepairList'})
     }
   }
 };

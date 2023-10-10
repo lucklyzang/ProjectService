@@ -4,9 +4,9 @@
     <van-overlay :show="overlayShow" z-index="100000" />
     <!-- 图片放大弹框  -->
     <div class="img-dislog-box">
-        <van-dialog v-model="imgBoxShow" width="98%" :close-on-click-overlay="true" confirm-button-text="关闭">
-            <img :src="currentImgUrl" />
-        </van-dialog> 
+      <van-dialog v-model="imgBoxShow" width="98%" :close-on-click-overlay="true" confirm-button-text="关闭">
+        <img :src="currentImgUrl" />
+      </van-dialog> 
     </div>
     <div class="nav">
        <van-nav-bar
@@ -43,8 +43,13 @@
                         </div>
                     </div>
                     <div class="list-line-two">
+                      <div class="list-line-two-left">
                         <span>类型: </span>
                         <span>{{ item.typeName }}</span>
+                      </div>
+                      <div class="list-line-two-right" :class="{ 'listLineTwoRightStyle' : item.state == 4 }">
+                        {{ taskStatusTransition(item.state) }}
+                      </div>
                     </div>
                     <div class="list-line-three">
                         <span>概述: </span>
@@ -265,7 +270,12 @@ export default {
 
     // 进入任务详情事件
     enterTaskDetailsEvent (item) {
-      this.$router.push({ name: "autoRepairHistoryRecord", params: item})
+      if (item.state == 4) {
+        // 去往签字页
+        this.$router.push({ name: 'autoRepairTaskSignature',params:{ taskId: item.id }});
+      } else {
+        this.$router.push({ name: "autoRepairHistoryRecord", params: item})
+      }
     },
 
     // 图片放大事件
@@ -309,6 +319,9 @@ export default {
           break;
         case 4 :
           return '待签字'
+          break;
+        case 5 :
+          return '已完成'
           break
       }
     }
@@ -322,12 +335,23 @@ export default {
 .page-box {
   .content-wrapper();
   .img-dislog-box {
-    .van-dialog {
-        .van-dialog__content {
-            >img {
-                width: 100%
-            }
+    /deep/ .van-dialog {
+      top: 50% !important;
+      max-height: 98vh;
+      display: flex;
+      flex-direction: column;
+      .van-dialog__content {
+        flex: 1;
+        overflow: auto;
+        >img {
+          width: 100%;
         }
+      };
+      .van-dialog__footer {
+        .van-dialog__confirm {
+          background: #f2f2f2
+        }
+      }
     }
   };
   /deep/ .van-popup--right {
@@ -425,46 +449,67 @@ export default {
                 box-sizing: border-box;
                 margin-top: 10px;
                 .list-line-one {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    width: 100%;
-                    .list-line-one-left {
-                        padding-right: 4px;
-                        box-sizing: border-box;
-                        flex: 1;
-                        width: 0;
-                        display: flex;
-                        >span {
-                            font-size: 12px;
-                            color: #BEC7D1;
-                            &:first-child {
-                                margin-right: 4px;
-                            };
-                            &:last-child {
-                                flex: 1;
-                                .no-wrap()
-                            }
-                        }
-                    };
-                    .list-line-one-right {
-                        >span {
-                            font-size: 12px;
-                            color: #BEC7D1;
-                        }    
-                    }
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  width: 100%;
+                  .list-line-one-left {
+                      padding-right: 4px;
+                      box-sizing: border-box;
+                      flex: 1;
+                      width: 0;
+                      display: flex;
+                      >span {
+                          font-size: 12px;
+                          color: #BEC7D1;
+                          &:first-child {
+                              margin-right: 4px;
+                          };
+                          &:last-child {
+                              flex: 1;
+                              .no-wrap()
+                          }
+                      }
+                  };
+                  .list-line-one-right {
+                      >span {
+                          font-size: 12px;
+                          color: #BEC7D1;
+                      }    
+                  }
                 };
                 .list-line-two {
-                    margin-top: 10px;
+                  margin-top: 16px;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  width: 100%;
+                  .list-line-two-left {
+                    padding-right: 4px;
+                    box-sizing: border-box;
+                    flex: 1;
+                    width: 0;
+                    display: flex;
                     >span {
-                        line-height: 20px;
-                        font-size: 14px;
-                        font-weight: bold;
-                        color: #00070F;
-                        &:last-child {
-                          word-break: break-all
-                        }  
+                      font-size: 14px;
+                      font-weight: bold;
+                      color: #00070F; 
+                      &:first-child {
+                        margin-right: 4px;
+                      };
+                      &:last-child {
+                        flex: 1;
+                        word-break: break-all
+                      }
                     }
+                  };
+                  .list-line-two-right {
+                    font-size: 14px;
+                    color: #289E8E;
+                  };
+                  .listLineTwoRightStyle {
+                    color: #F2A15F !important
+                  }
                 };
                 .list-line-three {
                     margin-top: 10px;
