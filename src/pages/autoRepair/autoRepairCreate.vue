@@ -275,9 +275,9 @@
                     <div class="issue-right">
                       <van-field
                         v-model="issueDescribe"
-                        rows="3"
+                        rows="4"
                         type="textarea"
-                        maxlength="300"
+                        maxlength="500"
                         placeholder="请输入问题描述"
                         show-word-limit
                       />
@@ -633,7 +633,7 @@ export default {
     // 目的房间点击事件
     goalRoomClickEvent () {
       // 根据科室查询房间信息
-      if (!this.currentDepartment['value'] && this.currentDepartment['value'] !== 0) { 
+      if (!this.currentDepartment['value'] && this.currentDepartment['value'] != 0) { 
         this.$toast('请选择目的科室');
         return 
       };
@@ -1264,8 +1264,8 @@ export default {
     issueClickEvent () {
       this.isIssuePhoto = true;
       this.isRepairPhoto = false;
-      if (this.problemPicturesList.length >= 5) {
-        this.$toast('至多只能上传5张图片!');
+      if (this.problemPicturesList.length >= 9) {
+        this.$toast('至多只能上传9张问题图片!');
         return
       };
       this.photoBox = true;
@@ -1299,8 +1299,8 @@ export default {
     repairClickEvent () {
       this.isIssuePhoto = false;
       this.isRepairPhoto = true;
-      if (this.repairPicturesList.length >= 5) {
-        this.$toast('至多只能上传5张图片!');
+      if (this.repairPicturesList.length >= 9) {
+        this.$toast('至多只能上传9张修复图片!');
         return
       };
       this.photoBox = true;
@@ -1320,10 +1320,10 @@ export default {
       this.temporaryFile = file;
       let _this = this;
       let reader = new FileReader();
-      let isLt2M = file.size/1024/1024 < 16;
+      let isLt2M = file.size/1024/1024 < 5;
       if (!isLt2M) {
         this.$dialog.alert({
-          message: '上传图片大小不能超过16MB!',
+          message: '上传图片大小不能超过5MB!',
           closeOnPopstate: true
         }).then(() => {
         });
@@ -1359,10 +1359,10 @@ export default {
       let file = document.getElementById("demo2").files[0];
       let _this = this;
       let reader = new FileReader();
-      let isLt2M = file.size/1024/1024 < 16;
+      let isLt2M = file.size/1024/1024 < 5;
       if (!isLt2M) {
         _this.$dialog.alert({
-          message: '上传图片大小不能超过16MB!',
+          message: '上传图片大小不能超过5MB!',
           closeOnPopstate: true
         }).then(() => {
         });
@@ -1818,7 +1818,10 @@ export default {
           display: flex;
           flex-direction: column;
           .delete-icon {
-            text-align: right
+            text-align: right;
+            .van-icon-cross {
+              font-weight: bold;
+            }
           };
           .dialog-title {
             padding: 10px 0;
