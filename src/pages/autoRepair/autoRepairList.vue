@@ -62,7 +62,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="no-more-data" v-if="isShowNoMoreData">
+                <div class="no-more-data" v-if="isShowNoMoreData && repairsTaskList.length > 0">
                   - 没有更多数据了 -
                 </div>
             </div>    
@@ -170,6 +170,7 @@ export default {
           if (this.currentPage >= totalPage) {
             this.isShowNoMoreData = true
           } else {
+            this.isShowNoMoreData = false;
             this.currentPage = this.currentPage + 1;
             this.getRepairsList(this.currentPage,this.pageSize,this.workerId,1,this.proId,true)
           };
@@ -184,7 +185,6 @@ export default {
       this.overlayShow = true;
       this.loadingText = '加载中...';
       this.repairsTaskEmptyShow = false;
-      this.isShowNoMoreData = false;
       this.currentPageList = [];
       getHistoryAutoRepairsTaskList({
         page:currentPage,
@@ -200,6 +200,10 @@ export default {
         if (res && res.status == 200) {
           this.currentPageList = res.data.data;
           this.totalCount = res.data.recordsTotal;
+          let totalPage = Math.ceil(this.totalCount/this.pageSize);
+          if (this.currentPage >= totalPage) {
+            this.isShowNoMoreData = true
+          };
           // 是否上拉加载
           if (flag) {
             this.isLoadingRepairsTask = false;
