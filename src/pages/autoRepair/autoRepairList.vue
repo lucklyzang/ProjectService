@@ -120,7 +120,7 @@ export default {
         })
       }
     });
-    this.getRepairsList(this.currentPage,this.pageSize,this.workerId,1,this.proId,false)
+    this.getRepairsList(this.currentPage,this.pageSize,this.workerId,1,this.proId,false,true)
   },
 
    beforeDestroy () {
@@ -172,7 +172,7 @@ export default {
           } else {
             this.isShowNoMoreData = false;
             this.currentPage = this.currentPage + 1;
-            this.getRepairsList(this.currentPage,this.pageSize,this.workerId,1,this.proId,true)
+            this.getRepairsList(this.currentPage,this.pageSize,this.workerId,1,this.proId,true,false)
           };
           this.eventTime = 0
         },300)
@@ -180,7 +180,7 @@ export default {
     },
 
     // 自主报修任务列表
-    getRepairsList (currentPage,pageSize,workerId,isOwn,proId,flag) {
+    getRepairsList (currentPage,pageSize,workerId,isOwn,proId,flag,isInitQuery) {
       this.loadingShow = true;
       this.overlayShow = true;
       this.loadingText = '加载中...';
@@ -200,10 +200,12 @@ export default {
         if (res && res.status == 200) {
           this.currentPageList = res.data.data;
           this.totalCount = res.data.recordsTotal;
-          let totalPage = Math.ceil(this.totalCount/this.pageSize);
-          if (this.currentPage >= totalPage) {
-            this.isShowNoMoreData = true
-          };
+          if (isInitQuery) {
+            let totalPage = Math.ceil(this.totalCount/this.pageSize);
+            if (this.currentPage >= totalPage) {
+              this.isShowNoMoreData = true
+            }
+          };  
           // 是否上拉加载
           if (flag) {
             this.isLoadingRepairsTask = false;
