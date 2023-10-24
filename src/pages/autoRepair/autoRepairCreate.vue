@@ -294,7 +294,7 @@
                   <span>维修员</span>
                 </div>
                 <div class="maintenance-man-right">
-                  <span>{{ userName }}</span>
+                  <span>{{ userInfo.name }}</span>
                 </div>
               </div>
               <div class="participation-man">
@@ -502,7 +502,7 @@ export default {
       return this.userInfo.extendData.proId
     },
     userName () {
-      return this.userInfo.userName
+      return this.userInfo.name
     },
     proName () {
       return this.userInfo.extendData.proName
@@ -2450,7 +2450,7 @@ export default {
                     color: #9E9E9A; 
                     height: 40px;
                     line-height: 40px;
-                    padding-left: 14px;
+                    padding-left: 10px;
                     box-sizing: border-box;
                     >span {
                       &:first-child {
@@ -2515,18 +2515,19 @@ export default {
               };
               .issue-content {
                 background: #fff;
-                padding: 14px;
+                padding: 10px;
                 margin-top: 10px;
                 box-sizing: border-box;
                 display: flex;
-                justify-content: space-between;
+                flex-direction: column;
                 .issue-left {
                   font-size: 14px;
-                  margin-left: 10px;
+                  padding-left: 10px;
+                  box-sizing: border-box;
+                  margin-bottom: 10px;
                   color: #9E9E9A
                 };
                 .issue-right {
-                  padding-left: 10px;
                   box-sizing: border-box;
                   text-align: right;
                   font-size: 14px;
@@ -2600,7 +2601,7 @@ export default {
               margin-top: 10px;
               .participation-man-left {
                 padding-left: 10px;
-                box-sizing: border;
+                box-sizing: border-box;
                 >span {
                   &:first-child {
                     color: #9E9E9A;
@@ -2642,7 +2643,7 @@ export default {
                   color: #9E9E9A; 
                   height: 40px;
                   line-height: 40px;
-                  padding-left: 14px;
+                  padding-left: 10px;
                   box-sizing: border-box;
                   >span {
                     &:first-child {

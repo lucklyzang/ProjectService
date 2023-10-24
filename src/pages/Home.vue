@@ -537,10 +537,12 @@
           flex:1;
           overflow: scroll;
           box-sizing: border-box;
+          padding-bottom: 20px;
           li {
             background: #fff;
             width:47%;
             height: 160px;
+            margin-top: 6%;
             border-radius: 4px;
             display:inline-block;
             text-align: center;
@@ -604,11 +606,11 @@
               font-weight: bold;
               margin-top: 30px;
             }
-            &:nth-child(3) {
-              margin-top: 6%
+            &:nth-child(1) {
+              margin-top: 0 !important
             };
-            &:nth-child(4) {
-              margin-top: 10px
+            &:nth-child(2) {
+              margin-top: 0 !important
             };
             &:nth-child(odd) {
               margin-right: 6%

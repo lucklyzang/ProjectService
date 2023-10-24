@@ -547,6 +547,7 @@ export default {
                                 width: 23.5%;
                                 height: 70px;
                                 margin-right: 2%;
+                                margin-bottom: 10px;
                                 &:nth-child(4n) {
                                     margin-right: 0 !important
                                 }

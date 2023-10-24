@@ -393,6 +393,7 @@ export default {
                                 width: 18.4%;
                                 height: 70px;
                                 margin-right: 2%;
+                                margin-bottom: 10px;
                                 &:nth-child(5n) {
                                     margin-right: 0 !important
                                 }
@@ -483,6 +484,7 @@ export default {
                                 width: 18.4%;
                                 height: 70px;
                                 margin-right: 2%;
+                                margin-bottom: 10px;
                                 &:nth-child(5n) {
                                     margin-right: 0 !important
                                 }
