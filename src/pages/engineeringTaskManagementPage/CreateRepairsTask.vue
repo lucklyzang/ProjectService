@@ -725,6 +725,8 @@ export default {
           queryRepairsTaskMaterial(this.proId).then((res) => {
             if (res && res.data.code == 200) {
               resolve(res.data.data)
+            } else {
+              reject(res.data.msg)
             }
           })
           .catch((err) => {

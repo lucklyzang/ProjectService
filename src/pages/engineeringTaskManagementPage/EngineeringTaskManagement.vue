@@ -95,6 +95,23 @@
         </div>
       </van-dialog>
     </div>
+    <!-- 完成确定弹框 -->
+     <div class="complete-box">
+      <van-dialog v-model="completeShow" width="80%" show-cancel-button 
+        confirm-button-color="#2390fe"
+        @confirm="completeSure"
+        @cancel="completeCancel"
+        confirm-button-text="取消"
+        cancel-button-text="确定"
+      >
+        <div class="dialog-top">
+          信息
+        </div>
+         <div class="dialog-center">
+          确定要完成么
+        </div>
+      </van-dialog>
+    </div>
     <!-- 右侧菜单 -->
     <van-popup v-model="rightMenuShow" position="right" ref="vanPopup" :style="{ width: '60%', height: '100%' }">
         <div class="top-icon">
@@ -210,6 +227,7 @@
                             </div>
                             <div class="list-bottom-right">
                               <span  v-if="item.state == 0" class="operate-one" @click.stop="allocationEvent(item,index,'维修任务')">分配</span>
+                              <span class="operate-complete"  v-if="item.state == 3" @click.stop="completeTask(item,index)">完成</span>
                               <span class="operate-two" @click.stop="editEvent(item,index,'维修任务')">编辑</span>
                               <span v-if="item.hasDelay == 0" class="operate-three" @click.stop="delayReasonEvent(item,index,'维修任务')">延迟</span>
                               <span class="operate-four" @click.stop="cancelReasonEvent(item,index,'维修任务')">取消</span>
@@ -234,7 +252,7 @@
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import {userSignOut} from '@/api/login.js'
-import { repairsList, assignRepairsTask,queryDepartment,delayRepairsTask, cancelRepairsTask, getTransporter, queryRepairsTaskCancelReason,queryRepairsTaskDelayReason} from '@/api/taskScheduling.js'
+import { repairsList, assignRepairsTask,queryDepartment,delayRepairsTask, cancelRepairsTask, getTransporter, queryRepairsTaskCancelReason,queryRepairsTaskDelayReason, completeRepairsTask} from '@/api/taskScheduling.js'
 import {mixinsDeviceReturn} from '@/mixins/deviceReturnFunction'
 import { IsPC,setStore,removeAllLocalStorage } from '@/common/js/utils'
 import SelectSearch from "@/components/SelectSearch";
@@ -249,6 +267,7 @@ export default {
       loadingShow: false,
       isDiabledPullRefresh: false,
       isLoadingRepairsTask: false,
+      completeShow: false,
       loadingText: '加载中...',
       screenDialogShow: false,
       allocationShow: false,
@@ -395,6 +414,59 @@ export default {
         if (this.loadFreshTimer) {clearTimeout(this.loadFreshTimer)}
       }, 3100);
     },
+
+    // 完成任务确定事件
+    completeCancel () {
+      this.completeRepairsTaskEvent({
+        proId: this.proId,
+        taskId: this.taskId
+      })
+    },
+
+    // 完成任务取消事件
+    completeSure () {
+
+    },
+
+    // 维修任务完成事件
+    completeTask (item) {
+      this.curentTaskInfo = item;
+      this.taskId = item.id;
+      this.completeShow = true
+    },
+
+    // 维修任务完成接口
+    completeRepairsTaskEvent (data) {
+      this.loadingShow = true;
+      this.overlayShow = true;
+      this.loadingText = '完成中';
+      completeRepairsTask(data)
+      .then((res) => {
+        this.loadingShow = false;
+        this.overlayShow = false;
+        this.loadingText = '';
+        if (res && res.data.code == 200) {
+          this.$toast('任务完成成功');
+          // 更新任务信息
+          this.getRepairsList(false)
+        } else {
+          this.$toast({
+            type: 'fail',
+            message: res.data.msg
+          })
+        }
+      })
+      .catch((err) => {
+        this.loadingText = '';
+        this.loadingShow = false;
+        this.overlayShow = false;
+        this.$toast({
+          type: 'fail',
+          message: err.message
+        })
+      })
+    },
+
 
     // 处理维修任务空间信息
     disposeCheckType (item) {
@@ -1240,11 +1312,15 @@ export default {
 .page-box {
   .content-wrapper();
   .img-dislog-box {
-    .van-dialog {
+    /deep/ .van-dialog {
+        top: 50% !important;
         .van-dialog__content {
-            >img {
-                width: 100%
-            }
+          max-height: 90vh;
+          overflow: auto;
+          >img {
+            width: 100%;
+            height: 100%
+          }
         }
     }
   };
@@ -1337,6 +1413,68 @@ export default {
             box-shadow: 0px 2px 6px 0 rgba(36, 149, 213, 1);
             color: #fff !important;
             border-radius: 30px;
+        }
+      };
+      .van-hairline--top::after {
+        border-top-width: 0 !important
+      }
+    }
+  };
+  .complete-box {
+     /deep/ .van-dialog {
+      border-radius: 10px !important;
+      overflow: inherit !important;
+      .van-dialog__content {
+          padding: 0 !important;
+          box-sizing: border-box;
+          .dialog-top {
+            border-top-left-radius: 10px !important;
+            border-top-right-radius: 10px !important;
+            height: 40px;
+            padding-left: 10px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #fff;
+            background: #3B9DF9;
+            text-align: left
+          };
+          .dialog-center {
+            width: 80%;
+            height: 8vh;
+            text-align: center;
+            line-height: 8vh;
+            margin: 0 auto;
+            margin-top: 20px
+          }
+      };
+      .van-dialog__footer {
+          padding: 20px !important;
+          box-sizing: border-box;
+          justify-content: center;
+          ::after {
+            content: none
+          };
+        .van-dialog__confirm {
+            color: #3B9DF9;
+            width: 40%;
+            height: 40px;
+            line-height: 40px;
+            background: #fff;
+            flex: none !important;
+            border-radius: 10px;
+            border: 1px solid #3B9DF9;
+        };
+        .van-dialog__cancel {
+            color: #fff !important;
+            height: 40px;
+            line-height: 40px;
+            flex: none !important;
+            width: 40%;
+            background: #3B9DF9;
+            border-radius: 10px;
+            margin-right: 30px
         }
       };
       .van-hairline--top::after {
@@ -1761,6 +1899,10 @@ export default {
                                   box-sizing: border-box;
                                   border-radius: 2px;
                                   margin-right: 4px
+                                };
+                                .operate-complete {
+                                  color: #289E8E;
+                                  border: 1px solid #289E8E
                                 };
                                 .operate-one {
                                   color: #F2A15F;

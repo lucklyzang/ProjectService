@@ -457,7 +457,10 @@ export default {
       if (item.length == 0) { return '请选择'};
       let temporaryArray = [];
       for (let innerItem of item) {
-        innerItem.hasOwnProperty('text') ? temporaryArray.push(innerItem.text) : temporaryArray.push(innerItem.name)
+        innerItem.hasOwnProperty('text') ? temporaryArray.push(innerItem.text) : innerItem.hasOwnProperty('name') ? temporaryArray.push(innerItem.name) : []
+      };
+      if (temporaryArray.length == 0) {
+        return '请选择'
       };
       return temporaryArray.join('、')
     },
@@ -734,6 +737,8 @@ export default {
           queryRepairsTaskMaterial(this.proId).then((res) => {
             if (res && res.data.code == 200) {
               resolve(res.data.data)
+            } else {
+              reject(res.data.msg)
             }
           })
           .catch((err) => {

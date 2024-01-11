@@ -56,6 +56,23 @@
         </div>
       </van-dialog>
     </div>
+     <!-- 完成确定弹框 -->
+     <div class="complete-box">
+      <van-dialog v-model="completeShow" width="80%" show-cancel-button 
+        confirm-button-color="#2390fe"
+        @confirm="completeSure"
+        @cancel="completeCancel"
+        confirm-button-text="取消"
+        cancel-button-text="确定"
+      >
+        <div class="dialog-top">
+          信息
+        </div>
+         <div class="dialog-center">
+          确定要完成么
+        </div>
+      </van-dialog>
+    </div>
      <!-- 图片放大弹框  -->
     <div class="img-dislog-box">
         <van-dialog v-model="imgBoxShow" width="98%" :close-on-click-overlay="true" confirm-button-text="关闭">
@@ -209,6 +226,7 @@
             </div>
             <div class="btn-box">
                 <span class="operate-one" @click="allocationEvent" v-if="schedulingTaskDetails.state == 0">分配</span>
+                <span class="operate-complete"  v-if="schedulingTaskDetails.state == 3" @click="completeTask">完成</span>
                 <span class="operate-two" @click="editEvent">编辑</span>
                 <span class="operate-three" @click="delayReasonEvent" v-if="schedulingTaskDetails.hasDelay == 0">延迟</span>
                 <span class="operate-four" @click="cancelReasonEvent">取消</span>
@@ -220,7 +238,7 @@
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import {userSignOut} from '@/api/login.js'
-import { assignRepairsTask, delayRepairsTask, cancelRepairsTask } from '@/api/taskScheduling.js'
+import { assignRepairsTask, delayRepairsTask, cancelRepairsTask, completeRepairsTask } from '@/api/taskScheduling.js'
 import {mixinsDeviceReturn} from '@/mixins/deviceReturnFunction'
 import { setStore,removeAllLocalStorage } from '@/common/js/utils'
 import SelectSearch from "@/components/SelectSearch";
@@ -237,6 +255,7 @@ export default {
       moveInfo: {
         startX: ''
       },
+      completeShow: false,
       allocationShow: false,
       delayReasonShow: false,
       cancelReasonShow: false,
@@ -295,6 +314,57 @@ export default {
      onClickLeft() {
       this.$router.push({ path: "/engineeringTaskManagement"})
     },
+
+    // 完成任务确定事件
+    completeCancel () {
+      this.completeRepairsTaskEvent({
+        taskId: this.schedulingTaskDetails['id'], //任务id
+        proId: this.proId, //项目id
+      })
+    },
+
+    // 完成任务取消事件
+    completeSure () {
+
+    },
+
+    // 维修任务完成事件
+    completeTask () {
+      this.completeShow = true
+    },
+
+    // 维修任务完成接口
+    completeRepairsTaskEvent (data) {
+      this.loadingShow = true;
+      this.overlayShow = true;
+      this.loadingText = '完成中';
+      completeRepairsTask(data)
+      .then((res) => {
+        this.loadingShow = false;
+        this.overlayShow = false;
+        this.loadingText = '';
+        if (res && res.data.code == 200) {
+          this.$toast('任务完成成功');
+          // 返回任务调度页
+          this.onClickLeft()
+        } else {
+          this.$toast({
+            type: 'fail',
+            message: res.data.msg
+          })
+        }
+      })
+      .catch((err) => {
+        this.loadingText = '';
+        this.loadingShow = false;
+        this.overlayShow = false;
+        this.$toast({
+          type: 'fail',
+          message: err.message
+        })
+      })
+    },
+
 
     // 处理维修任务空间信息
     disposeCheckType (item) {
@@ -776,6 +846,68 @@ export default {
         border-radius: 8px
     }
   };
+  .complete-box {
+     /deep/ .van-dialog {
+      border-radius: 10px !important;
+      overflow: inherit !important;
+      .van-dialog__content {
+          padding: 0 !important;
+          box-sizing: border-box;
+          .dialog-top {
+            border-top-left-radius: 10px !important;
+            border-top-right-radius: 10px !important;
+            height: 40px;
+            padding-left: 10px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #fff;
+            background: #3B9DF9;
+            text-align: left
+          };
+          .dialog-center {
+            width: 80%;
+            height: 8vh;
+            text-align: center;
+            line-height: 8vh;
+            margin: 0 auto;
+            margin-top: 20px
+          }
+      };
+      .van-dialog__footer {
+          padding: 20px !important;
+          box-sizing: border-box;
+          justify-content: center;
+          ::after {
+            content: none
+          };
+        .van-dialog__confirm {
+            color: #3B9DF9;
+            width: 40%;
+            height: 40px;
+            line-height: 40px;
+            background: #fff;
+            flex: none !important;
+            border-radius: 10px;
+            border: 1px solid #3B9DF9;
+        };
+        .van-dialog__cancel {
+            color: #fff !important;
+            height: 40px;
+            line-height: 40px;
+            flex: none !important;
+            width: 40%;
+            background: #3B9DF9;
+            border-radius: 10px;
+            margin-right: 30px
+        }
+      };
+      .van-hairline--top::after {
+        border-top-width: 0 !important
+      }
+    }
+  };
   .allocation-box {
     /deep/ .van-dialog {
       border-radius: 10px !important;
@@ -1031,6 +1163,9 @@ export default {
                 border-radius: 4px;
                 margin-right: 8px;
                 color: #fff
+            };
+            .operate-complete {
+              background: #289E8E;
             };
             .operate-one {
                 background: #F2A15F

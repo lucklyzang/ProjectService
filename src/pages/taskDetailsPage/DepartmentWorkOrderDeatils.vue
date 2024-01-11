@@ -192,10 +192,10 @@
 
       // 扫一扫
       fillConsumable () {
-        if (this.oneRepairsMsg.spaces.length == this.oneRepairsMsg.hasSpaces.length) {
-          this.$toast('该任务下所有区域都已完成检修,不能执行该操作');
-          return
-        };
+        // if (this.oneRepairsMsg.spaces.length == this.oneRepairsMsg.hasSpaces.length) {
+        //   this.$toast('该任务下所有区域都已完成检修,不能执行该操作');
+        //   return
+        // };
         if (this.departmentServiceMsg.state == 3) {
           this.$toast('该任务状态为待签字,不能执行该操作');
           return
@@ -238,12 +238,12 @@
             this.departmentId = codeData[0];
             this.departmentNo = codeData[1];
             // 如果当前科室已完成检查结果上报,则禁止在次校验
-            let temporaryFlagOne = this.oneRepairsMsg.spaces.filter((item) => {return item.checked == true});
-            let temporaryFlagTwo = temporaryFlagOne.some((item) => {return item.depNo == this.departmentNo});
-            if (temporaryFlagTwo) {
-              this.$toast('当前扫码区域巡检已完成,禁止此操作');
-              return
-            };
+            // let temporaryFlagOne = this.oneRepairsMsg.spaces.filter((item) => {return item.checked == true});
+            // let temporaryFlagTwo = temporaryFlagOne.some((item) => {return item.depNo == this.departmentNo});
+            // if (temporaryFlagTwo) {
+            //   this.$toast('当前扫码区域巡检已完成,禁止此操作');
+            //   return
+            // };
             this.juddgeCurrentDepartment({
               id: this.taskId,  //任务ID
               depNo: this.departmentNo, //科室编号

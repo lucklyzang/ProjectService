@@ -61,6 +61,15 @@ export function cancelRepairsTask (data) {
   })
 };
 
+// 维修任务完成
+export function completeRepairsTask (data) {
+  return request({
+    url: 'bxTask/completeTask',
+    method: 'put',
+    data
+  })
+};
+
 // 维修任务编辑
 
 export function editRepairsTask (data) {
