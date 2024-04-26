@@ -11,6 +11,7 @@ const DepartmentService = () => import('@/pages/taskPage/DepartmentService')
 const WorkOrderDetails = () => import('@/pages/taskDetailsPage/WorkOrderDetails')
 const FillConsumable = () => import('@/pages/taskMessagePage/workOrderMessage/FillConsumable')
 const WorkOrderSignature = () => import('@/pages/taskMessagePage/workOrderMessage/WorkOrderSignature')
+const workOrderCheck = () => import('@/pages/taskDetailsPage/WorkOrderCheck')
 const DepartmentWorkOrderDeatils = () => import('@/pages/taskDetailsPage/DepartmentWorkOrderDeatils')
 const DepartmentServiceSignature = () => import('@/pages/taskMessagePage/departmentService/DepartmentServiceSignature')
 const DepartmentServiceBill = () => import('@/pages/taskMessagePage/departmentService/DepartmentServiceBill')
@@ -77,6 +78,11 @@ let baseRoute  = [
     path: '/workOrderSignature',
     name: 'workOrderSignature',
     component:  WorkOrderSignature
+  },
+  {
+    path: '/workOrderCheck',
+    name: 'workOrderCheck',
+    component:  workOrderCheck
   },
   {
     path: '/departmentWorkOrderDeatils',

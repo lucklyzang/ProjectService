@@ -30,7 +30,7 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import {uploadRepairsTaskPhoto, completeRepairsTaskFinal} from '@/api/worker.js'
+  import {uploadRepairsTaskPhoto, noAuditTask} from '@/api/worker.js'
   import { formatTime, setStore, getStore, removeStore, IsPC, deepClone } from '@/common/js/utils'
   export default {
     name: 'WorkOrderSignature',
@@ -162,7 +162,7 @@
         this.loadinText = '加载中,请稍等···';
         this.showLoadingHint = true;
         this.overlayShow = true;
-        completeRepairsTaskFinal({
+        noAuditTask({
           proId: this.proId,
           taskId: this.taskId
         })
@@ -171,9 +171,9 @@
             this.clearPhotoList();
             this.clearStoragePhoto();
             this.$toast(`${res.data.msg}`);
-            this.$router.push({path: 'repairsWorkOrder'});
-            this.changeTitleTxt({tit:'报修工单'});
-            setStore('currentTitle','报修工单')
+            this.$router.push({path: 'workOrderCheck'});
+            this.changeTitleTxt({tit:'工单审核'});
+            setStore('currentTitle','工单审核');
           } else {
             this.$toast(`${res.data.msg}`);
           };

@@ -20,7 +20,7 @@
       <van-pull-refresh v-model="isRefresh" @refresh="onRefresh" success-text="刷新成功">
         <div class="content-list-action-task-wrapper" v-show="currentIndex === 0">
           <div class="content-list-action-task-item" v-for="(item,index) in taskMessageList" :key="`${index}-${item}`">
-            <span class="status-box" :class="{statusWaitSure:item.state == 1,statusWaitFinish: item.state == 3,statusWaitSignature: item.state == 4}">{{stateTransfer(item.state)}}</span>
+            <span class="status-box" :class="{statusWaitSure:item.state == 1,statusWaitFinish: item.state == 3,statusWaitSignature: item.state == 4, statusWaitCheck:item.state == 8}">{{stateTransfer(item.state)}}</span>
             <span class="task-date">{{item.planStartTime}}</span>
             <p class="task-btn">
               <span class="back" @click="taskBack(item)" v-show="item.state == 1 || item.state == 2">退回</span>
@@ -179,7 +179,8 @@
           workerId: this.workerId,
           state: -1,
           startDate	: '',
-          endDate : ''
+          endDate : '',
+          audit: this.userInfo.extendData.projectAudit
         },0)
       }
     },
@@ -202,7 +203,8 @@
           workerId: this.workerId,
           state: -1,
           startDate	: '',
-          endDate : ''
+          endDate : '',
+          audit: this.userInfo.extendData.projectAudit
         },0)
       }
     },
@@ -241,6 +243,9 @@
           case 7 :
             return '已延迟'
             break;
+           case 8 :
+            return '待审核'
+            break;
         }
       },
 
@@ -251,7 +256,8 @@
           workerId: this.workerId,
           state: this.currentIndex == 0 ? -1 : -2,
           startDate	: '',
-          endDate : ''
+          endDate : '',
+          audit: this.userInfo.extendData.projectAudit
         },this.currentIndex)
       },
 
@@ -270,7 +276,8 @@
               workerId: this.workerId,
               state: -1,
               startDate	: '',
-              endDate : ''
+              endDate : '',
+              audit: this.userInfo.extendData.projectAudit
             },0)
           } else {
             this.$toast(`${res.data.msg}`)
@@ -309,7 +316,8 @@
             workerId: this.workerId,
             state: -1,
             startDate	: '',
-            endDate : ''
+            endDate : '',
+            audit: this.userInfo.extendData.projectAudit
           },index)
         } else {
           this.getRepairsProjectList({
@@ -317,7 +325,8 @@
             workerId: this.workerId,
             state: -2,
             startDate	: '',
-            endDate : ''
+            endDate : '',
+            audit: this.userInfo.extendData.projectAudit
           },index)
         }
       },
@@ -441,7 +450,8 @@
               workerId: this.workerId,
               state: -1,
               startDate	: '',
-              endDate : ''
+              endDate : '',
+              audit: this.userInfo.extendData.projectAudit
             },0)
           } else {
             this.$dialog.alert({
@@ -464,9 +474,15 @@
       taskView (item) {
         this.changeRepairsWorkOrderMsg(item);
         setStore('repairsWorkOrderMsg',item);
-        this.$router.push({path: 'workOrderDetails'});
-        this.changeTitleTxt({tit:'工单详情'});
-        setStore('currentTitle','工单详情')
+        if (item.state == 8) {
+          this.$router.push({path: 'workOrderCheck'});
+          this.changeTitleTxt({tit:'工单审核'});
+          setStore('currentTitle','工单审核');
+        } else {
+          this.$router.push({path: 'workOrderDetails'});
+          this.changeTitleTxt({tit:'工单详情'});
+          setStore('currentTitle','工单详情')
+        }
       },
 
       // 返回上一页
@@ -601,6 +617,9 @@
           };
           .statusWaitSignature {
             color: #06e606
+          };
+          .statusWaitCheck {
+            color: orange
           };
           .task-date {
             position: absolute;

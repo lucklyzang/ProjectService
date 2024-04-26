@@ -42,6 +42,24 @@ export function sureRepairsTask(data) {
   })
 };
 
+// 驳回工单
+export function dismissalTask(data) {
+  return request({
+    url: 'bxTask/dismissalTask',
+    method: 'put',
+    data
+  })
+};
+
+// 签名完成
+export function noAuditTask(data) {
+  return request({
+    url: 'bxTask/noAuditTask',
+    method: 'put',
+    data
+  })
+};
+
 //完成任务(状态为待签字)
 export function completeRepairsTask(data) {
   return request({
