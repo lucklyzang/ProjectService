@@ -44,6 +44,14 @@ export default {
         color: #fff;
         display: block
       }
+    };
+    .left-text {
+      position: absolute;
+      height: @header-title-height;
+      line-height: @header-title-height;
+      right: 20px;
+      font-size: 16px;
+      color: #fff;
     }
   }
 </style>

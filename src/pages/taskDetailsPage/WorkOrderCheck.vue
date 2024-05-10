@@ -687,8 +687,8 @@
       // 完成审核
       completeTask () {
         if (!this.userInfo.extendData.projectAudit) {
-            this.$toast('你暂无此权限!');
-            return
+          this.$toast('你暂无此权限!');
+          return
         };
         this.loadinText = '完成审核中,请稍等···';
         this.showLoadingHint = true;
@@ -762,8 +762,8 @@
       // 驳回工单显示驳回原因弹框事件
       rejectWorkorderEvent () {
         if (!this.userInfo.extendData.projectAudit) {
-            this.$toast('你暂无此权限!');
-            return
+          this.$toast('你暂无此权限!');
+          return
         };          
         this.rejectReason = '';  
         this.rejectReasonShow = true;

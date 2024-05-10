@@ -51,6 +51,15 @@ export function dismissalTask(data) {
   })
 };
 
+//批量审核工单
+export function batchCgeckTask(data) {
+  return request({
+    url: 'bxTask/auditTask',
+    method: 'put',
+    data
+  })
+};
+
 // 签名完成
 export function noAuditTask(data) {
   return request({

@@ -5,18 +5,19 @@
     </div>
     <van-overlay :show="overlayShow"/>
     <div class="loading">
-      <loading :isShow="showLoadingHint" textContent="加载中,请稍候····" textColor="#2db8f9"></loading>
+      <loading :isShow="showLoadingHint" :textContent="loadinText" textColor="#2db8f9"></loading>
     </div>
     <!-- 顶部导航栏 -->
     <HeaderTop :title="navTopTitle">
       <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
+      <div v-if="currentIndex == 0" slot="right" class="left-text" @click="managementEvent">{{ isManagementClick ? '退出管理' : '管理' }}</div>
     </HeaderTop>
     <div class="content-top">
       <ul class="tab-title">
         <li :class="{liStyle: currentIndex == index}" v-for="(item,index) in tabTitleList" :key="`${item,index}`" @click="liClickEvent(item,index)">{{item}}</li>
       </ul>
     </div>
-    <div class="content-bottom">
+    <div class="content-bottom" ref="contentBottom">
       <van-pull-refresh v-model="isRefresh" @refresh="onRefresh" success-text="刷新成功">
         <div class="content-list-action-task-wrapper" v-show="currentIndex === 0">
           <div class="content-list-action-task-item" v-for="(item,index) in taskMessageList" :key="`${index}-${item}`">
@@ -28,6 +29,7 @@
               <span class="view"  @click="taskView(item)" v-show="item.state !== 1">查看任务</span>
             </p>
             <p class="work-order-number">
+              <van-checkbox icon-size="20px" checked-color="#3B9DF9" v-model="item.checked" v-if="item.state == 8 && isManagementClick"></van-checkbox>
               <span class="tit">工单号:</span>
               <span class="name">{{item.taskNumber}}</span>
             </p>
@@ -73,6 +75,12 @@
         </div>
       </van-pull-refresh>
     </div>
+    <div class="bottom-check-area" v-if="isManagementClick && taskMessageList.length > 0">
+      <div class="check-area-left">
+        <van-checkbox icon-size="24px" checked-color="#3B9DF9" v-model="allChecked" @click="allChooseEvent">全选</van-checkbox>
+      </div>
+      <div class="check-area-right" :class="{'checkAreaRightStyle' : !isCheckCanClick}" @click="completeCheckEvent">完成审核</div>
+    </div>
    <!-- 退回原因弹窗 -->
     <van-dialog v-model="reasonShow" title="请选择退回原因" show-cancel-button width="92%"
           @confirm="reasonSure" @cancel="reasonCancel"
@@ -86,6 +94,21 @@
             </div>
           </div>
     </van-dialog>
+    <!-- 批量审核弹框 -->
+    <div class="checkDialog">
+      <van-dialog class="checkDialog" v-model="checkDialogShow" width="90%" :show-confirm-button="false" :close-on-click-overlay="true">
+        <div class="close-icon">
+          <van-icon name="cross" color="#0E2442" size="22" @click="checkDialogShow = false" />
+        </div>
+        <div class="check-text">
+          {{ `是否完成审核以下${checkOrderCount}条工单` }}
+        </div>
+        <div class="btn-area">
+          <div class="no-btn"  @click="checkDialogShow = false">否</div>
+          <div class="yes-btn"  @click="sureCheckEvent">是</div>
+        </div>
+      </van-dialog>
+    </div> 
   </div>
 </template>
 
@@ -97,13 +120,14 @@
   import { mapGetters, mapMutations } from 'vuex'
   import store from '@/store'
   import { formatTime, setStore, getStore, removeStore, IsPC, judgeOverTime, removeAllLocalStorage} from '@/common/js/utils'
-  import {queryRepairsProjectList,sureRepairsTask,backRepairsTask,queryBackRepairsTaskReason} from '@/api/worker.js'
+  import {queryRepairsProjectList,sureRepairsTask,backRepairsTask,queryBackRepairsTaskReason,batchCgeckTask} from '@/api/worker.js'
   export default {
     name: 'RepairsWorkOrder',
     data () {
       return {
         currentIndex: 0,
         taskId: '',
+        loadinText: '加载中,请稍候····',
         tabTitleList: ['待办任务','已完成'],
         reasonShow: false,
         isRefresh: false,
@@ -116,8 +140,15 @@
         reasonName: '',
         reasonValue: '',
         taskMessageList: [],
-        taskCompleteMessageList: []
-      };
+        allChecked: false,
+        temporaryTaskMessageList: [],
+        taskCompleteMessageList: [],
+        isManagementClick: false,
+        isCheckCanClick: false,
+        checkDialogShow: false,
+        checkOrderCount: 0,
+        chooseCheckOrder: []
+      }
     },
 
     components: {
@@ -143,6 +174,46 @@
     },
 
     watch : {
+      taskMessageList: {
+        handler(newValue, oldValue){
+          if (this.taskMessageList.length == 0) {
+            return
+          };
+          let flag = this.taskMessageList.every((el) => { return el.checked == true });
+          let flagOther = this.taskMessageList.some((el) => { return el.checked == true });
+          if (flag) {
+            this.allChecked = true
+          } else {
+            this.allChecked = false
+          };
+          if (flagOther) {
+            this.isCheckCanClick = true
+          } else {
+            this.isCheckCanClick = false
+          }
+        },
+        deep: true,
+        immediate: true
+      },
+      // allChecked: {
+      //   handler(newValue, oldValue){
+      //     if (this.taskMessageList.length == 0) {
+      //       return
+      //     };
+      //     if (newValue) {
+      //       this.taskMessageList.forEach(el => {
+      //         el.checked = true
+      //       })
+      //     } else {
+      //       if (!this.taskMessageList.some((el) => { return el.checked == true })) {
+      //         this.taskMessageList.forEach(el => {
+      //           el.checked = false
+      //         })
+      //       }
+      //     }
+      //   },
+      //   immediate: true
+      // }
     },
 
     beforeRouteEnter (to, from, next){
@@ -181,7 +252,7 @@
           startDate	: '',
           endDate : '',
           audit: this.userInfo.extendData.projectAudit
-        },0)
+        },0,'')
       }
     },
 
@@ -205,7 +276,7 @@
           startDate	: '',
           endDate : '',
           audit: this.userInfo.extendData.projectAudit
-        },0)
+        },0,'')
       }
     },
 
@@ -249,6 +320,95 @@
         }
       },
 
+      // 管理事件
+      managementEvent () {
+        this.isManagementClick = !this.isManagementClick;
+        let contentBottom = this.$refs.contentBottom;
+        if (this.isManagementClick) {
+          contentBottom.style.paddingBottom = '78px';
+          this.taskMessageList = this.temporaryTaskMessageList.filter((item) => { return item.state == 8 });
+          this.taskMessageList.forEach((item) => { return item.checked = false });
+        } else {
+          contentBottom.style.paddingBottom = 0;
+          this.taskMessageList = this.temporaryTaskMessageList
+        };
+        if (this.taskMessageList.length == 0) {
+          this.noDataShow = true;
+        } else {
+          this.noDataShow = false
+        }
+      },
+
+      // 复选框全选事件
+      allChooseEvent () {
+        if (this.allChecked) {
+          this.taskMessageList.forEach(el => {
+            el.checked = true
+          })
+        } else {
+          this.taskMessageList.forEach(el => {
+            el.checked = false
+          })
+        }
+      },
+
+      // 完成审核事件
+      completeCheckEvent () {
+        if (!this.isCheckCanClick) { return };
+        if (!this.userInfo.extendData.projectAudit) {
+          this.$toast('你暂无此权限!');
+          return
+        };
+        this.checkDialogShow = true;
+        this.chooseCheckOrder = this.taskMessageList.filter((item) => { return item.checked == true });
+        this.checkOrderCount = this.chooseCheckOrder.length
+      },
+
+      // 确定审核事件
+      sureCheckEvent () {
+        this.checkDialogShow = false;
+        this.loadinText = '批量审核中,请稍等···';
+        this.showLoadingHint = true;
+        this.overlayShow = true;
+        let temporaryTaskList = [];
+        for (let item of this.chooseCheckOrder) {
+          temporaryTaskList.push(item.id)
+        };
+        batchCgeckTask({
+          proId: this.proId,
+          taskList: temporaryTaskList
+        })
+        .then((res) => {
+          if (res && res.data.code == 200) {
+            this.$toast('批量审核成功');
+            this.checked = false;
+            this.getRepairsProjectList({
+              proId: this.proId,
+              workerId: this.workerId,
+              state: -1,
+              startDate	: '',
+              endDate : '',
+              audit: this.userInfo.extendData.projectAudit
+            },0,'审核')
+          } else {
+            this.$toast(`${res.data.msg}`);
+          };
+          this.loadinText = '加载中,请稍候····';
+          this.showLoadingHint = false;
+          this.overlayShow = false
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err}`,
+            closeOnPopstate: true
+          }).then(() => {
+          });
+          this.loadinText = '加载中,请稍候····';
+          this.showLoadingHint = false;
+          this.overlayShow = false
+        })
+      },
+
       // 下拉刷新事件
       onRefresh() {
         this.getRepairsProjectList ({
@@ -258,7 +418,7 @@
           startDate	: '',
           endDate : '',
           audit: this.userInfo.extendData.projectAudit
-        },this.currentIndex)
+        },this.currentIndex,'')
       },
 
       // 退回原因确定
@@ -278,7 +438,7 @@
               startDate	: '',
               endDate : '',
               audit: this.userInfo.extendData.projectAudit
-            },0)
+            },0,'')
           } else {
             this.$toast(`${res.data.msg}`)
           }
@@ -310,6 +470,9 @@
       // tab点击事件
       liClickEvent (item,index) {
         this.currentIndex = index;
+        this.isManagementClick = false;
+        let contentBottom = this.$refs.contentBottom;
+        contentBottom.style.paddingBottom = 0;
         if (index == 0) {
           this.getRepairsProjectList({
             proId: this.proId,
@@ -318,7 +481,7 @@
             startDate	: '',
             endDate : '',
             audit: this.userInfo.extendData.projectAudit
-          },index)
+          },index,'')
         } else {
           this.getRepairsProjectList({
             proId: this.proId,
@@ -327,12 +490,12 @@
             startDate	: '',
             endDate : '',
             audit: this.userInfo.extendData.projectAudit
-          },index)
+          },index,'')
         }
       },
 
       // 查询报修项目列表
-      getRepairsProjectList (data,index) {
+      getRepairsProjectList (data,index,text) {
         this.noDataShow = false;
         this.overlayShow = true;
         this.showLoadingHint = true;
@@ -341,6 +504,7 @@
           this.showLoadingHint = false;
           this.overlayShow = false;
           this.taskMessageList = [];
+          this.temporaryTaskMessageList = [];
           this.taskCompleteMessageList = [];
           if(res && res.data.code == 200) {
             this.isRefresh = false;
@@ -359,7 +523,8 @@
                     state: item.state,
                     id: item.id,
                     isMe: item.isMe,
-                    spaces: item.spaces
+                    spaces: item.spaces,
+                    checked: false
                   })
                 } else {
                   this.taskCompleteMessageList.push({
@@ -377,6 +542,16 @@
                   })
                 }
               };
+              this.temporaryTaskMessageList = this.taskMessageList;
+              if (text == '审核') {
+                if (this.temporaryTaskMessageList.filter((item) => { return item.state == 8 }).length == 0) {
+                  this.isManagementClick = false
+                } else {
+                  this.isManagementClick = true;
+                  this.taskMessageList = this.temporaryTaskMessageList.filter((item) => { return item.state == 8 });
+                };
+                this.allChecked = false;
+              }
               // 为房间信息增加check字段
               for (let item of this.taskMessageList) {
                 for (let innerItem in item) {
@@ -452,7 +627,7 @@
               startDate	: '',
               endDate : '',
               audit: this.userInfo.extendData.projectAudit
-            },0)
+            },0,'')
           } else {
             this.$dialog.alert({
               message: `${res.data.msg}`,
@@ -500,6 +675,54 @@
   @import "~@/common/stylus/mixin.less";
   @import "~@/common/stylus/modifyUi.less";
   .content-wrapper {
+    .checkDialog {
+      /deep/ .van-dialog {
+        width: 90% !important;
+        top: 50% !important;
+        .van-dialog__content {
+          height: 209px;
+          padding: 20px;
+          margin: 0 !important;
+          box-sizing: border-box;
+          .close-icon {
+            text-align: right
+          };
+          .check-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #101010;
+            height: 100px;
+          };
+          .btn-area {
+            display: flex;
+            justify-content: center;
+            .no-btn {
+              width: 32%;
+              height: 36px;
+              text-align: center;
+              line-height: 36px;
+              border: 1px solid #0A7AF5;
+              border-radius: 7px;
+              font-size: 14px;
+              color: #0A7AF5;
+              margin-right: 60px;
+            };
+            .yes-btn {
+              width: 32%;
+              height: 36px;
+              text-align: center;
+              line-height: 36px;
+              background: #0A7AF5;
+              border-radius: 7px;
+              font-size: 14px;
+              color: #fff
+            }
+          }
+        }
+      }
+    };
     /deep/ .van-dialog {
       .van-dialog__content {
         margin-bottom: 6px;
@@ -584,6 +807,7 @@
       background: #f7f7f7;
       position: relative;
       overflow: auto;
+      box-sizing: border-box;
       /deep/ .van-pull-refresh {
         overflow: auto
       };
@@ -662,6 +886,11 @@
           .work-order-number {
             font-size: 14px;
             color: #bbbaba;
+            display: flex;
+            align-items: center;
+            /deep/ .van-checkbox {
+              margin-right: 6px;
+            };
             .name {
               max-width: 70%;
               display: inline-block;
@@ -676,6 +905,45 @@
       };
       .content-list-complete-task-wrapper {
 
+      }
+    };
+    .bottom-check-area {
+      width: 100%;
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      height: 78px;
+      display: flex;
+      justify-content: space-between;
+      padding: 20px 10px;
+      box-sizing: border-box;
+      background: #fff;
+      .check-area-left {
+        height: 37px;
+        display: flex;
+        align-items: center;
+        /deep/ .van-checkbox {
+          .van-icon {
+            border: 1px solid #3B9DF9 !important
+          }; 
+          .van-checkbox__label {
+            font-size: 14px !important;
+            color: #101010 !important;
+          }
+        }
+      };
+      .check-area-right {
+        width: 140px;
+        height: 37px;
+        text-align: center;
+        line-height: 37px;
+        background: #2C65F7;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #fff;
+      };
+      .checkAreaRightStyle {
+        background: #e4e4e4 !important;
       }
     }
   }
