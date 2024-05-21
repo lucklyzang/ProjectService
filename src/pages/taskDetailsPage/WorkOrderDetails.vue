@@ -372,7 +372,7 @@
         };
       },
 
-       // 添加确认
+      // 添加确认
       toolSure () {
         let count = this.inventoryMsgList.some((item)=> {return item.checked == true});
         if (!count) {

@@ -185,8 +185,11 @@
           if (!this.userInfo['extendData']['projectDisp']) {
             this.taskList = this.taskList.filter((item) => { return item.tit != '报修工单'})
           };
-          if (!this.userInfo['extendData']['projectAssgin']) {
+          if (!this.userInfo['extendData']['projectAssgin'] || this.userInfo['extendData']['projectAudit']) {
             this.taskList = this.taskList.filter((item) => { return item.tit != '调度管理'})
+          };
+          if (this.userInfo['extendData']['projectAudit']) {
+            this.taskList = this.taskList.filter((item) => { return item.tit != '自主报修'})
           }
         }  
       },

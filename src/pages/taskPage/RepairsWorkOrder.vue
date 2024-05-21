@@ -243,7 +243,11 @@
           this.changeTitleTxt({tit:'工程管理系统'});
           setStore('currentTitle','工程管理系统')
         })
-      }
+      };
+      // 控制tab切换首项文案显示
+      if (this.userInfo['extendData']['projectAudit']) {
+        this.tabTitleList[0] = '待审核任务'
+      };
       if (this.isFreshRepairsWorkOrderPage) {
         this.getRepairsProjectList({
           proId: this.proId,

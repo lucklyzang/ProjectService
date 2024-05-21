@@ -85,7 +85,7 @@
               </li>
             </ul>
           </div>
-          <div class="manage-wrapper">
+          <div class="manage-wrapper-one" v-if="!userInfo.extendData.projectAudit">
             <div class="mange-title">
               <span>耗材使用量</span>
             </div>
@@ -101,11 +101,31 @@
               </p>
             </div>
           </div>
+          <div class="manage-wrapper" v-if="userInfo.extendData.projectAudit">
+            <div class="mange-title">
+              <span>{{repairsWorkOrderMsg.state == 5 || repairsWorkOrderMsg.state == 6? "消耗耗材" : "耗材管理"}}</span>
+              <span @click="addConsumable" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">添加</span>
+            </div>
+            <div class="circulation-area">
+              <p v-for="(item,index) in consumableMsgList" :key="`${item}-${index}`">
+                <span>{{index+1}}</span>
+                <span>
+                  {{item.mateName}}-{{item.model}}
+                </span>
+                <span>
+                  <van-stepper @change="function(val){stepValueChange(item,index,val)}" theme="round" integer 
+                  @focus="function(val){stepValueFocus(item,index,val)}"
+                  :disabled="repairsWorkOrderMsg.state == 5 || repairsWorkOrderMsg.state == 6? true : false"
+                  v-model="item.number" min="0"/>
+                </span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>  
       <div class="content-bottom" ref="contentBottom" v-show="repairsWorkOrderMsg.state !== 5 && repairsWorkOrderMsg.state !== 6">
         <p class="complete-check" :class="{'completeCheckStyle' : !userInfo.extendData.projectAudit }" @click="completeTask">完成审核</p>
-        <p class="reject-workorder" :class="{'rejectWorkorderStyle' : !userInfo.extendData.projectAudit }" @click="rejectWorkorderEvent">驳回工单</p>
+        <p class="reject-workorder" :class="{'rejectWorkorderStyle' : !userInfo.extendData.projectAudit }" @click="rejectWorkorderEvent">取消</p>
       </div>
     </div>
     <div class="reject-reason-dialog">
@@ -151,6 +171,40 @@
         >
       </van-dialog>
     </div>
+    <div class="contentDialog">
+      <van-dialog v-model="toolShow"  show-cancel-button width="92%"
+            @confirm="toolSure" @cancel="toolCancel" confirmButtonText="添加"
+          >
+            <div class="tool-name-list">
+              <div class="tool-name-list-title-innner">
+                <van-field
+                  v-model="searchValue"
+                />
+                <span class="icon-span">
+                  <van-icon name="search" @click="searchEvent"/>
+                </span>
+              </div>
+              <div class="tool-name-list-content">
+                <p class="circulation-area-title">
+                  <span>物料名称</span>
+                  <span>单位</span>
+                  <span>操作</span>
+                </p>
+                <p v-for="(item,index) in inventoryMsgList" :key="`${item}-${index}`" class="circulation-area-content">
+                  <span @click="mateNameEvent(item,index)">
+                    {{item.mateName}}-{{item.model}}
+                  </span>
+                  <span>
+                    {{item.unit ? item.unit : '无'}}
+                  </span>
+                  <span>
+                    <van-checkbox v-model="item.checked" shape="square" :disabled="item.disabled"></van-checkbox>
+                  </span>
+                </p>
+              </div>
+            </div>
+      </van-dialog>
+    </div>
   </div>
 </template>
 <script>
@@ -191,6 +245,7 @@
         issueImageList: [],
         completeImageList: [],
         inventoryMsgList: [],
+        searchValue: '',
         temporaryInventoryMsgList: [],
         historyIssueImageList: [],
         historyCompleteImageList: [],
@@ -330,9 +385,105 @@
         this.rejectReasonShow = false;
       },
 
+      // 搜索事件
+      searchEvent () {
+        if (this.searchValue == '') {
+          this.getAllMaterial({
+            proId: this.proId,
+            state: 0
+          });
+          return
+        };
+        this.inventoryMsgList = [];
+        this.inventoryMsgList = this.temporaryInventoryMsgList.filter((item) => {return item.mateName.indexOf(this.searchValue) != -1})
+      },
+
+      // 添加确认
+      toolSure () {
+        let count = this.inventoryMsgList.some((item)=> {return item.checked == true});
+        if (!count) {
+          this.$toast('至少要选择一种耗材')
+        } else {
+          this.materialContentShow = true;
+          let checkConsumableList = this.inventoryMsgList.filter((item) => {return item.checked == true});
+          for (let item of checkConsumableList) {
+            this.consumableMsgList.push({
+              number: 0,
+              mateName: item.mateName,
+              mateNumber: item.mateNumber,
+              unit: item.unit,
+              mateId: item.id,
+              model: item.model,
+              quantity: item.quantity,
+              storeId: this.storeId,
+              systemId: this.systemId
+            })
+          };
+        }
+      },
+
+      // 添加取消
+      toolCancel () {
+
+      },
+
       // 耗材名称点击事件
       mateNameEvent (name,index) {
         this.inventoryMsgList[index]['checked'] = !this.inventoryMsgList[index]['checked'];
+      },
+
+      // 添加物质
+      addConsumable () {
+        this.toolShow = true;
+        this.searchValue = '';
+        this.getAllMaterial({
+	        proId: this.proId,
+          state: 0
+        })
+      },
+
+      //查询所有物料信息
+      getAllMaterial (data) {
+        queryAllMaterial(data)
+        .then((res) => {
+          if(res && res.data.code == 200) {
+            if (res.data.data.length > 0) {
+              this.inventoryMsgList = [];
+              this.temporaryInventoryMsgList = [];
+              for (let item of res.data.data) {
+                item.checked = false;
+                // 添加过的物料不允许再次添加,数量为0不容许选择操作
+                let isExist = this.consumableMsgList.filter((innerItem) => { return innerItem.mateId == item.id});
+                if (isExist.length > 0) {
+                  item['disabled'] = true
+                } else {
+                  if (item.quantity > 0) {
+                    item['disabled'] = false
+                  } else {
+                    item['disabled'] = true
+                  }
+                }
+              };
+              this.inventoryMsgList = res.data.data;
+              this.temporaryInventoryMsgList = res.data.data;
+              this.storeId = this.inventoryMsgList[0]['storeId'];
+              this.systemId = this.inventoryMsgList[0]['systemId'];
+            } else {
+              this.$dialog.alert({
+                message: '没有查询到对应的物料信息',
+                closeOnPopstate: true
+              }).then(() => {
+              })
+            }
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err.message}`,
+            closeOnPopstate: true
+          }).then(() => {
+          })
+        })
       },
 
       // 是否删除耗材确定事件
@@ -354,6 +505,41 @@
           this.isChangeConsumableShow = this.isFillMaterialList[echoIndex]['isFilledMaterial']
         } catch (err) {
           this.$toast(`${err}`)
+        }
+      },
+
+      // 步进器值变化事件
+      stepValueChange (item,index,val) {
+        if (item.quantity == null) { return};
+        if (val === "") {return};
+        this.consumableIndex = index;
+        if (val == 0) {
+          if (!this.isDeleteShow) {
+            this.isDeleteShow = true;
+            return
+          }
+        };
+        if (item.quantity > 0) {
+          if (val > item.quantity) {
+            this.$toast(`数量不能超过耗材库存数量${item.quantity}`);
+            this.$nextTick(() => {
+              this.$set(this.consumableMsgList[index],'number',item.quantity)
+            });
+            return
+          }
+        }  
+      },
+
+      // 步进器聚焦事件
+      stepValueFocus (item,index,val) {
+        if (val != 0) {
+        }
+      },
+
+      // 步进器失去焦点事件
+      stepValueBlur (item,index,val) {
+        if (Number(item.number) > item.quantity && this.consumableMsgList[index]['number'] != 1) {
+          this.consumableMsgList[index]['number'] = 1
         }
       },
 
@@ -385,7 +571,7 @@
         setStore('isFillMaterialList', {"number": temporaryDepartmentNumber})
       },
 
-       // 清除该任务存储的是否填写耗材的状态
+      // 清除该任务存储的是否填写耗材的状态
       clearStorageMaterial () {
         if (this.isFillMaterialList.length == 0) { return };
         let temporaryPhotoList = this.isFillMaterialList.filter((item) => {return item.taskId !== this.taskId});
@@ -657,16 +843,27 @@
               )
             }  
           };
-          return new Promise((resolve,reject) => {
+          this.loadinText = '物料上传中,请稍等···';
+          this.showLoadingHint = true;
+          this.overlayShow = true;
+           return new Promise((resolve,reject) => {
             saveMate(mateMsg).then((res) => {
+              this.loadinText = '';
+              this.showLoadingHint = false;
+              this.overlayShow = false;
               if (res && res.data.code == 200) {
                 this.$toast('物料上传成功');
                 resolve()
               } else {
+                this.$toast(`${res.data.msg}`);
                 reject(`${res.data.msg}`)
               }
             })
           .catch((err) => {
+            this.loadinText = '';
+            this.showLoadingHint = false;
+            this.overlayShow = false;
+            this.$toast(`${err.message}`);
             reject(err.message)
           })
         })
@@ -685,11 +882,12 @@
       },
 
       // 完成审核
-      completeTask () {
+      async completeTask () {
         if (!this.userInfo.extendData.projectAudit) {
           this.$toast('你暂无此权限!');
           return
         };
+        await this.submitMaterials();
         this.loadinText = '完成审核中,请稍等···';
         this.showLoadingHint = true;
         this.overlayShow = true;
@@ -759,14 +957,17 @@
       },
       
 
-      // 驳回工单显示驳回原因弹框事件
+      // 驳回工单显示驳回原因弹框事件(需求变更，点击后直接返回上一页)
       rejectWorkorderEvent () {
-        if (!this.userInfo.extendData.projectAudit) {
-          this.$toast('你暂无此权限!');
-          return
-        };          
-        this.rejectReason = '';  
-        this.rejectReasonShow = true;
+        this.$router.push({path: 'repairsWorkOrder'});
+        this.changeTitleTxt({tit:'报修工单'});
+        setStore('currentTitle','报修工单')
+        // if (!this.userInfo.extendData.projectAudit) {
+        //   this.$toast('你暂无此权限!');
+        //   return
+        // };          
+        // this.rejectReason = '';  
+        // this.rejectReasonShow = true;
       },
 
       // 驳回工单关闭前事件
@@ -882,6 +1083,94 @@
           img {
             width: 100%;
             height: 100%
+          }
+        }
+      }
+    };
+    .contentDialog {
+      /deep/ .van-dialog {
+        top: 50%;
+        .van-dialog__content {
+          margin-bottom: 6px;
+          /*height: 500px;*/
+          margin: 10px 0;
+          .tool-name-list {
+            width: 94%;
+            display: flex;
+            flex-flow: column;
+            overflow: auto;
+            margin: 0 auto;
+            padding: 0;
+            max-height: 80vh;
+            .tool-name-list-title-innner {
+              padding: 10px;
+              position: relative;
+              /deep/ .van-cell {
+                padding: 4px;
+                border: 1px solid #333;
+              };
+              .icon-span {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                display: inline-block;
+                right: 16px;
+                .van-icon {
+                  font-size: 23px
+                }
+              }
+            }
+            .tool-name-list-content {
+              flex: 1;
+              padding: 6px;
+              overflow: auto;
+              box-sizing: border-box;
+              border-top: 1px solid #b2b2b2;
+              .circulation-area-content {
+                position: relative;
+                height: 40px;
+                background: #fff;
+                > span {
+                  height: 40px;
+                  line-height: 40px;
+                  font-size: 16px;
+                  display: inline-block;
+                  &:first-child {
+                    width: 55%
+                  };
+                  &:nth-child(2) {
+                    width: 20%;
+                  }
+                  &:last-child {
+                    position: absolute;
+                    top: 12px;
+                    right: 0
+                  }
+                }
+              }
+              .circulation-area-title {
+                position: relative;
+                font-size: 0;
+                span {
+                  height: 40px;
+                  line-height: 40px;
+                  display: inline-block;
+                  width: 20%;
+                  font-size: 16px;
+                  &:first-child {
+                    width: 55%
+                  };
+                  &:nth-child(2) {
+                    width: 20%;
+                  }
+                  &:last-child {
+                    position: absolute;
+                    text-align: right;
+                    right: 0
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1065,7 +1354,7 @@
               }
             }
           };
-          .manage-wrapper {
+          .manage-wrapper-one {
             background: #fff;
             .mange-title {
               height: 50px;
@@ -1132,6 +1421,108 @@
                 }
               }
             }
+          };
+           .manage-wrapper {
+            background: #fff;
+            .mange-title {
+              height: 50px;
+              .bottom-border-1px(#dadada);
+              span {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                &:first-child {
+                  left: 10px;
+                };
+                &:last-child {
+                  right: 10px;
+                  width: 55px;
+                  height: 30px;
+                  text-align: center;
+                  line-height: 30px;
+                  border-radius: 6px;
+                  background: #2db8f9;
+                  color: #fff
+                }
+              }
+            };
+            .circulation-area {
+                max-height: 90%;
+                margin: 0 auto;
+                overflow: auto;
+                font-size: 0;
+              > p {
+                position: relative;
+                height: 50px;
+                background: #fff;
+                margin-bottom: 6px;
+                &:last-child {
+                  margin-bottom:0
+                }
+                > span {
+                  height: 50px;
+                  line-height: 50px;
+                  font-size: 16px;
+                  display: inline-block;
+                  text-align: center;
+                  &:first-child {
+                    width: 15%;
+                    .no-wrap()
+                  };
+                  &:nth-child(2) {
+                    width: 55%;
+                    .no-wrap();
+                    text-align: left;
+                    /deep/ .van-cell {
+                      .van-cell__value--alone {
+                        .van-field__control {
+                          text-align: center
+                        }
+                      }
+                    }
+                  };
+                  &:last-child {
+                    position: absolute;
+                    top:0;
+                    right: 4px;
+                    width: 30%;
+                    text-align: right;
+                    /deep/ .van-stepper--round {
+                      .van-stepper__minus {
+                        color: #fff;
+                        background-color: @color-theme;
+                        border: 1px solid @color-theme;
+                        &:before {
+                          height: 3px
+                        }
+                      };
+                      .van-stepper__plus {
+                        color: #fff;
+                        background-color: @color-theme;
+                        border: 1px solid @color-theme;
+                        &:before {
+                          height: 3px
+                        };
+                        &:after {
+                          width: 3px
+                        }
+                      }
+                    };
+                    span {
+                      display: inline-block;
+                      position: absolute;
+                      top: 0;
+                      right: 2px;
+                      font-size: 22px;
+                      color: @color-theme;
+                      /deep/ .van-icon {
+                        top: 2px
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }  
@@ -1139,7 +1530,7 @@
         height: 60px;
         margin: 0 auto;
         width: 100%;
-        font-size: 13px;
+        font-size: 14px;
         background: #f7f7f7;
         display: flex;
         justify-content: center;
@@ -1149,27 +1540,27 @@
           width: 35%;
           line-height: 40px;
           border-radius: 4px;
-          background: @color-theme;
+          background: #2db8f9;
           color: #fff;
           font-weight: bold;
           text-align: center;
           margin-right: 25px;
         };
         .completeCheckStyle {
-           opacity: .4 !important;
+          opacity: .5 !important;
         };
         .reject-workorder {
           height: 40px;
           width: 35%;
           line-height: 40px;
-          background: #FF0000;
+          border: 1px solid #101010;
           border-radius: 4px;
-          color: #fff;
+          color: #101010;
           font-weight: bold;
           text-align: center
         };
         .rejectWorkorderStyle {
-            opacity: .4 !important;
+          // opacity: .4 !important;
         }
       }
     }
