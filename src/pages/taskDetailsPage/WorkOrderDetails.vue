@@ -1048,6 +1048,7 @@
             isApp: 1,
             materials: []
           };
+          console.log('提交的物料信息',this.consumableMsgList);
           for (let item of this.consumableMsgList) {
             if (item.number > 0) {
               mateMsg.materials.push(
@@ -1059,6 +1060,7 @@
                   mateNumber: item.mateNumber,
                   mateName: item.mateName,
                   model: item.model,
+                  unit: item.unit,
                   storeId: this.storeId,
                   systemId: this.systemId
                 }

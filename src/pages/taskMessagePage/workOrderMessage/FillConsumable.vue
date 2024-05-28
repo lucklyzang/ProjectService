@@ -353,6 +353,7 @@
               number: item.number,
               mateNumber: item.mateNumber,
               mateName: item.mateName,
+              unit: item.unit,
               model: item.model,
               storeId: this.storeId,
               systemId: this.systemId
