@@ -2738,8 +2738,10 @@ export default {
                 };
                 &:nth-child(2) {
                   text-align: left;
+                  margin-right: 4px;
                   flex: 1;
-                  .no-wrap();
+                  white-space: nowrap;
+                  overflow-x: auto;
                   /deep/ .van-cell {
                     .van-cell__value--alone {
                       .van-field__control {

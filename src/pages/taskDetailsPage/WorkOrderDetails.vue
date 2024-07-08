@@ -1211,8 +1211,11 @@
               overflow: auto;
               box-sizing: border-box;
               border-top: 1px solid #b2b2b2;
+              width: 100%;
               .circulation-area-content {
                 position: relative;
+                display: flex;
+                align-items: center;
                 height: 40px;
                 background: #fff;
                 > span {
@@ -1221,21 +1224,26 @@
                   font-size: 16px;
                   display: inline-block;
                   &:first-child {
-                    width: 55%
+                    width: 60%;
+                    overflow-x: auto;
+                    white-space: nowrap;
                   };
                   &:nth-child(2) {
                     width: 20%;
+                    text-align: center;
                   }
                   &:last-child {
-                    position: absolute;
-                    top: 12px;
-                    right: 0
+                    width: 20%;
+                    display: flex;
+                    justify-content: center;
                   }
                 }
               }
               .circulation-area-title {
                 position: relative;
                 font-size: 0;
+                display: flex;
+                align-items: center;
                 span {
                   height: 40px;
                   line-height: 40px;
@@ -1243,15 +1251,15 @@
                   width: 20%;
                   font-size: 16px;
                   &:first-child {
-                    width: 55%
+                    width: 60%;
                   };
                   &:nth-child(2) {
                     width: 20%;
+                    text-align: center;
                   }
                   &:last-child {
-                    position: absolute;
-                    text-align: right;
-                    right: 0
+                    width: 20%;
+                    text-align: center;
                   }
                 }
               }
@@ -1488,7 +1496,8 @@
                   };
                   &:nth-child(2) {
                     width: 55%;
-                    .no-wrap();
+                    overflow-x: auto;
+                    white-space: nowrap;
                     text-align: left;
                     /deep/ .van-cell {
                       .van-cell__value--alone {
