@@ -235,6 +235,7 @@
         photonList: [],
         searchValue: '',
         consumableMsgList: [],
+        originalConsumableMsgList: [],
         enlargeImgShow: false,
         oneRepairsMsg: '',
         enlargeImgUrl: '',
@@ -449,15 +450,24 @@
             return
           }
         };
-        if (item.quantity > 0) {
-          if (val > item.quantity) {
-            this.$toast(`数量不能超过耗材库存数量${item.quantity}`);
-            this.$nextTick(() => {
-              this.$set(this.consumableMsgList[index],'number',item.quantity)
-            });
-            return
-          }
-        }  
+        // 获取当前物料可使用库存数量(可用库存加上次使用量)
+        let LastNumL;
+        let LastNumLength = this.originalConsumableMsgList.filter((innerItem) => { return innerItem.id == item.id });
+        // 重新编辑之前提交过的物料数量
+        if (LastNumLength.length > 0) {
+          LastNumL = LastNumLength[0]['number']
+        } else {
+          // 首次添加的物料数量
+          LastNumL = 0
+        };
+        let residualInventory = LastNumL + item.quantity;
+        if (val > residualInventory) {
+          this.$toast(`数量不能超过耗材库存数量${residualInventory}`);
+          this.$nextTick(() => {
+            this.$set(this.consumableMsgList[index],'number',residualInventory)
+          });
+          return
+        }
       },
 
       // 步进器聚焦事件
@@ -597,6 +607,7 @@
               this.consumableMsgList = [];
               console.log('使用物料',res.data.data);
               this.consumableMsgList = res.data.data;
+              this.originalConsumableMsgList = deepClone(res.data.data);
             } else {
             }
           } else {
