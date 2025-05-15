@@ -30,6 +30,16 @@
               {{oneRepairsMsg.typeName}}
             </span>
           </p>
+          <div class="task-attribution-box">
+            <p>任务归属</p>
+            <p>
+              <van-checkbox-group v-model="taskAttributionResult" :plain="true" :max="1">
+                <van-checkbox name="0">普通任务</van-checkbox>
+                <van-checkbox name="1">消防任务</van-checkbox>
+                <van-checkbox name="2">电梯任务</van-checkbox>
+              </van-checkbox-group>
+            </p>
+          </div>
           <p class="content-top-other">
             <span>时间</span>
             <span>
@@ -233,6 +243,7 @@
         historyIssueImageList: [],
         historyCompleteImageList: [],
         photonList: [],
+        taskAttributionResult: [],
         searchValue: '',
         consumableMsgList: [],
         originalConsumableMsgList: [],
@@ -576,6 +587,10 @@
         queryOneRepairsProject(this.taskId).then((res) => {
           if(res && res.data.code == 200) {
             this.oneRepairsMsg = res.data.data;
+            if (this.oneRepairsMsg['userTag'] !== null) {
+              this.taskAttributionResult = [];
+              this.taskAttributionResult.push(this.oneRepairsMsg['userTag'].toString());
+            };
             let temporaryArr = [];
             for (let item of this.oneRepairsMsg.spaces) {
               temporaryArr.push(item.name)
@@ -1343,6 +1358,58 @@
                 color: @color-theme;
                 font-weight: bold;
                 line-height: 18px;
+                b {
+                  font-weight: bold;
+                }
+              }
+            }
+          };
+          .task-attribution-box {
+            min-height: 45px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 10px;
+            .bottom-border-1px(#dadada);
+            &:last-child {
+              .bottom-border-1px(#fff)
+            }
+            > p {
+              display: inline-block;
+              &:first-child {
+                color: black;
+              };
+              &:not(:first-child) {
+                width: 80%;
+                color: @color-theme;
+                line-height: 18px;
+                /deep/ .van-checkbox-group {
+                  width: 100%;
+                  display: flex;
+                  flex-wrap: wrap;
+                  justify-content: flex-end;
+                  align-items: center;
+                  > div {
+                    margin-left: 8px;
+                    .van-checkbox__label {
+                      color: #2db8f9 !important;
+                      font-weight: bold;
+                    };
+                    .van-checkbox__label {
+                      margin-left: 3px !important;
+                    };
+                    .van-checkbox__icon--checked {
+                      .van-icon {
+                        color: #2db8f9 !important;
+                        background-color: #fff !important;
+                      }
+                    };
+                    &:last-child {
+                      margin-right: 0;
+                    }
+                  }
+                };
                 b {
                   font-weight: bold;
                 }
