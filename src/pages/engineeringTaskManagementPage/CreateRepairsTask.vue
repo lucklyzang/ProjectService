@@ -1068,7 +1068,7 @@ export default {
         destinationId: '', // 目的地id
         depId: this.currentGoalDepartment == '请选择' ? '' : this.goalDepartmentOption.filter((item) => { return item['text'] == this.currentGoalDepartment})[0]['value'], // 目的科室id
         select: '',
-        isMe: this.isMe, // 是否我方解决 0-否，1-是
+        isMe: this.isMeRadioValue, // 是否我方解决 0-否，1-是
         priority: this.priorityRadioValue,
         taskRemark: this.taskDescribe, //任务描述
         proId: this.proId,
