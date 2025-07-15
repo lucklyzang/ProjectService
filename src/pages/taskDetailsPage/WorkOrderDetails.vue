@@ -985,7 +985,7 @@
             if (res && res.data.code == 200) {
               this.issueImageList = [];
               this.completeImageList = [];
-              this.$toast('图片上传成功');
+              // this.$toast('图片上传成功');
               resolve()
             } else {
               reject(`${res.data.msg}`);
@@ -1096,7 +1096,7 @@
           return new Promise((resolve,reject) => {
             saveMate(mateMsg).then((res) => {
               if (res && res.data.code == 200) {
-                this.$toast('物料上传成功');
+                // this.$toast('物料上传成功');
                 resolve()
               } else {
                 reject(`${res.data.msg}`)

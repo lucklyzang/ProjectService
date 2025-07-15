@@ -10,7 +10,7 @@
     <!-- 顶部导航栏 -->
     <HeaderTop :title="navTopTitle">
       <van-icon name="arrow-left" slot="left" @click="backTo"></van-icon>
-      <div v-if="currentIndex == 0" slot="right" class="left-text" @click="managementEvent">{{ isManagementClick ? '退出管理' : '管理' }}</div>
+      <!-- <div v-if="currentIndex == 0" slot="right" class="left-text" @click="managementEvent">{{ isManagementClick ? '退出管理' : '管理' }}</div> -->
     </HeaderTop>
     <div class="content-top">
       <ul class="tab-title">
