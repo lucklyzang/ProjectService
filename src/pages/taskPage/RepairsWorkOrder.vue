@@ -246,7 +246,7 @@
       };
       // 控制tab切换首项文案显示
       if (this.userInfo['extendData']['projectAudit']) {
-        this.tabTitleList[0] = '待审核任务'
+        this.tabTitleList[0] = '待复核任务'
       };
       if (this.isFreshRepairsWorkOrderPage) {
         this.getRepairsProjectList({
@@ -319,7 +319,7 @@
             return '已延迟'
             break;
            case 8 :
-            return '待审核'
+            return '待复核'
             break;
         }
       },
