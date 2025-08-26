@@ -198,13 +198,15 @@ export default {
         this.overlayShow = false;
         this.loadingText = '';
         if (res && res.status == 200) {
-          if (res.data.code != 200) {
-            this.$toast({
-              type: 'fail',
-              message: res.data.msg
-            });
-            return;
-          };
+          if (res.data.hasOwnProperty('code')) {
+            if (res.data.code != 200) {
+              this.$toast({
+                type: 'fail',
+                message: res.data.msg
+              });
+              return;
+            }
+          };  
           this.currentPageList = res.data.data;
           this.totalCount = res.data.recordsTotal;
           if (isInitQuery) {
