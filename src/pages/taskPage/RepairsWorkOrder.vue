@@ -120,7 +120,7 @@
   import { mapGetters, mapMutations } from 'vuex'
   import store from '@/store'
   import { formatTime, setStore, getStore, removeStore, IsPC, judgeOverTime, removeAllLocalStorage} from '@/common/js/utils'
-  import {queryRepairsProjectList,sureRepairsTask,backRepairsTask,queryBackRepairsTaskReason,batchCgeckTask} from '@/api/worker.js'
+  import {queryRepairsProjectList,sureRepairsTask,backRepairsTask,queryBackRepairsTaskReason,batchCgeckTask,sureStartTask} from '@/api/worker.js'
   export default {
     name: 'RepairsWorkOrder',
     data () {
@@ -653,6 +653,14 @@
       taskView (item) {
         this.changeRepairsWorkOrderMsg(item);
         setStore('repairsWorkOrderMsg',item);
+        if (item.state == 2) {
+          // 确认任务开始
+          this.sureTask({
+            proId: this.proId, //项目ID 必输
+            taskId: item.id, //任务ID 必输
+            workerId: this.workerId //用户ID 必输
+          })
+        };
         if (item.state == 8) {
           this.$router.push({path: 'workOrderCheck'});
           this.changeTitleTxt({tit:'工单审核'});
@@ -662,6 +670,21 @@
           this.changeTitleTxt({tit:'工单详情'});
           setStore('currentTitle','工单详情')
         }
+      },
+
+      // 确认任务开始
+      sureTask (data) {
+        sureStartTask(data).then((res) => {
+          if(res && res.data.code == 200) {
+          }
+        })
+        .catch((err) => {
+          this.$dialog.alert({
+            message: `${err}`,
+            closeOnPopstate: true
+            }).then(() => {
+            })
+        })
       },
 
       // 返回上一页

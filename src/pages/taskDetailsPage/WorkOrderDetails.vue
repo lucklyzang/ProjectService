@@ -211,7 +211,7 @@
   import store from '@/store'
   import VanFieldSelectPicker from '@/components/VanFieldSelectPicker'
   import { mapGetters, mapMutations } from 'vuex'
-  import {queryOneRepairsProject,uploadRepairsTaskPhoto,queryAllMaterial,queryRepairsTaskPhoto,saveMate,completeRepairsTask,sureStartTask,queryMaterialById} from '@/api/worker.js'
+  import {queryOneRepairsProject,uploadRepairsTaskPhoto,queryAllMaterial,queryRepairsTaskPhoto,saveMate,completeRepairsTask,queryMaterialById} from '@/api/worker.js'
   import { formatTime, setStore, getStore, removeStore, IsPC, changeArrIndex, removeAllLocalStorage, deepClone, compress } from '@/common/js/utils'
   export default {
     name: 'WorkOrderDetails',
@@ -725,21 +725,6 @@
         this.inventoryMsgList = this.temporaryInventoryMsgList.filter((item) => {return item.mateName.indexOf(this.searchValue) != -1})
       },
 
-      // 确认任务开始
-      sureTask (data) {
-        sureStartTask(data).then((res) => {
-          if(res && res.data.code == 200) {
-          }
-        })
-        .catch((err) => {
-          this.$dialog.alert({
-            message: `${err}`,
-            closeOnPopstate: true
-            }).then(() => {
-            })
-        })
-      },
-
       // 查询任务下的图片
       getOneRepairsProjectPhoto () {
         return new Promise((resolve,reject) => {
@@ -818,12 +803,6 @@
               _this.issueImageList.push(src);
               // 存储上传的照片
               _this.storePhoto(_this.issueImageList,_this.photoType);
-              // 确认任务开始
-              _this.sureTask({
-                proId: _this.proId,
-                taskId: _this.taskId,
-                workerId: _this.workerId
-              })
             } else {
               _this.completeImageList.push(src);
               // 存储上传的照片
@@ -862,12 +841,6 @@
               _this.issueImageList.push(src);
               // 存储上传的照片
               _this.storePhoto(_this.issueImageList,_this.photoType);
-              // 确认任务开始
-              _this.sureTask({
-                proId: _this.proId,
-                taskId: _this.taskId,
-                workerId: _this.workerId
-              })
             } else {
               _this.completeImageList.push(src);
               // 存储上传的照片
