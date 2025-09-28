@@ -47,7 +47,7 @@
                         <span>类型: </span>
                         <span>{{ item.typeName }}</span>
                       </div>
-                      <div class="list-line-two-right" :class="{ 'listLineTwoRightStyle' : item.state == 4 }">
+                      <div class="list-line-two-right" :class="{statusWaitSure:item.state == 1,statusWaitFinish: item.state == 3,statusWaitSignature: item.state == 4, statusWaitCheck:item.state == 8}">
                         {{ taskStatusTransition(item.state) }}
                       </div>
                     </div>
@@ -337,6 +337,9 @@ export default {
           break;
         case 5 :
           return '已完成'
+          break;
+        case 8 :
+          return '待审核'
           break
       }
     }
@@ -520,7 +523,19 @@ export default {
                   };
                   .list-line-two-right {
                     font-size: 14px;
-                    color: #289E8E;
+                    color: #8e9397;
+                  };
+                  .statusWaitSure {
+                    color: red
+                  };
+                  .statusWaitFinish {
+                    color: @color-theme
+                  };
+                  .statusWaitSignature {
+                    color: #06e606
+                  };
+                  .statusWaitCheck {
+                    color: orange
                   };
                   .listLineTwoRightStyle {
                     color: #F2A15F !important

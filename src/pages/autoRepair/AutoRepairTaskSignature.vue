@@ -38,7 +38,7 @@
 import ElectronicSignature from '@/components/ElectronicSignature'
 import { mapGetters, mapMutations } from "vuex";
 import { rotateBase64Img } from '@/common/js/utils';
-import { uploadRepairsTaskPhoto, completeRepairsTaskFinal } from '@/api/worker.js'
+import { uploadRepairsTaskPhoto, completeRepairsTaskFinal, noAuditTask } from '@/api/worker.js'
 import {mixinsDeviceReturn} from '@/mixins/deviceReturnFunction';
 export default {
   name: "AutoRepairTaskSignature",
@@ -172,7 +172,7 @@ export default {
       if (res && res.data.code == 200) {
         this.$toast(`${res.data.msg}`);
         this.rewrite ();
-        this.updateTaskComplete()
+        this.updateTaskNoAuditTask()
       } else {
         this.$toast(`${res.data.msg}`);
       }
@@ -195,6 +195,38 @@ export default {
       this.loadingShow = true;
       this.overlayShow = true;
       completeRepairsTaskFinal({
+        proId: this.proId,
+        taskId: this.$route.params.taskId
+      })
+      .then((res) => {
+        if (res && res.data.code == 200) {
+          this.$toast(`${res.data.msg}`);
+          this.$router.push({ path: "/autoRepairList" })
+        } else {
+          this.$toast(`${res.data.msg}`);
+        };
+        this.loadinText = '';
+        this.loadingShow = false;
+        this.overlayShow = false
+      })
+      .catch((err) => {
+        this.loadinText = '';
+        this.loadingShow = false;
+        this.overlayShow = false;
+        this.$dialog.alert({
+          message: `${err.message}`,
+          closeOnPopstate: true
+        }).then(() => {
+        })
+      })
+    },
+
+    // 更改任务状态为待审核
+    updateTaskNoAuditTask () {
+      this.loadinText = '加载中,请稍等···';
+      this.loadingShow = true;
+      this.overlayShow = true;
+      noAuditTask({
         proId: this.proId,
         taskId: this.$route.params.taskId
       })

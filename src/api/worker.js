@@ -60,7 +60,7 @@ export function batchCgeckTask(data) {
   })
 };
 
-// 签名完成
+// 签名完成(状态为待审核)
 export function noAuditTask(data) {
   return request({
     url: 'bxTask/noAuditTask',
