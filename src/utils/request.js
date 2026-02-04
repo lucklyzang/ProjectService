@@ -13,7 +13,7 @@ import { setStore } from '@/common/js/utils'
 // http://blinktech.cn/project 生产环境
 // http://act.blinktech.cn/project 新测试环境
 const service = axios.create({
-  baseURL: 'http://blink.blinktech.cn/project', //接口基础地址
+  baseURL: 'http://ver.blinktech.cn/project', //接口基础地址
   retry: 2, // 网络请求异常后，重试次数
   retryDelay: 1000, // 每次重试间隔时间
   shouldRetry: (err) => true // 重试条件

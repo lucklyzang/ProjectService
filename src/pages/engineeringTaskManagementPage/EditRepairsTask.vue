@@ -169,6 +169,18 @@
               </van-radio-group>
             </div>
           </div>
+          <div class="concat-box">
+            <div class="concat-box-left">
+              <span>联系人(电话)</span>
+            </div>
+            <div class="concat-box-right">
+              <van-field
+                v-model="contact"
+                type="text"
+                placeholder="请输入联系方式"
+              />
+            </div>
+          </div>
           <div class="task-describe transport-type">
             <div class="transport-type-left">
               <span>任务描述</span>
@@ -388,7 +400,8 @@ export default {
         {tit:'调度管理'},
         {tit:'报修任务'},
         {tit:'区域巡检'}
-      ]
+      ],
+      contact: ''
     }
   },
 
@@ -443,6 +456,7 @@ export default {
       this.isMeRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['isMe'].toString();
       this.taskDescribe = casuallyTemporaryStorageCreateRepairsTaskMessage['taskRemark'];
       this.consumableMsgList = casuallyTemporaryStorageCreateRepairsTaskMessage['materials'];
+      this.contact = casuallyTemporaryStorageCreateRepairsTaskMessage['contact'];
       // 处理目的建筑、目的科室显示信息
       let trmporaryMessage = casuallyTemporaryStorageCreateRepairsTaskMessage['depName'].split("/");
       this.currentStructure = trmporaryMessage[0] ? trmporaryMessage[0] : '请选择';
@@ -1106,6 +1120,7 @@ export default {
         tools: [],  //使用工具
         depName: `${this.currentStructure == '请选择' || !this.currentStructure ? '' : this.currentStructure}/${this.currentGoalDepartment == '请选择' || !this.currentGoalDepartment ? '' : this.currentGoalDepartment}`, //目的地名称
         typeName: this.currentTaskType, // 类型名称
+        contact: this.contact,
         materials: []  // 需要的物料
       };
       if (temporaryMessage['depName'] == '/') {
@@ -1847,6 +1862,30 @@ export default {
           .problem-overview {
             align-items: center
           };
+           .concat-box {
+            width: 100%;
+            padding: 8px 6px;
+            box-sizing: border-box;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            margin-top: 6px;
+            .concat-box-left {
+              width: 105px;
+              >span {
+               color: #9E9E9A;
+              }
+            };
+            .concat-box-right {
+              flex: 1;
+              /deep/ .van-cell {
+                padding: 4px 6px !important;
+                background: #F9F9F9
+              }
+            }
+          };
           .transport-type {
             width: 100%;
             padding: 10px 6px;
@@ -1857,8 +1896,7 @@ export default {
             font-size: 14px;
             margin-top: 6px;
             .transport-type-left {
-              padding: 0 10px;
-              box-sizing: border-box;
+              width: 105px;
               >span {
                 &:nth-child(1) {
                   color: #9E9E9A

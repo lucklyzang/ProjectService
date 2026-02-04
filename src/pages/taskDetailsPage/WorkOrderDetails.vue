@@ -71,6 +71,12 @@
               {{ oneRepairsMsg.spaces.join(',') }}
             </p>
           </div>
+           <p class="content-top-other">
+            <span>联系人(电话)</span>
+            <span>
+              {{ oneRepairsMsg.contact ? oneRepairsMsg.contact : '无' }}
+            </span>
+          </p>
           <p class="content-top-name">
             <span>工单内容</span>
             <span>

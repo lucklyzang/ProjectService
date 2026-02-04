@@ -169,6 +169,18 @@
               </van-radio-group>
             </div>
           </div>
+          <div class="concat-box">
+            <div class="concat-box-left">
+              <span>联系人(电话)</span>
+            </div>
+            <div class="concat-box-right">
+              <van-field
+                v-model="contact"
+                type="text"
+                placeholder="请输入联系方式"
+              />
+            </div>
+          </div>
           <div class="task-describe transport-type">
             <div class="transport-type-left">
               <span>任务描述</span>
@@ -388,7 +400,8 @@ export default {
         {tit:'调度管理'},
         {tit:'报修任务'},
         {tit:'区域巡检'}
-      ]
+      ],
+      contact: ''
     }
   },
 
@@ -452,7 +465,8 @@ export default {
       this.currentUseTool = casuallyTemporaryStorageCreateRepairsTaskMessage['currentUseTool'];
       this.isMeRadioValue = casuallyTemporaryStorageCreateRepairsTaskMessage['isMeRadioValue'];
       this.taskDescribe = casuallyTemporaryStorageCreateRepairsTaskMessage['taskDescribe'];
-      this.consumableMsgList = casuallyTemporaryStorageCreateRepairsTaskMessage['consumableMsgList']
+      this.consumableMsgList = casuallyTemporaryStorageCreateRepairsTaskMessage['consumableMsgList'];
+      this.contact = casuallyTemporaryStorageCreateRepairsTaskMessage['contact'];
     },
 
     // 公共修改是否暂存的方法
@@ -1083,7 +1097,8 @@ export default {
         tools: [],  //使用工具
         depName: `${this.currentStructure == '请选择' ? '' : this.currentStructure}/${this.currentGoalDepartment == '请选择' ? '' : this.currentGoalDepartment}`, //出发地名称
         typeName: this.currentTaskType, // 类型名称
-        materials: []        // 需要的物料
+        materials: [],        // 需要的物料
+        contact: this.contact
       };
       // 拼接参与者数据
       if (this.currentParticipant.length > 0) {
@@ -1290,6 +1305,7 @@ export default {
       casuallyTemporaryStorageCreateRepairsTaskMessage['taskDescribe'] = this.taskDescribe;
       casuallyTemporaryStorageCreateRepairsTaskMessage['consumableMsgList'] = this.consumableMsgList;
       casuallyTemporaryStorageCreateRepairsTaskMessage['isTemporaryStorage'] = true;
+      casuallyTemporaryStorageCreateRepairsTaskMessage['contact'] = this.contact;
       this.changeTemporaryStorageCreateRepairsTaskMessage(casuallyTemporaryStorageCreateRepairsTaskMessage);
       this.$toast('暂存成功');
       this.$router.push({path: '/engineeringTaskManagement'})
@@ -1857,8 +1873,7 @@ export default {
             font-size: 14px;
             margin-top: 6px;
             .transport-type-left {
-              padding: 0 10px;
-              box-sizing: border-box;
+              width: 105px;
               >span {
                 &:nth-child(1) {
                   color: #9E9E9A
@@ -1891,6 +1906,30 @@ export default {
           };
           .transport-type {
             .transport-type-right {
+              /deep/ .van-cell {
+                padding: 4px 6px !important;
+                background: #F9F9F9
+              }
+            }
+          };
+          .concat-box {
+            width: 100%;
+            padding: 8px 6px;
+            box-sizing: border-box;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            margin-top: 6px;
+            .concat-box-left {
+              width: 105px;
+              >span {
+               color: #9E9E9A;
+              }
+            };
+            .concat-box-right {
+              flex: 1;
               /deep/ .van-cell {
                 padding: 4px 6px !important;
                 background: #F9F9F9

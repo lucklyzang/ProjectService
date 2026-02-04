@@ -214,7 +214,15 @@
                             >
                         </span>
                     </div>
-                </div>   
+                </div> 
+                <div class="message-one message-two">
+                    <div class="message-two-left">
+                        <span>联系人(电话)</span>
+                    </div>
+                    <div class="message-two-right">
+                        {{ schedulingTaskDetails.contact ? schedulingTaskDetails.contact : '无' }}
+                    </div>
+                </div>  
                 <div class="message-one message-two">
                     <div class="message-two-left">
                         <span>问题描述</span>
