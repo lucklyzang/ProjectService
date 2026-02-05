@@ -177,7 +177,7 @@
               <van-field
                 v-model="contact"
                 type="text"
-                placeholder="请输入联系方式"
+                placeholder="请输入联系人及联系方式"
               />
             </div>
           </div>
