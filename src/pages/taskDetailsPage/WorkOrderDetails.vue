@@ -71,10 +71,16 @@
               {{ oneRepairsMsg.spaces.join(',') }}
             </p>
           </div>
-           <p class="content-top-other">
+          <p class="content-top-other">
             <span>联系人(电话)</span>
             <span>
               {{ oneRepairsMsg.contact ? oneRepairsMsg.contact : '无' }}
+            </span>
+          </p>
+          <p class="content-top-other">
+            <span>联系人(姓名)</span>
+            <span>
+              {{ oneRepairsMsg.contactName ? oneRepairsMsg.contactName : '无' }}
             </span>
           </p>
           <p class="content-top-name">
