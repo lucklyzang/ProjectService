@@ -82,18 +82,42 @@
       <div class="check-area-right" :class="{'checkAreaRightStyle' : !isCheckCanClick}" @click="completeCheckEvent">完成审核</div>
     </div>
    <!-- 退回原因弹窗 -->
-    <van-dialog v-model="reasonShow" title="请选择退回原因" show-cancel-button width="92%"
-          @confirm="reasonSure" @cancel="reasonCancel"
-        >
-          <div class="tool-name-list">
-            <div class="tool-name-list-title-innner">退回原因:</div>
-            <div class="tool-name-list-content">
-              <span :class="{spanStyle:reasonIndex === index}" v-for="(item,index) in reasonOperationList" :key="`${item}-${index}`" @click="reasonCheck(item,index)">
-                {{item.text}}
-              </span>
+   <div class="back-dialog">
+      <van-dialog v-model="reasonShow"  width="92%" :show-confirm-button="false">
+        <div class="close-icon">
+          <span>退回原因</span>
+          <van-icon name="cross" color="#0E2442" size="22" @click="reasonShow = false" />
+        </div>
+        <div class="back-content-box">
+          <div class="back-input">
+            <div class="back-input-text">
+              <span>*</span>
+              <span>退回原因:</span>
             </div>
+            <van-field
+              v-model="reasonInputValue"
+              rows="3"
+              type="textarea"
+              maxlength="200"
+              placeholder="请输入"
+              show-word-limit
+            />
           </div>
-    </van-dialog>
+          <div class="quick-input">
+              <div class="quick-input-text">快捷输入:</div>
+              <div class="quick-input-content">
+                <span v-for="(item,index) in reasonOperationList" :key="`${item}-${index}`" @click="reasonCheck(item,index)">
+                  {{item.text}}
+                </span>
+              </div>
+            </div>
+        </div>
+        <div class="btn-area">
+          <div class="no-btn"  @click="reasonCancel">取消</div>
+          <div class="yes-btn" @click="reasonSure">确认</div>
+        </div>
+      </van-dialog>
+    </div>
     <!-- 批量审核弹框 -->
     <div class="checkDialog">
       <van-dialog class="checkDialog" v-model="checkDialogShow" width="90%" :show-confirm-button="false" :close-on-click-overlay="true">
@@ -135,6 +159,7 @@
         overlayShow: false,
         showLoadingHint: false,
         reasonOperationList: [],
+        reasonInputValue: '',
         reasonIndex: '',
         reasonText: '',
         reasonName: '',
@@ -427,11 +452,11 @@
 
       // 退回原因确定
       reasonSure () {
-        if (this.reasonIndex === '') {
+        if (this.reasonInputValue === '') {
           this.$toast('请选择退回原因');
           return
         };
-        backRepairsTask({proId:this.proId, taskId:this.taskId,reason:this.reasonText})
+        backRepairsTask({proId:this.proId, taskId:this.taskId,reason:this.reasonInputValue})
         .then((res) => {
           if (res && res.data.code == 200) {
             this.$toast(`${res.data.msg}`);
@@ -460,6 +485,7 @@
       reasonCancel() {
         this.reasonIndex = '';
         this.reasonName = '';
+        this.reasonInputValue = '';
         this.reasonShow = false
       },
 
@@ -468,7 +494,12 @@
         this.reasonIndex = index;
         this.reasonText = item.text;
         this.reasonName = item.text
-        this.reasonValue = item.value
+        this.reasonValue = item.value;
+        if (this.reasonInputValue === '') {
+          this.reasonInputValue = this.reasonText;
+        } else {
+          this.reasonInputValue = this.reasonInputValue + ',' + this.reasonText;
+        }
       },
 
       // tab点击事件
@@ -569,6 +600,12 @@
             } else {
               this.noDataShow = true;
             }
+          } else {
+            this.$dialog.alert({
+              message: `${res.data.msg}`,
+              closeOnPopstate: true
+            }).then(() => {
+            })
           }
         })
         .catch((err) => {
@@ -587,6 +624,7 @@
       taskBack (item) {
         this.taskId = item.id;
         this.reasonShow = true;
+        this.reasonInputValue = '';
         queryBackRepairsTaskReason({proId:this.proId})
         .then((res) => {
           this.reasonOperationList = [];
@@ -750,46 +788,116 @@
         }
       }
     };
-    /deep/ .van-dialog {
+    .back-dialog {
+      /deep/ .van-dialog {
+       border-radius: 0 !important;
       .van-dialog__content {
-        margin-bottom: 6px;
-        height: 200px;
-        margin: 10px 0;
-        .tool-name-list {
-          width: 94%;
-          height: 100%;
-          overflow: auto;
-          margin: 0 auto;
-          padding: 0;
-          border: 1px solid #b2b2b2;
-          .tool-name-list-title-innner {
-            padding: 10px;
-          }
-          .tool-name-list-content {
-            padding: 6px;
-            .spanStyle {
-              color: #fff;
-              background: @color-theme
-            }
-            span {
-              display: inline-block;
-              width: 48%;
-              height: 40px;
-              text-align: center;
-              margin-bottom: 8px;
-              line-height: 40px;
-              background: #f3f3f3;
-              margin-right: 4%;
-              &:nth-child(even) {
-                margin-right: 0
+        height: 380px;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 40px;
+        box-sizing: border-box;
+         .close-icon {
+           height: 40px;
+           padding: 0 8px;
+           box-sizing: border-box;
+           background: #f6f9fb;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           >span {
+             font-size: 14px;
+             color: #101010;
+           }
+          };
+          .back-content-box {
+            padding: 10px 20px;
+            box-sizing: border-box;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            .back-input {
+              .back-input-text {
+                >span {
+                  &:nth-child(1) {
+                    color: red;
+                    margin-left: -8px;
+                  };
+                  &:nth-child(2) {
+                    font-size: 14px;
+                    color: #101010;
+                  }
+                }
+              };
+              /deep/ .van-cell {
+                margin: 10px 0;
+                border: 1px solid #888888;
+                font-size: 14px !important;
+                color: #101010 !important
+              }
+            };
+            .quick-input {
+              display: flex;
+              flex: 1;
+              height: 0;
+              .quick-input-text {
+                font-size: 14px;
+                color: #9e9e9a;
+                margin-right: 4px;
+              };
+              .quick-input-content {
+                flex: 1;
+                height: 100%;
+                overflow: auto;
+                flex-wrap: wrap;
+                >span {
+                  background: #bddcf9;
+                  border-radius: 4px;
+                  border: 4px;
+                  height: 26px;
+                  line-height: 26px;
+                  padding: 0 6px;
+                  box-sizing: border-box;
+                  display: inline-block;
+                  font-size: 12px;
+                  color: #3b9df9;
+                  margin-right: 8px;
+                  margin-bottom: 8px;
+                }
               }
             }
+          };
+         .btn-area {
+          display: flex;
+          justify-content: center;
+          .no-btn {
+            width: 30%;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            border: 1px solid #3b9df9;
+            box-sizing: border-box;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #3b9df9;
+            margin-right: 60px;
+          };
+          .yes-btn {
+            width: 30%;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            background: #3b9df9;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #fff
           }
         }
       }
+    }
     };
-      .content-wrapper();
-      position: relative;
+    .content-wrapper();
+    position: relative;
     .no-data {
       position: absolute;
       top: 200px;
