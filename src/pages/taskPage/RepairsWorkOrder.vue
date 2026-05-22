@@ -456,6 +456,7 @@
           this.$toast('请选择退回原因');
           return
         };
+        this.reasonShow = false;
         backRepairsTask({proId:this.proId, taskId:this.taskId,reason:this.reasonInputValue})
         .then((res) => {
           if (res && res.data.code == 200) {
@@ -814,6 +815,7 @@
             padding: 10px 20px;
             box-sizing: border-box;
             flex: 1;
+            height: 0;
             display: flex;
             flex-direction: column;
             .back-input {
