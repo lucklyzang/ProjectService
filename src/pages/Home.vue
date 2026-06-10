@@ -26,9 +26,7 @@
         <p class="content-middle-title">任务看板</p>
         <ul class="content-middle-task-name">
           <li v-for="(item,index) in taskList" :key="index" @click="taskClickEvent(item,index)">
-            <span class="task-length" :class="{daskListSignStyle:index == 0 && isExist(item.tit)}" v-show="index == 0 && repairsWorkerOrderCount != 0">{{repairsWorkerOrderCount}}</span>
-            <span class="task-length" :class="{daskListSignStyle:index == 1 && isExist(item.tit)}" v-show="index == 1 && deviceServiceCount != 0">{{deviceServiceCount}}</span>
-            <span class="task-length" :class="{daskListSignStyle:index == 2 && isExist(item.tit)}" v-show="index == 2 && departmentServieCount != 0">{{departmentServieCount}}</span>
+            <span class="task-length" :class="{daskListSignStyle:isExist(item.tit)}" v-show="item.count !== null && item.count !== '' && item.count !== 0">{{ item.count }}</span>
             <p class="task-button-wrapper">
               <img :src="btnTaskWrapperPng" alt="">
             </p>
@@ -82,17 +80,14 @@
         btnIndex: 0,
         noDataShow: false,
         showLoadingHint: false,
-        repairsWorkerOrderCount: '',
         temporaryNumList: [],
-        deviceServiceCount: '',
-        departmentServieCount: '',
         isTimeoutContinue: true,
         taskList: [
-          {tit:'报修工单', imgUrl: repairsWorkOrderOnePng},
-          {tit:'设备巡检', imgUrl: deviceServiceOnePng},
-          {tit:'区域巡检', imgUrl: departmentServiceOnePng},
-          {tit:'调度管理', imgUrl: dispatchingManagementPng},
-          {tit:'自主报修', imgUrl: autoRepairPng}
+          {tit:'报修工单', imgUrl: repairsWorkOrderOnePng, value: 'bxTask', count: 0},
+          {tit:'设备巡检', imgUrl: deviceServiceOnePng, value: 'sxTask', count: 0},
+          {tit:'区域巡检', imgUrl: departmentServiceOnePng, value: 'kxTask', count: 0},
+          {tit:'调度管理', imgUrl: dispatchingManagementPng, value: 'dgTask', count: 0},
+          {tit:'自主报修', imgUrl: autoRepairPng, value: 'zizhuTask', count: 0}
         ],
         btnList: [
           {name: '主页', icon: 'wap-home-o'},
@@ -272,6 +267,9 @@
             break;
           case '设备巡检' :
             return 'sx'
+            break;
+          case '自主报修' :
+            return 'zizhuTask'
             break
         }
       },
@@ -291,10 +289,18 @@
       getTaskCount (proId,workerId) {
         queryTaskCount(proId,workerId).then((res) => {
           if (res && res.data.code == 200) {
-            const {bxTask, sxTask, kxTask} = res.data.data;
-            this.repairsWorkerOrderCount = bxTask;
-            this.deviceServiceCount = sxTask;
-            this.departmentServieCount = kxTask
+            const {bxTask, sxTask, kxTask, zizhuTask} = res.data.data;
+            this.taskList.forEach((item) => {
+              if (item.value == 'bxTask') {
+                item.count = bxTask;
+              } else if (item.value == 'sxTask') {
+                item.count = sxTask;
+              } else if (item.value == 'kxTask') {
+                item.count = kxTask;
+              } else if (item.value == 'zizhuTask') {
+                item.count = zizhuTask;
+              }
+            })
           }
         })
         .catch((err) => {

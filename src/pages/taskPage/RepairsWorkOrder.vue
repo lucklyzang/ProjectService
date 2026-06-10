@@ -245,7 +245,9 @@
       let catch_components = store.state.catchComponent.catch_components;
       let i = catch_components.indexOf('RepairsWorkOrder');
       i === -1 && catch_components.push('RepairsWorkOrder');
-      next();
+      next((el) => {
+        el.changeCatchComponent(catch_components)
+      })
     },
 
     beforeRouteLeave(to, from, next) {

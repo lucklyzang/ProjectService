@@ -174,8 +174,9 @@
       let catch_components = store.state.catchComponent.catch_components;
       let i = catch_components.indexOf('DeviceService');
       i === -1 && catch_components.push('DeviceService');
-      console.log(store.state.catchComponent.catch_components);
-      next();
+      next((el) => {
+        el.changeCatchComponent(catch_components)
+      })
     },
 
     beforeRouteLeave(to, from, next) {
