@@ -289,7 +289,7 @@
       getTaskCount (proId,workerId) {
         queryTaskCount(proId,workerId).then((res) => {
           if (res && res.data.code == 200) {
-            const {bxTask, sxTask, kxTask, zizhuTask} = res.data.data;
+            const {bxTask, sxTask, kxTask} = res.data.data;
             this.taskList.forEach((item) => {
               if (item.value == 'bxTask') {
                 item.count = bxTask;
@@ -297,8 +297,6 @@
                 item.count = sxTask;
               } else if (item.value == 'kxTask') {
                 item.count = kxTask;
-              } else if (item.value == 'zizhuTask') {
-                item.count = zizhuTask;
               }
             })
           }
