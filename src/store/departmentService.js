@@ -57,7 +57,7 @@ export default {
     // 改变是否是单个科室的签字状态
     changeIsSingleDepartmentSignature (state, playLoad) {
       state.isSingleDepartmentSignature = playLoad
-    },
+    }
   },
   actions:{}
 }

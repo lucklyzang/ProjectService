@@ -327,6 +327,7 @@
 
       // 搜索事件
       searchEvent () {
+        console.log('搜索了');
         if (this.searchValue == '') {
           this.getAllMaterial({
             proId: this.proId,
@@ -464,46 +465,53 @@
               box-sizing: border-box;
               border-top: 1px solid #b2b2b2;
               .circulation-area-content {
-                position: relative;
                 height: 40px;
-                background: #fff;
+								background: #fff;
+								display: flex;
+								align-items: center;
                 > span {
                   height: 40px;
                   line-height: 40px;
                   font-size: 16px;
                   display: inline-block;
                   &:first-child {
-                    width: 55%
+                    width: 55%;
+										overflow-x: auto;
+										white-space: nowrap;
+										margin-right: 2%;
                   };
                   &:nth-child(2) {
                     width: 20%;
+										text-align: center;
                   }
                   &:last-child {
-                    position: absolute;
-                    top: 12px;
-                    right: 0
+                    width: 20%;
+										display: flex;
+										align-items: center;
+										justify-content: center;
                   }
                 }
               }
               .circulation-area-title {
-                position: relative;
-                font-size: 0;
+                display: flex;
+								align-items: center;
                 span {
                   height: 40px;
-                  line-height: 40px;
+									line-height: 40px;
+									font-size: 17px;
+									font-weight: bold;
                   display: inline-block;
-                  width: 20%;
-                  font-size: 16px;
                   &:first-child {
-                    width: 55%
+                    width: 55%;
+										margin-right: 2%;
                   };
                   &:nth-child(2) {
                     width: 20%;
+										text-align: center;
                   }
                   &:last-child {
-                    position: absolute;
-                    text-align: right;
-                    right: 0
+                    width: 20%;
+										text-align: center;
                   }
                 }
               }
@@ -547,7 +555,8 @@
           overflow: auto;
           font-size: 0;
         > p {
-          position: relative;
+          display: flex;
+          align-items: center;
           height: 50px;
           background: #fff;
           margin-bottom: 6px;
@@ -565,7 +574,10 @@
               width: 10%
             };
             &:nth-child(2) {
-              text-align: center;
+              width: 45%;
+              white-space: nowrap;
+              overflow-x: auto;
+              margin-right: 5%;
               /deep/ .van-cell {
                 .van-cell__value--alone {
                   .van-field__control {
@@ -575,15 +587,15 @@
               }
             };
             &:nth-child(3) {
-              width: 10%;
+              width: 15%;
               /deep/ .van-cell {
                 padding: 0
               }
             }
             &:last-child {
-              position: absolute;
-              top:0;
-              right: 0;
+              width: 30%;
+              display: flex;
+              align-items: center;
               /deep/ .van-stepper--round {
                 .van-stepper__minus {
                   color: #fff;
@@ -623,25 +635,25 @@
       .circulation-area-title {
         height: 10%;
         position: relative;
-        font-size: 0;
+        display: flex;
+        align-items: center;
           span {
             display: inline-block;
-            text-align: left;
-            width: 40%;
+            text-align: center;
             font-size: 16px;
             line-height: 56px;
             &:first-child {
               width: 10%;
-              text-align: center
             };
             &:nth-child(2) {
-              text-align: center
+              width: 45%;
+						  margin-right: 5%;
             };
             &:nth-child(3) {
-              width: 10%
+              width: 15%
             };
             &:last-child {
-              text-align: center
+              width: 30%;
             }
           }
         }

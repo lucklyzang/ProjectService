@@ -1224,37 +1224,36 @@
               border-top: 1px solid #b2b2b2;
               width: 100%;
               .circulation-area-content {
-                position: relative;
-                display: flex;
-                align-items: center;
                 height: 40px;
-                background: #fff;
+								background: #fff;
+								display: flex;
+								align-items: center;
                 > span {
                   height: 40px;
                   line-height: 40px;
                   font-size: 16px;
                   display: inline-block;
                   &:first-child {
-                    width: 60%;
-                    overflow-x: auto;
-                    white-space: nowrap;
+                    width: 55%;
+										overflow-x: auto;
+										white-space: nowrap;
+										margin-right: 2%;
                   };
                   &:nth-child(2) {
                     width: 20%;
-                    text-align: center;
+										text-align: center;
                   }
                   &:last-child {
                     width: 20%;
-                    display: flex;
-                    justify-content: center;
+										display: flex;
+										align-items: center;
+										justify-content: center;
                   }
                 }
               }
               .circulation-area-title {
-                position: relative;
-                font-size: 0;
                 display: flex;
-                align-items: center;
+								align-items: center;
                 span {
                   height: 40px;
                   line-height: 40px;
@@ -1262,15 +1261,16 @@
                   width: 20%;
                   font-size: 16px;
                   &:first-child {
-                    width: 60%;
+                    width: 55%;
+										margin-right: 2%;
                   };
                   &:nth-child(2) {
                     width: 20%;
-                    text-align: center;
+										text-align: center;
                   }
                   &:last-child {
                     width: 20%;
-                    text-align: center;
+										text-align: center;
                   }
                 }
               }
@@ -1540,7 +1540,8 @@
                 overflow: auto;
                 font-size: 0;
               > p {
-                position: relative;
+                display: flex;
+							  align-items: center;
                 height: 50px;
                 background: #fff;
                 margin-bottom: 6px;
@@ -1558,10 +1559,11 @@
                     .no-wrap()
                   };
                   &:nth-child(2) {
-                    width: 55%;
+                    width: 53%;
                     overflow-x: auto;
                     white-space: nowrap;
                     text-align: left;
+                    margin-right: 2%;
                     /deep/ .van-cell {
                       .van-cell__value--alone {
                         .van-field__control {
@@ -1571,11 +1573,9 @@
                     }
                   };
                   &:last-child {
-                    position: absolute;
-                    top:0;
-                    right: 4px;
                     width: 30%;
-                    text-align: right;
+									  display: flex;
+									  align-items: center;
                     /deep/ .van-stepper--round {
                       .van-stepper__minus {
                         color: #fff;
