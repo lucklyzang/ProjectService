@@ -200,7 +200,17 @@
           this.$toast('该任务状态为待签字,不能执行该操作');
           return
         };
-        window.android.scanQRcode()
+        // 存储扫码校验通过的科室编号
+				this.storeDepartmentNumber('hcgzs');
+				// 存储当前扫码校验通过的科室id
+				this.storeCurrentDepartmentNumber(2343);
+				// 存储当前扫码校验通过的科室编号
+				this.changeDepartmentServiceOfficeId('hcgzs');
+        setStore('departmentServiceId','hcgzs');
+            this.$router.push({path: 'departmentServiceBill'});
+            this.changeTitleTxt({tit:'区域巡检单'});
+            setStore('currentTitle','区域巡检单')
+        // window.android.scanQRcode()
       },
 
       // 校验当前科室二维码

@@ -392,7 +392,7 @@
         };
         // 重新存入当前报修工单上传的图片
         if (getStore('completPhotoInfo')) {
-          this.$store.commit('changeIsCompletePhotoList', JSON.parse(getStore('completPhotoInfo'))['photoInfo']);
+          this.$store.commit('changeIsCompletePhotoList', []);
         };
         // 重新存入当前是否填写过耗材
         if (getStore('isFillMaterialList')) {
