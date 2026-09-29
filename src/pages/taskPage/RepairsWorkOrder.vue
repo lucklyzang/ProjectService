@@ -41,11 +41,13 @@
               <span class="tit">类型:</span>
               <span class="name">{{item.typeName}}</span>
             </p>
-            <p class="work-info-other">
-              <span class="tit">地点:</span>
-              <span class="name">{{item.depName}}</span>
-              <span v-for="(item,index) in item.spaces" :key="`${item,index}`">-{{item.name}}</span>
-            </p>
+            <div class="work-info-other-space">
+              <p class="tit">地点:</p>
+              <p class="name-space">
+                <span class="name">{{item.depName}}</span>
+                <span v-for="(innerItem,innerIndex) in item.spaces" :key="innerIndex">-{{innerItem.name ? innerItem.name : ''}}</span>
+              </p>	
+            </div>
           </div>
         </div>
         <div class="content-list-action-task-wrapper content-list-complete-task-wrapper" v-show="currentIndex === 1">
@@ -67,10 +69,13 @@
               <span class="tit">类型:</span>
               <span class="name">{{item.typeName}}</span>
             </p>
-            <p class="work-info-other">
-              <span class="tit">地点:</span>
-              <span class="name">{{item.depName}}</span>
-            </p>
+            <div class="work-info-other-space">
+              <p class="tit">地点:</p>
+              <p class="name-space">
+                <span class="name">{{item.depName}}</span>
+                <span v-for="(innerItem,innerIndex) in item.spaces" :key="innerIndex">-{{innerItem.name ? innerItem.name : ''}}</span>
+              </p>	
+            </div>
           </div>
         </div>
       </van-pull-refresh>
@@ -1022,6 +1027,21 @@
             color: black;
             font-weight: bold;
           };
+          > div {
+            height: 30px;
+            font-size: 15px;
+            overflow: auto;
+            color: black;
+            font-weight: bold;
+						display: flex;
+          };
+          .work-info-other-space {
+              line-height: 20px;
+						 .name-space {
+							 flex: 1;
+							 word-break: break-all;
+						 }
+					 };
           .work-order-number {
             font-size: 14px;
             color: #bbbaba;
