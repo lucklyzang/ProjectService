@@ -168,7 +168,7 @@
                           <div class="list-top appoint-list-top">
                             <div class="list-top-left">
                               <img :src="anxiousSignPng" alt="急" v-show="item.priority == 2 || item.priority == 3 || item.priority == 4">
-                              <span>{{ item.depName == '/' ? '' : item.depName }}</span>
+                              <span>{{ disposeStructureDepName(item) }}</span>
                             </div>
                             <div class="list-top-right" :class="{'noAllocationStyle':item.state == 0,'noLookupStyle':item.state == 1,'noStartStyle': item.state == 2,'underwayStyle':item.state == 3,'tobeSigned':item.state == 4}">
                               {{ taskStatusTransition(item.state) }}
@@ -467,6 +467,34 @@ export default {
       })
     },
 
+    // 处理建筑科室信息
+    disposeStructureDepName (item) {
+      if (item.structName) {
+        if (item['depName'].indexOf('/') != -1) {
+          let trmporaryMessage = item['depName'].split("/");
+          if (trmporaryMessage.length > 0) {
+            return `${trmporaryMessage[0]}/${trmporaryMessage[1]}`
+          }
+        } else {
+          return `${item.structName}/${item.depName}`
+        }
+      } else {
+        if (item['depName'] == '/') {
+          return ''
+        } else {
+          if (item['depName'].indexOf('/') != -1) {
+            let trmporaryMessage = item['depName'].split("/");
+            if (trmporaryMessage.length > 0) {
+              if (trmporaryMessage.length == 2) {
+                return item['depName']
+              } else {
+                return `${trmporaryMessage[0]}/${trmporaryMessage[1]}`	
+              }
+            }
+          }
+        }
+      }
+    },
 
     // 处理维修任务空间信息
     disposeCheckType (item) {
@@ -1976,6 +2004,7 @@ export default {
                                     }
                                     >img {
                                       width: 100%;
+                                      height: 80px;
                                     }
                                   }
                                 }

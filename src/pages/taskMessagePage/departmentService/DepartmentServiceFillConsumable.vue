@@ -399,7 +399,9 @@
               number: item.number,
               mateName: item.mateName,
               mateNumber: item.mateNumber,
+              quantity: item.quantity,
               model: item.model,
+              unit: item.unit,
               storeId: this.storeId,
               systemId: this.systemId
             }

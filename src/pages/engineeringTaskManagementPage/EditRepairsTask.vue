@@ -458,14 +458,26 @@ export default {
       this.consumableMsgList = casuallyTemporaryStorageCreateRepairsTaskMessage['materials'];
       this.contact = casuallyTemporaryStorageCreateRepairsTaskMessage['contact'];
       // 处理目的建筑、目的科室显示信息
-      if (casuallyTemporaryStorageCreateRepairsTaskMessage['depName'].indexOf('/') == -1) {
-        this.currentStructure = '请选择';
-        this.currentGoalDepartment = casuallyTemporaryStorageCreateRepairsTaskMessage['depName'];
-      } else {
-        let trmporaryMessage = casuallyTemporaryStorageCreateRepairsTaskMessage['depName'].split("/");
-        this.currentStructure = trmporaryMessage[0] ? trmporaryMessage[0] : '请选择';
-        this.currentGoalDepartment = trmporaryMessage[1] ? trmporaryMessage[1] : '请选择';
-      };
+				if (casuallyTemporaryStorageCreateRepairsTaskMessage['structName']) {
+					if (casuallyTemporaryStorageCreateRepairsTaskMessage['depName'].indexOf('/') != -1) {
+						let trmporaryMessage = casuallyTemporaryStorageCreateRepairsTaskMessage['depName'].split("/");
+						if (trmporaryMessage.length > 0) {
+							this.currentStructure = trmporaryMessage[0] ? trmporaryMessage[0] : '请选择';
+							this.currentGoalDepartment = trmporaryMessage[1] ? trmporaryMessage[1] : '请选择'
+						}
+					} else {
+						this.currentStructure = casuallyTemporaryStorageCreateRepairsTaskMessage['structName'];
+						this.currentGoalDepartment = casuallyTemporaryStorageCreateRepairsTaskMessage['depName'];
+					}
+				} else {
+					if (casuallyTemporaryStorageCreateRepairsTaskMessage['depName'].indexOf('/') != -1) {
+						let trmporaryMessage = casuallyTemporaryStorageCreateRepairsTaskMessage['depName'].split("/");
+						if (trmporaryMessage.length > 0) {
+							this.currentStructure = trmporaryMessage[0] ? trmporaryMessage[0] : '请选择';
+							this.currentGoalDepartment = trmporaryMessage[1] ? trmporaryMessage[1] : '请选择';
+						}
+					}
+				};
       // 物料信息回显完毕时，再次添加物料时进行是否超过库存判断
       setTimeout(() => {this.isMaterialChange = true},100)
     },
