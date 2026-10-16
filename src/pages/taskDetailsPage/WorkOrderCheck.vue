@@ -154,8 +154,8 @@
             </div>
         </van-dialog>
     </div>
-    <div class="infoDialog">
-      <van-dialog class="infoDialog" v-model="enlargeImgShow" width="90%">
+    <div class="img-dislog-box">
+      <van-dialog class="infoDialog" v-model="enlargeImgShow" width="98%" confirm-button-text="关闭">
         <img :src="enlargeImgUrl">
       </van-dialog>
     </div>  
@@ -1086,6 +1086,26 @@
         }
       }
     };
+    .img-dislog-box {
+    /deep/ .van-dialog {
+      top: 50% !important;
+      max-height: 98vh;
+      display: flex;
+      flex-direction: column;
+      .van-dialog__content {
+        flex: 1;
+        overflow: auto;
+        >img {
+          width: 100%;
+        }
+      };
+      .van-dialog__footer {
+        .van-dialog__confirm {
+          background: #f2f2f2
+        }
+      }
+    }
+  };
     .contentDialog {
       /deep/ .van-dialog {
         top: 50%;
